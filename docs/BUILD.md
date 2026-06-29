@@ -200,6 +200,14 @@ The application shell should include:
 - Surface Dev/Stage/Prod/Preview context in the app top bar without exposing secrets
 - Keep data access and database behavior unchanged
 
+### Sprint 4B - Broker Portal Action Layer
+- Add right-side detail drawers for agents, recruits, transactions, and tasks
+- Add server actions for agent status, recruit stage, transaction stage, and task status updates
+- Log successful changes to activity logs, and recruiting stage moves to recruiting activities
+- Add RLS write policies for the first action layer
+- Keep action controls permission-aware and tenant-scoped
+- Require migration `20260629_add_broker_action_policies.sql` before deployed write actions are enabled
+
 ## Folder Structure
 Recommended structure:
 

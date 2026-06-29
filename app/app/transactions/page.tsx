@@ -1,13 +1,14 @@
-import { Badge } from "@/components/ui/badge";
+import { TransactionsTable } from "@/components/broker-portal/transactions-table";
 import { PageHeader } from "@/components/ui/page-header";
-import { DataTable, TableCell, TableHead } from "@/components/ui/table";
 import { requirePermission } from "@/lib/auth/session";
 import { getTransactions } from "@/lib/data/app-data";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { isDatabaseConfigured } from "@/lib/data/database";
+import { canAccess } from "@/lib/rbac/permissions";
 
 export default async function TransactionsPage() {
   const session = await requirePermission("view_transactions");
   const transactions = await getTransactions(session);
+  const canEdit = canAccess(session.permissions, "edit_transactions");
 
   return (
     <>
@@ -16,34 +17,7 @@ export default async function TransactionsPage() {
         subtitle="Deal pipeline with stage, close timing, list price, and estimated GCI."
         eyebrow="Revenue"
       />
-      <DataTable>
-        <thead>
-          <tr>
-            <TableHead>Agent</TableHead>
-            <TableHead>Client</TableHead>
-            <TableHead>Property</TableHead>
-            <TableHead>Stage</TableHead>
-            <TableHead>List Price</TableHead>
-            <TableHead>Estimated GCI</TableHead>
-            <TableHead>Expected Close</TableHead>
-            <TableHead>Status</TableHead>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border">
-          {transactions.map((transaction) => (
-            <tr key={transaction.id} className="transition hover:bg-surface-muted">
-              <TableCell className="font-medium">{transaction.agent}</TableCell>
-              <TableCell>{transaction.clientName}</TableCell>
-              <TableCell className="min-w-64 text-text-secondary">{transaction.propertyAddress}</TableCell>
-              <TableCell><Badge variant="accent">{transaction.stage}</Badge></TableCell>
-              <TableCell>{formatCurrency(transaction.listPrice)}</TableCell>
-              <TableCell>{formatCurrency(transaction.estimatedGci)}</TableCell>
-              <TableCell className="text-text-secondary">{formatDate(transaction.expectedCloseDate)}</TableCell>
-              <TableCell><Badge variant="success">{transaction.status}</Badge></TableCell>
-            </tr>
-          ))}
-        </tbody>
-      </DataTable>
+      <TransactionsTable actionsEnabled={isDatabaseConfigured()} canEdit={canEdit} transactions={transactions} />
     </>
   );
 }

@@ -219,6 +219,13 @@ Use right-side drawers for:
 
 Do not overuse modals for core workflows.
 
+Drawer standards:
+- Use the shared right-side drawer pattern
+- Keep the record summary at the top
+- Keep the primary state-changing action in a compact form
+- Close with the icon button or Escape
+- Preserve table and Kanban context behind the drawer
+
 ### Modals
 Use modals for:
 - Confirm delete

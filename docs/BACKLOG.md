@@ -178,6 +178,31 @@ Acceptance Criteria:
 - Protected app routes continue to redirect without a session
 - No database behavior or RLS behavior changes
 
+## Sprint 4B - Broker Portal Action Layer
+### Epic: Real Record Workflows
+Goal: Convert read-only broker screens into first-pass operational workflows.
+
+Stories:
+1. As staff, I can open record details without leaving the page.
+2. As authorized staff, I can update agent, recruit, transaction, and task state.
+3. As ownership, I can see action history reflected in recent activity.
+
+Tasks:
+- Add shared right-side detail drawer
+- Add agent detail drawer and status update
+- Add recruit detail drawer and stage update
+- Add transaction detail drawer and stage/status update
+- Add task detail drawer and status/complete actions
+- Add server actions and tenant-scoped mutation helpers
+- Add RLS policies for permitted writes and activity inserts
+- Smoke-test protected pages with demo owner session
+
+Acceptance Criteria:
+- Lint, typecheck, and production build pass
+- Agents, recruiting, transactions, and tasks render for demo owner
+- Actions are hidden or disabled when unavailable
+- Supabase migration is required before deployed writes are expected to succeed
+
 ## Sprint 5 - Agent Database
 ### Epic: Agent Records
 Goal: Brokerage staff can view agent records.
