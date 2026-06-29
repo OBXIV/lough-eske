@@ -47,6 +47,9 @@ Future Supabase project label:
 Current Supabase project ref:
 - `gdwkhjoushqdrfmbzyit`
 
+Current Supabase project URL:
+- `https://gdwkhjoushqdrfmbzyit.supabase.co`
+
 Purpose:
 - Release candidate validation
 - Sales/demo QA before production promotion
@@ -55,6 +58,13 @@ Purpose:
 
 Expected Vercel environment:
 - Preview or dedicated staging domain
+
+Current Vercel Preview variables:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
+Still required before deployed Preview can use Stage database-backed reads:
+- `DATABASE_URL`
 
 ## Prod
 Future Supabase project label:
