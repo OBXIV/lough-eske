@@ -7,9 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint app components lib scripts types",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit --incremental false",
     "db:verify": "node scripts/verify-sprint2.mjs",
     "sprint3:verify": "node scripts/verify-sprint3.mjs",
+    "sprint3b:verify": "node scripts/verify-sprint3b.mjs",
     "supabase:verify": "node scripts/verify-supabase-public.mjs"
   },
   "dependencies": {
@@ -18,6 +19,7 @@
     "clsx": "latest",
     "lucide-react": "latest",
     "next": "latest",
+    "postgres": "^3.4.9",
     "react": "latest",
     "react-dom": "latest",
     "tailwind-merge": "latest"

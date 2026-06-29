@@ -184,6 +184,7 @@ Columns:
 - id uuid primary key default gen_random_uuid()
 - tenant_id uuid not null references tenants(id) on delete cascade
 - agent_id uuid references agents(id) on delete set null
+- prospect_name text
 - stage text not null default 'Identified'
 - heat_score text default 'Warm'
 - recruit_score integer default 50

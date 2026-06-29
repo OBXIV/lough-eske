@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { DataTable, TableCell, TableHead } from "@/components/ui/table";
 import { requirePermission } from "@/lib/auth/session";
-import { tasks } from "@/lib/data/demo";
+import { getTasks } from "@/lib/data/app-data";
 import { formatDate } from "@/lib/utils";
 import type { Task } from "@/types/domain";
 
@@ -13,7 +13,8 @@ function priorityVariant(priority: Task["priority"]) {
 }
 
 export default async function TasksPage() {
-  await requirePermission("manage_tasks");
+  const session = await requirePermission("manage_tasks");
+  const tasks = await getTasks(session);
 
   return (
     <>

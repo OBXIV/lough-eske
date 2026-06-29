@@ -3,11 +3,16 @@ import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { DataTable, TableCell, TableHead } from "@/components/ui/table";
 import { requirePermission } from "@/lib/auth/session";
-import { demoTenant, placeholderTenants } from "@/lib/data/demo";
+import { getTenantProfile, getVisibleTenantsForSession } from "@/lib/data/app-data";
 import { rolePermissions } from "@/lib/rbac/permissions";
 
 export default async function SettingsPage() {
   const session = await requirePermission("manage_settings");
+  const [tenant, visibleTenants] = await Promise.all([
+    getTenantProfile(session),
+    getVisibleTenantsForSession(session),
+  ]);
+  const tenantPlaceholders = visibleTenants.filter((visibleTenant) => visibleTenant.id !== tenant.id);
   const roleNames = Object.keys(rolePermissions);
 
   return (
@@ -19,11 +24,11 @@ export default async function SettingsPage() {
           <dl className="mt-5 space-y-4 text-sm">
             <div className="flex items-center justify-between gap-4 border-b border-border pb-3">
               <dt className="text-text-secondary">Name</dt>
-              <dd className="font-medium">{demoTenant.name}</dd>
+              <dd className="font-medium">{tenant.name}</dd>
             </div>
             <div className="flex items-center justify-between gap-4 border-b border-border pb-3">
               <dt className="text-text-secondary">Accent</dt>
-              <dd className="font-medium">{demoTenant.primaryColor}</dd>
+              <dd className="font-medium">{tenant.primaryColor}</dd>
             </div>
             <div className="flex items-center justify-between gap-4 border-b border-border pb-3">
               <dt className="text-text-secondary">Current role</dt>
@@ -32,10 +37,10 @@ export default async function SettingsPage() {
           </dl>
           <h3 className="mt-6 text-sm font-semibold text-text-primary">Tenant switcher placeholders</h3>
           <div className="mt-3 space-y-2">
-            {placeholderTenants.map((tenant) => (
-              <div key={tenant.id} className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-sm">
-                <span>{tenant.name}</span>
-                <Badge>{tenant.status}</Badge>
+            {tenantPlaceholders.map((placeholderTenant) => (
+              <div key={placeholderTenant.id} className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-sm">
+                <span>{placeholderTenant.name}</span>
+                <Badge>{placeholderTenant.status}</Badge>
               </div>
             ))}
           </div>

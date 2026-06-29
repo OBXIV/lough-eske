@@ -14,6 +14,7 @@ npm run dev
 ```bash
 npm run db:verify
 npm run sprint3:verify
+npm run sprint3b:verify
 npm run supabase:verify
 npm run typecheck
 npm run lint
@@ -26,8 +27,12 @@ Copy `.env.example` to `.env.local` and set:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+DATABASE_URL=
 ```
+
+`DATABASE_URL` is server-only and should use the Supabase pooler URL for the target environment. Leave it unset to fall back to local demo fixtures during scaffold work.
 
 ## Specs
 

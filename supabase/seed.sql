@@ -202,18 +202,19 @@ on conflict (id) do update set
   assigned_owner_id = excluded.assigned_owner_id,
   updated_at = now();
 
-insert into public.recruits (id, tenant_id, agent_id, stage, heat_score, recruit_score, source, assigned_recruiter_id, next_follow_up_date, notes_summary)
+insert into public.recruits (id, tenant_id, agent_id, prospect_name, stage, heat_score, recruit_score, source, assigned_recruiter_id, next_follow_up_date, notes_summary)
 values
-  ('bbbbbbbb-0001-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111', null, 'Identified', 'Warm', 61, 'Compass', '91000000-0000-4000-8000-000000000003', '2026-07-02', 'High-volume neighborhood specialist.'),
-  ('bbbbbbbb-0002-4000-8000-000000000002', '11111111-1111-4111-8111-111111111111', null, 'Contacted', 'Hot', 82, 'Coldwell Banker', '91000000-0000-4000-8000-000000000003', '2026-06-30', 'Wants stronger marketing support.'),
-  ('bbbbbbbb-0003-4000-8000-000000000003', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0006-4000-8000-000000000006', 'Engaged', 'Hot', 88, 'Sotheby''s', '91000000-0000-4000-8000-000000000003', '2026-07-01', 'Team fit looks strong.'),
-  ('bbbbbbbb-0004-4000-8000-000000000004', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0009-4000-8000-000000000009', 'Offer Pending', 'Warm', 74, 'Referral', '91000000-0000-4000-8000-000000000003', '2026-07-05', 'Reviewing split model.'),
-  ('bbbbbbbb-0005-4000-8000-000000000005', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0010-4000-8000-000000000010', 'Joined', 'Hot', 91, 'Independent', '91000000-0000-4000-8000-000000000003', '2026-07-10', 'Onboarding package sent.'),
-  ('bbbbbbbb-0006-4000-8000-000000000006', '11111111-1111-4111-8111-111111111111', null, 'Lost', 'Cold', 38, 'Zillow Premier', '91000000-0000-4000-8000-000000000003', '2026-08-01', 'Staying put this quarter.'),
-  ('bbbbbbbb-0007-4000-8000-000000000007', '11111111-1111-4111-8111-111111111111', null, 'Contacted', 'Warm', 67, 'Local team lead', '91000000-0000-4000-8000-000000000003', '2026-07-08', 'Interested in transaction support.'),
-  ('bbbbbbbb-0008-4000-8000-000000000008', '11111111-1111-4111-8111-111111111111', null, 'Identified', 'Cold', 44, 'Open house visit', '91000000-0000-4000-8000-000000000003', '2026-07-15', 'Early relationship only.')
+  ('bbbbbbbb-0001-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111', null, 'Sofia Mercer', 'Identified', 'Warm', 61, 'Compass', '91000000-0000-4000-8000-000000000003', '2026-07-02', 'High-volume neighborhood specialist.'),
+  ('bbbbbbbb-0002-4000-8000-000000000002', '11111111-1111-4111-8111-111111111111', null, 'Noah Patel', 'Contacted', 'Hot', 82, 'Coldwell Banker', '91000000-0000-4000-8000-000000000003', '2026-06-30', 'Wants stronger marketing support.'),
+  ('bbbbbbbb-0003-4000-8000-000000000003', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0006-4000-8000-000000000006', 'Mina Foster', 'Engaged', 'Hot', 88, 'Sotheby''s', '91000000-0000-4000-8000-000000000003', '2026-07-01', 'Team fit looks strong.'),
+  ('bbbbbbbb-0004-4000-8000-000000000004', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0009-4000-8000-000000000009', 'Owen Clarke', 'Offer Pending', 'Warm', 74, 'Referral', '91000000-0000-4000-8000-000000000003', '2026-07-05', 'Reviewing split model.'),
+  ('bbbbbbbb-0005-4000-8000-000000000005', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0010-4000-8000-000000000010', 'Elena Park', 'Joined', 'Hot', 91, 'Independent', '91000000-0000-4000-8000-000000000003', '2026-07-10', 'Onboarding package sent.'),
+  ('bbbbbbbb-0006-4000-8000-000000000006', '11111111-1111-4111-8111-111111111111', null, 'Miles Grant', 'Lost', 'Cold', 38, 'Zillow Premier', '91000000-0000-4000-8000-000000000003', '2026-08-01', 'Staying put this quarter.'),
+  ('bbbbbbbb-0007-4000-8000-000000000007', '11111111-1111-4111-8111-111111111111', null, 'Harper Lane', 'Contacted', 'Warm', 67, 'Local team lead', '91000000-0000-4000-8000-000000000003', '2026-07-08', 'Interested in transaction support.'),
+  ('bbbbbbbb-0008-4000-8000-000000000008', '11111111-1111-4111-8111-111111111111', null, 'Theo Hayes', 'Identified', 'Cold', 44, 'Open house visit', '91000000-0000-4000-8000-000000000003', '2026-07-15', 'Early relationship only.')
 on conflict (id) do update set
   agent_id = excluded.agent_id,
+  prospect_name = excluded.prospect_name,
   stage = excluded.stage,
   heat_score = excluded.heat_score,
   recruit_score = excluded.recruit_score,

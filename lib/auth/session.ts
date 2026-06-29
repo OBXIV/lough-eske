@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getDemoSessionByEmail, getDemoUserByEmail } from "@/lib/data/demo";
+import { getTenantProfile } from "@/lib/data/app-data";
 import { canAccess, getDefaultRoute } from "@/lib/rbac/permissions";
 import type { PermissionKey, UserSession } from "@/types/domain";
 
@@ -16,7 +17,15 @@ export async function getCurrentSession(): Promise<UserSession | null> {
     return null;
   }
 
-  return getDemoSessionByEmail(email);
+  const session = getDemoSessionByEmail(email);
+  if (!session) {
+    return null;
+  }
+
+  return {
+    ...session,
+    tenant: await getTenantProfile(session),
+  };
 }
 
 export async function requireSession() {

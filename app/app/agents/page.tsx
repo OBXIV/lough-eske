@@ -2,11 +2,12 @@ import { Badge } from "@/components/ui/badge";
 import { DataTable, TableCell, TableHead } from "@/components/ui/table";
 import { PageHeader } from "@/components/ui/page-header";
 import { requirePermission } from "@/lib/auth/session";
-import { agents } from "@/lib/data/demo";
+import { getAgents } from "@/lib/data/app-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default async function AgentsPage() {
-  await requirePermission("view_agents");
+  const session = await requirePermission("view_agents");
+  const agents = await getAgents(session);
 
   return (
     <>

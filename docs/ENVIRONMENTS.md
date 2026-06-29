@@ -73,8 +73,11 @@ For migration and seed execution, local ignored operator credentials may include
 
 ```txt
 SUPABASE_ACCESS_TOKEN
+DATABASE_URL
 POSTGRES_URL_NON_POOLING
 POSTGRES_PASSWORD
 ```
 
 Use the IPv4 session pooler connection string for migration and seed commands when the local network cannot reach Supabase direct Postgres over IPv6. Transaction pooler mode is useful for short-lived application queries, but it can fail during CLI migration work because prepared statements are not supported in transaction mode.
+
+For server-side application reads, set `DATABASE_URL` in the target Vercel environment. The application disables prepared statements for this connection so it can use Supabase pooler URLs safely.

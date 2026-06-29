@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { requirePermission } from "@/lib/auth/session";
-import { recruits } from "@/lib/data/demo";
+import { getRecruits } from "@/lib/data/app-data";
 import { formatDate } from "@/lib/utils";
 import type { Recruit } from "@/types/domain";
 
@@ -15,7 +15,8 @@ function heatVariant(heatScore: Recruit["heatScore"]) {
 }
 
 export default async function RecruitingPage() {
-  await requirePermission("view_recruiting");
+  const session = await requirePermission("view_recruiting");
+  const recruits = await getRecruits(session);
 
   return (
     <>

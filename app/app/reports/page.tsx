@@ -3,11 +3,16 @@ import { BarChart3, CircleDollarSign, Funnel, Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { requirePermission } from "@/lib/auth/session";
-import { agents, recruits, transactions } from "@/lib/data/demo";
+import { getAgents, getRecruits, getTransactions } from "@/lib/data/app-data";
 import { formatCurrency } from "@/lib/utils";
 
 export default async function ReportsPage() {
-  await requirePermission("view_reports");
+  const session = await requirePermission("view_reports");
+  const [agents, recruits, transactions] = await Promise.all([
+    getAgents(session),
+    getRecruits(session),
+    getTransactions(session),
+  ]);
 
   const totalGci = transactions.reduce((total, transaction) => total + transaction.estimatedGci, 0);
   const totalProduction = agents.reduce((total, agent) => total + agent.productionYtd, 0);

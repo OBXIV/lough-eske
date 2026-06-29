@@ -4,12 +4,18 @@ import { KpiCard } from "@/components/dashboard/kpi-card";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
-import { activityLogs, recruits, tasks, transactions } from "@/lib/data/demo";
 import { requirePermission } from "@/lib/auth/session";
+import { getActivityLogs, getRecruits, getTasks, getTransactions } from "@/lib/data/app-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default async function DashboardPage() {
-  await requirePermission("view_dashboard");
+  const session = await requirePermission("view_dashboard");
+  const [activityLogs, recruits, tasks, transactions] = await Promise.all([
+    getActivityLogs(session),
+    getRecruits(session),
+    getTasks(session),
+    getTransactions(session),
+  ]);
 
   const activeRecruits = recruits.filter((recruit) => recruit.stage !== "Joined" && recruit.stage !== "Lost").length;
   const joinedAgents = recruits.filter((recruit) => recruit.stage === "Joined").length;

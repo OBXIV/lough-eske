@@ -2,16 +2,14 @@ import { ChevronDown, LogOut, Search } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { signOutAction } from "@/lib/auth/actions";
-import { getVisibleTenants } from "@/lib/tenant/access";
-import type { UserSession } from "@/types/domain";
+import type { Tenant, UserSession } from "@/types/domain";
 
 type TopBarProps = {
   session: UserSession;
+  visibleTenants: Tenant[];
 };
 
-export function TopBar({ session }: TopBarProps) {
-  const visibleTenants = getVisibleTenants(session);
-
+export function TopBar({ session, visibleTenants }: TopBarProps) {
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background/95 px-4 py-3 backdrop-blur lg:px-8">
       <div className="flex items-center justify-between gap-4">

@@ -2,11 +2,12 @@ import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { DataTable, TableCell, TableHead } from "@/components/ui/table";
 import { requirePermission } from "@/lib/auth/session";
-import { transactions } from "@/lib/data/demo";
+import { getTransactions } from "@/lib/data/app-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default async function TransactionsPage() {
-  await requirePermission("view_transactions");
+  const session = await requirePermission("view_transactions");
+  const transactions = await getTransactions(session);
 
   return (
     <>
