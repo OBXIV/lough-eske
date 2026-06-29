@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const DEV_PROJECT_REF = "ybzelcftszhhbotzcqzq";
+const STAGE_PROJECT_REF = "gdwkhjoushqdrfmbzyit";
 
 function getArg(name) {
   const prefix = `${name}=`;
@@ -137,6 +138,10 @@ if (new Set(refs).size > 1) {
 
 if (environmentName === "stage" && refs.includes(DEV_PROJECT_REF)) {
   failures.push("Stage is pointing at the Dev Supabase project ref.");
+}
+
+if (environmentName === "stage" && publicRef && publicRef !== STAGE_PROJECT_REF) {
+  failures.push("Stage public URL does not match the documented Stage Supabase project ref.");
 }
 
 if (environmentName === "dev" && publicRef && publicRef !== DEV_PROJECT_REF) {

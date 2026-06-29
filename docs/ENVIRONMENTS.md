@@ -45,12 +45,13 @@ Future Supabase project label:
 - `lough-eske-stage`
 
 Current Supabase project ref:
-- TBD
+- `gdwkhjoushqdrfmbzyit`
 
 Purpose:
 - Release candidate validation
 - Sales/demo QA before production promotion
 - Production-like data volume with synthetic or approved demo data
+- Current schema and demo seed state matches Dev as of June 29, 2026
 
 Expected Vercel environment:
 - Preview or dedicated staging domain
