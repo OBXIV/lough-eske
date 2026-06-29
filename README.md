@@ -35,5 +35,6 @@ The build specs live in `docs/`:
 
 - `docs/BUILD.md`
 - `docs/DATABASE.md`
+- `docs/ENVIRONMENTS.md`
 - `docs/UI.md`
 - `docs/BACKLOG.md`
