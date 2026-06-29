@@ -169,14 +169,14 @@ export const tasks: Task[] = [
 ];
 
 export const activityLogs: ActivityLog[] = [
-  { id: "log1", action: "Moved Mina Foster to Engaged", entityType: "Recruit", actor: "Riley Moss", createdAt: "2026-06-28T14:20:00Z" },
+  { id: "log1", action: "Moved Mina Foster to Engaged", entityId: "r3", entityType: "Recruit", actor: "Riley Moss", createdAt: "2026-06-28T14:20:00Z" },
   { id: "log2", action: "Updated GCI forecast for July closings", entityType: "Report", actor: "Morgan Hale", createdAt: "2026-06-28T12:05:00Z" },
-  { id: "log3", action: "Created task for Owen Clarke offer follow-up", entityType: "Task", actor: "Riley Moss", createdAt: "2026-06-27T18:10:00Z" },
+  { id: "log3", action: "Created task for Owen Clarke offer follow-up", entityId: "task2", entityType: "Task", actor: "Riley Moss", createdAt: "2026-06-27T18:10:00Z" },
   { id: "log4", action: "Marked inspection contingency review open", entityType: "Transaction", actor: "Sam Ortiz", createdAt: "2026-06-27T16:25:00Z" },
   { id: "log5", action: "Reviewed month-end GCI forecast", entityType: "Report", actor: "Parker Vale", createdAt: "2026-06-27T11:40:00Z" },
-  { id: "log6", action: "Added retention task for Taylor Brooks", entityType: "Agent", actor: "Morgan Hale", createdAt: "2026-06-26T20:05:00Z" },
-  { id: "log7", action: "Logged recruiting call with Noah Patel", entityType: "Recruit", actor: "Riley Moss", createdAt: "2026-06-26T15:30:00Z" },
-  { id: "log8", action: "Closed referral transaction for D. Shaw", entityType: "Transaction", actor: "Sam Ortiz", createdAt: "2026-06-24T22:15:00Z" },
-  { id: "log9", action: "Created onboarding activity for Elena Park", entityType: "Recruit", actor: "Riley Moss", createdAt: "2026-06-24T18:45:00Z" },
-  { id: "log10", action: "Reviewed inactive agent status", entityType: "Agent", actor: "Morgan Hale", createdAt: "2026-06-23T19:00:00Z" },
+  { id: "log6", action: "Added retention task for Taylor Brooks", entityId: "a4", entityType: "Agent", actor: "Morgan Hale", createdAt: "2026-06-26T20:05:00Z" },
+  { id: "log7", action: "Logged recruiting call with Noah Patel", entityId: "r2", entityType: "Recruit", actor: "Riley Moss", createdAt: "2026-06-26T15:30:00Z" },
+  { id: "log8", action: "Closed referral transaction for D. Shaw", entityId: "t6", entityType: "Transaction", actor: "Sam Ortiz", createdAt: "2026-06-24T22:15:00Z" },
+  { id: "log9", action: "Created onboarding activity for Elena Park", entityId: "r5", entityType: "Recruit", actor: "Riley Moss", createdAt: "2026-06-24T18:45:00Z" },
+  { id: "log10", action: "Reviewed inactive agent status", entityId: "a8", entityType: "Agent", actor: "Morgan Hale", createdAt: "2026-06-23T19:00:00Z" },
 ];

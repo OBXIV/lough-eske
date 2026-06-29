@@ -6,7 +6,7 @@ This document defines the v0.1 user interface, design system, and tenant theming
 Internal project codename: **Lough Eske**  
 Product name: **TBD**  
 Version: **v0.1**  
-Last updated: **June 29, 2026**
+Last updated: **June 30, 2026**
 
 ## UI Philosophy
 The product must feel like a neutral, premium, executive-grade SaaS platform. It should not look like a single brokerage's internal app.
@@ -223,6 +223,8 @@ Drawer standards:
 - Use the shared right-side drawer pattern
 - Keep the record summary at the top
 - Keep the primary state-changing action in a compact form
+- Show save/create feedback inside the drawer after submission
+- Include recent record activity when available
 - Close with the icon button or Escape
 - Preserve table and Kanban context behind the drawer
 

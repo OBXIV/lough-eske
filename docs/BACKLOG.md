@@ -6,7 +6,7 @@ This document defines the v0.1 execution backlog for Nova.
 Internal project codename: **Lough Eske**  
 Product name: **TBD**  
 Version: **v0.1**  
-Last updated: **June 29, 2026**
+Last updated: **June 30, 2026**
 
 ## Delivery Strategy
 Build the SaaS foundation first, then modules. Do not start with a single screen and wire data later. Multi-tenancy, auth, RBAC, and design tokens must come first.
@@ -202,6 +202,29 @@ Acceptance Criteria:
 - Agents, recruiting, transactions, and tasks render for demo owner
 - Actions are hidden or disabled when unavailable
 - Supabase migration is required before deployed writes are expected to succeed
+
+## Sprint 4C - Broker Portal Workflow Hardening
+### Epic: First Usable Operations Loop
+Goal: Make the broker portal actions resilient enough for Stage demos and daily staff workflows.
+
+Stories:
+1. As staff, I get immediate feedback when I save, create, or complete work.
+2. As staff, I can create recruits and tasks without leaving the portal.
+3. As ownership, I can inspect recent record-level activity from the drawer.
+
+Tasks:
+- Add shared action feedback and pending submit controls
+- Add activity context to agent, recruit, transaction, and task drawers
+- Add create recruit drawer and server action
+- Add create task drawer and server action
+- Add RLS insert policy support for recruit and task create flows
+- Add `tasks.related_label` for manual task context
+
+Acceptance Criteria:
+- Lint, typecheck, and production build pass
+- Create/update forms return useful success or error states
+- Record drawers show relevant recent activity
+- Stage Supabase has the Sprint 4C migration applied before Preview writes are validated
 
 ## Sprint 5 - Agent Database
 ### Epic: Agent Records

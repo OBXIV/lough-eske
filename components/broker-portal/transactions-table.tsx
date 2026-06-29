@@ -1,18 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { Eye, Save } from "lucide-react";
 
 import { updateTransactionStageAction } from "@/app/app/actions";
-import { DetailField, DrawerFormShell } from "@/components/broker-portal/detail-fields";
+import { ActionFeedback, SubmitButton } from "@/components/broker-portal/action-form";
+import { ActivityList, DetailField, DrawerFormShell } from "@/components/broker-portal/detail-fields";
 import { Badge } from "@/components/ui/badge";
 import { DetailDrawer } from "@/components/ui/detail-drawer";
 import { DataTable, TableCell, TableHead } from "@/components/ui/table";
+import { initialActionFormState } from "@/lib/action-state";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import type { Transaction } from "@/types/domain";
+import type { ActivityLog, Transaction } from "@/types/domain";
 
 type TransactionsTableProps = {
   actionsEnabled: boolean;
+  activities: ActivityLog[];
   canEdit: boolean;
   transactions: Transaction[];
 };
@@ -33,11 +36,62 @@ function statusVariant(status: Transaction["status"]) {
   return "default";
 }
 
-export function TransactionsTable({ actionsEnabled, canEdit, transactions }: TransactionsTableProps) {
+function matchesTransactionActivity(activity: ActivityLog, transaction: Transaction) {
+  const action = activity.action.toLowerCase();
+  const terms = [transaction.clientName, transaction.propertyAddress]
+    .map((term) => term.toLowerCase().trim())
+    .filter(Boolean);
+
+  return activity.entityId === transaction.id || terms.some((term) => action.includes(term));
+}
+
+type TransactionStageFormProps = {
+  actionsEnabled: boolean;
+  transaction: Transaction;
+};
+
+function TransactionStageForm({ actionsEnabled, transaction }: TransactionStageFormProps) {
+  const [state, formAction] = useActionState(updateTransactionStageAction, initialActionFormState);
+
+  return (
+    <DrawerFormShell
+      description="Move the transaction to the next operational stage and update the pipeline status."
+      title="Update stage"
+    >
+      <form action={formAction} className="flex flex-col gap-3 sm:flex-row">
+        <input name="transactionId" type="hidden" value={transaction.id} />
+        <label className="min-w-0 flex-1 text-sm font-medium text-text-primary">
+          <span className="sr-only">Transaction stage</span>
+          <select
+            className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text-primary"
+            defaultValue={transaction.stage}
+            disabled={!actionsEnabled}
+            name="stage"
+          >
+            {transactionStages.map((stage) => (
+              <option key={stage} value={stage}>{stage}</option>
+            ))}
+          </select>
+        </label>
+        <SubmitButton disabled={!actionsEnabled} icon={Save} label="Save" pendingLabel="Saving" />
+      </form>
+      <ActionFeedback
+        disabledMessage={!actionsEnabled ? "Writes are disabled in this environment." : undefined}
+        state={state}
+      />
+    </DrawerFormShell>
+  );
+}
+
+export function TransactionsTable({ actionsEnabled, activities, canEdit, transactions }: TransactionsTableProps) {
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
   const selectedTransaction = useMemo(
     () => transactions.find((transaction) => transaction.id === selectedTransactionId) ?? null,
     [selectedTransactionId, transactions],
+  );
+  const selectedActivities = useMemo(
+    () => (selectedTransaction ? activities.filter((activity) => matchesTransactionActivity(activity, selectedTransaction)) : []),
+    [activities, selectedTransaction],
   );
 
   return (
@@ -101,36 +155,9 @@ export function TransactionsTable({ actionsEnabled, canEdit, transactions }: Tra
               <DetailField label="Expected close" value={formatDate(selectedTransaction.expectedCloseDate)} />
             </dl>
             {canEdit ? (
-              <DrawerFormShell
-                description="Move the transaction to the next operational stage and update the pipeline status."
-                title="Update stage"
-              >
-                <form action={updateTransactionStageAction} className="flex flex-col gap-3 sm:flex-row">
-                  <input name="transactionId" type="hidden" value={selectedTransaction.id} />
-                  <label className="min-w-0 flex-1 text-sm font-medium text-text-primary">
-                    <span className="sr-only">Transaction stage</span>
-                    <select
-                      className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text-primary"
-                      defaultValue={selectedTransaction.stage}
-                      disabled={!actionsEnabled}
-                      name="stage"
-                    >
-                      {transactionStages.map((stage) => (
-                        <option key={stage} value={stage}>{stage}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <button
-                    className="inline-flex items-center justify-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-card disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={!actionsEnabled}
-                    type="submit"
-                  >
-                    <Save className="h-4 w-4" aria-hidden />
-                    Save
-                  </button>
-                </form>
-              </DrawerFormShell>
+              <TransactionStageForm key={selectedTransaction.id} actionsEnabled={actionsEnabled} transaction={selectedTransaction} />
             ) : null}
+            <ActivityList activities={selectedActivities} />
           </div>
         ) : null}
       </DetailDrawer>

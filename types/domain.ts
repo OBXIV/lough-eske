@@ -110,6 +110,7 @@ export type Task = {
 export type ActivityLog = {
   id: string;
   action: string;
+  entityId?: string;
   entityType: string;
   actor: string;
   createdAt: string;

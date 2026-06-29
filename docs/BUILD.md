@@ -7,7 +7,7 @@ Internal project codename: **Lough Eske**
 Product name: **TBD**  
 Current working product label: **Brokerage Operating System**  
 Version: **v0.1**  
-Last updated: **June 29, 2026**
+Last updated: **June 30, 2026**
 
 ## North Star
 Build a multi-tenant SaaS platform for independent real estate brokerages. Do not build a single-brokerage CRM. The system must support Demo Brokerage, Point Realty, and future brokerages as separate tenants inside the same application.
@@ -207,6 +207,14 @@ The application shell should include:
 - Add RLS write policies for the first action layer
 - Keep action controls permission-aware and tenant-scoped
 - Require migration `20260629_add_broker_action_policies.sql` before deployed write actions are enabled
+
+### Sprint 4C - Broker Portal Workflow Hardening
+- Add pending, success, disabled, and error feedback to drawer action forms
+- Show record-scoped recent activity in agent, recruit, transaction, and task drawers
+- Add create drawers for recruits and tasks
+- Add tenant-scoped mutation helpers for recruit and task creation
+- Add RLS insert policies and `tasks.related_label` for create flows
+- Require migration `20260701_add_create_flow_support.sql` before deployed create actions are expected to succeed
 
 ## Folder Structure
 Recommended structure:

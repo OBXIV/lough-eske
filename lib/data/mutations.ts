@@ -21,9 +21,36 @@ type UpdatedTaskRow = {
   title: string;
 };
 
+type CreatedRecruitRow = {
+  id: string;
+  prospect_name: string | null;
+};
+
+type CreatedTaskRow = {
+  id: string;
+  title: string;
+};
+
 function actorId(session: UserSession) {
   return session.user.profileId;
 }
+
+export type CreateRecruitInput = {
+  heatScore: Recruit["heatScore"];
+  name: string;
+  nextFollowUpDate: string | null;
+  notesSummary: string | null;
+  recruitScore: number;
+  source: string | null;
+  stage: Recruit["stage"];
+};
+
+export type CreateTaskInput = {
+  dueDate: string | null;
+  priority: Task["priority"];
+  relatedLabel: string | null;
+  title: string;
+};
 
 export async function updateAgentStatus(
   session: UserSession,
@@ -167,5 +194,110 @@ export async function updateTaskStatus(
         ${taskId}
       )
     `;
+  });
+}
+
+export async function createRecruit(session: UserSession, input: CreateRecruitInput) {
+  if (!isDatabaseConfigured()) return null;
+
+  return withTenantRls(session, async (sql) => {
+    const rows = await sql<CreatedRecruitRow[]>`
+      insert into public.recruits (
+        tenant_id,
+        prospect_name,
+        stage,
+        heat_score,
+        recruit_score,
+        source,
+        assigned_recruiter_id,
+        next_follow_up_date,
+        notes_summary
+      )
+      values (
+        ${session.tenant.id},
+        ${input.name},
+        ${input.stage},
+        ${input.heatScore},
+        ${input.recruitScore},
+        ${input.source},
+        ${actorId(session)},
+        ${input.nextFollowUpDate},
+        ${input.notesSummary}
+      )
+      returning id, prospect_name
+    `;
+
+    const recruit = rows[0];
+    if (!recruit) throw new Error("Recruit could not be created.");
+
+    await sql`
+      insert into public.recruiting_activities (tenant_id, recruit_id, activity_type, notes, created_by)
+      values (
+        ${session.tenant.id},
+        ${recruit.id},
+        'Note',
+        ${`Created recruit ${recruit.prospect_name ?? input.name}`},
+        ${actorId(session)}
+      )
+    `;
+
+    await sql`
+      insert into public.activity_logs (tenant_id, actor_id, action, entity_type, entity_id)
+      values (
+        ${session.tenant.id},
+        ${actorId(session)},
+        ${`Created recruit ${recruit.prospect_name ?? input.name}`},
+        'recruit',
+        ${recruit.id}
+      )
+    `;
+
+    return recruit.id;
+  });
+}
+
+export async function createTask(session: UserSession, input: CreateTaskInput) {
+  if (!isDatabaseConfigured()) return null;
+
+  return withTenantRls(session, async (sql) => {
+    const rows = await sql<CreatedTaskRow[]>`
+      insert into public.tasks (
+        tenant_id,
+        title,
+        related_label,
+        related_type,
+        due_date,
+        priority,
+        status,
+        created_by
+      )
+      values (
+        ${session.tenant.id},
+        ${input.title},
+        ${input.relatedLabel},
+        'manual',
+        ${input.dueDate},
+        ${input.priority},
+        'open',
+        ${actorId(session)}
+      )
+      returning id, title
+    `;
+
+    const task = rows[0];
+    if (!task) throw new Error("Task could not be created.");
+
+    await sql`
+      insert into public.activity_logs (tenant_id, actor_id, action, entity_type, entity_id)
+      values (
+        ${session.tenant.id},
+        ${actorId(session)},
+        ${`Created task "${task.title}"`},
+        'task',
+        ${task.id}
+      )
+    `;
+
+    return task.id;
   });
 }

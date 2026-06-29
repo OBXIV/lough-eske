@@ -60,6 +60,7 @@ type TaskRow = {
   id: string;
   title: string;
   related_record: string | null;
+  related_label: string | null;
   due_date: string | null;
   priority: Task["priority"];
   status: Task["status"];
@@ -68,6 +69,7 @@ type TaskRow = {
 type ActivityLogRow = {
   id: string;
   action: string;
+  entity_id: string | null;
   entity_type: string | null;
   actor: string | null;
   created_at: string;
@@ -241,6 +243,7 @@ export async function getTasks(session: UserSession): Promise<Task[]> {
     select
       tasks.id,
       tasks.title,
+      tasks.related_label,
       case
         when tasks.related_type = 'agent' then nullif(concat_ws(' ', related_agents.first_name, related_agents.last_name), '')
         when tasks.related_type = 'recruit' then coalesce(related_recruits.prospect_name, nullif(concat_ws(' ', recruit_agents.first_name, recruit_agents.last_name), ''))
@@ -263,7 +266,7 @@ export async function getTasks(session: UserSession): Promise<Task[]> {
   return rows.map((row) => ({
     id: row.id,
     title: row.title,
-    relatedRecord: row.related_record ?? "Unassigned",
+    relatedRecord: row.related_label ?? row.related_record ?? "Unassigned",
     dueDate: row.due_date ?? "",
     priority: row.priority,
     status: row.status,
@@ -279,6 +282,7 @@ export async function getActivityLogs(session: UserSession): Promise<ActivityLog
     select
       activity_logs.id,
       activity_logs.action,
+      activity_logs.entity_id::text as entity_id,
       initcap(activity_logs.entity_type) as entity_type,
       nullif(concat_ws(' ', actors.first_name, actors.last_name), '') as actor,
       activity_logs.created_at::text as created_at
@@ -292,6 +296,7 @@ export async function getActivityLogs(session: UserSession): Promise<ActivityLog
   return rows.map((row) => ({
     id: row.id,
     action: row.action,
+    entityId: row.entity_id ?? undefined,
     entityType: row.entity_type ?? "Activity",
     actor: row.actor ?? "System",
     createdAt: row.created_at,
