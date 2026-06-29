@@ -17,7 +17,11 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Settings" subtitle="Tenant administration shell for identity, theme, users, and role visibility." />
+      <PageHeader
+        title="Settings"
+        subtitle="Tenant administration for identity, theme, users, role visibility, and environment safety."
+        eyebrow="Admin"
+      />
       <section className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
         <Card className="p-5">
           <h2 className="text-base font-semibold text-text-primary">Tenant profile</h2>
@@ -35,10 +39,10 @@ export default async function SettingsPage() {
               <dd><Badge variant="accent">{session.role}</Badge></dd>
             </div>
           </dl>
-          <h3 className="mt-6 text-sm font-semibold text-text-primary">Tenant switcher placeholders</h3>
+          <h3 className="mt-6 text-sm font-semibold text-text-primary">Available tenants</h3>
           <div className="mt-3 space-y-2">
             {tenantPlaceholders.map((placeholderTenant) => (
-              <div key={placeholderTenant.id} className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-sm">
+              <div key={placeholderTenant.id} className="flex items-center justify-between rounded-md border border-border bg-surface-muted px-3 py-2 text-sm">
                 <span>{placeholderTenant.name}</span>
                 <Badge>{placeholderTenant.status}</Badge>
               </div>
@@ -54,9 +58,15 @@ export default async function SettingsPage() {
           </thead>
           <tbody className="divide-y divide-border">
             {roleNames.map((roleName) => (
-              <tr key={roleName}>
+              <tr key={roleName} className="transition hover:bg-surface-muted">
                 <TableCell className="font-medium">{roleName}</TableCell>
-                <TableCell>{rolePermissions[roleName as keyof typeof rolePermissions].join(", ")}</TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-1.5">
+                    {rolePermissions[roleName as keyof typeof rolePermissions].map((permission) => (
+                      <Badge key={permission}>{permission}</Badge>
+                    ))}
+                  </div>
+                </TableCell>
               </tr>
             ))}
           </tbody>

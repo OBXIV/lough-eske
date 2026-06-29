@@ -6,7 +6,7 @@ This document defines the v0.1 execution backlog for Nova.
 Internal project codename: **Lough Eske**  
 Product name: **TBD**  
 Version: **v0.1**  
-Last updated: **June 28, 2026**
+Last updated: **June 29, 2026**
 
 ## Delivery Strategy
 Build the SaaS foundation first, then modules. Do not start with a single screen and wire data later. Multi-tenancy, auth, RBAC, and design tokens must come first.
@@ -155,6 +155,28 @@ Acceptance Criteria:
 - Dashboard shows tenant-specific data
 - Cards are visually polished
 - Demo tenant dashboard looks credible
+
+## Sprint 4A - Broker Portal UX Pass
+### Epic: Meeting-Ready Broker Portal
+Goal: Raise the existing broker/staff portal from scaffold UI to a credible SaaS operating surface.
+
+Stories:
+1. As a broker owner, I can scan the portal without it feeling like a template.
+2. As staff, I can navigate core app areas on smaller screens.
+3. As a deployer, I can see the current app environment in the UI without exposing secrets.
+
+Tasks:
+- Refresh shared tokens and shell styling
+- Add mobile primary navigation
+- Tighten card, badge, table, page header, and KPI primitives
+- Polish dashboard, recruiting, agents, transactions, tasks, reports, agent services, settings, login, and demo entry layout/copy
+- Add environment label helper for Dev, Stage, Preview, Prod, and Local
+
+Acceptance Criteria:
+- Lint, typecheck, and production build pass
+- Public demo/login routes render
+- Protected app routes continue to redirect without a session
+- No database behavior or RLS behavior changes
 
 ## Sprint 5 - Agent Database
 ### Epic: Agent Records

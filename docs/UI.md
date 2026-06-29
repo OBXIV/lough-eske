@@ -6,7 +6,7 @@ This document defines the v0.1 user interface, design system, and tenant theming
 Internal project codename: **Lough Eske**  
 Product name: **TBD**  
 Version: **v0.1**  
-Last updated: **June 28, 2026**
+Last updated: **June 29, 2026**
 
 ## UI Philosophy
 The product must feel like a neutral, premium, executive-grade SaaS platform. It should not look like a single brokerage's internal app.
@@ -61,18 +61,19 @@ Use CSS variables or Tailwind theme tokens. Components should consume tokens, no
 
 ```css
 :root {
-  --background: #F7F8FA;
+  --background: #F3F5F7;
   --surface: #FFFFFF;
-  --sidebar: #1F2937;
-  --sidebar-hover: #374151;
-  --text-primary: #111827;
-  --text-secondary: #6B7280;
-  --border: #E5E7EB;
-  --accent: #2563EB;
-  --success: #16A34A;
-  --warning: #F59E0B;
-  --danger: #DC2626;
-  --info: #0EA5E9;
+  --surface-muted: #F8FAFC;
+  --sidebar: #FBFCFE;
+  --sidebar-hover: #EEF3F8;
+  --text-primary: #172033;
+  --text-secondary: #667085;
+  --border: #D7DEE8;
+  --accent: #2755D8;
+  --success: #16844A;
+  --warning: #B76E00;
+  --danger: #C2412D;
+  --info: #0369A1;
 }
 ```
 
@@ -84,7 +85,7 @@ Use `--background` for the main app background.
 Use `--surface` for cards, panels, drawers, and modal interiors.
 
 ### Sidebar
-Use `--sidebar` for the primary left navigation.
+Use `--sidebar` for the primary left navigation surface.
 
 ### Accent
 Use `--accent` sparingly for:
@@ -137,7 +138,7 @@ The tenant accent should replace `--accent` only. It should not rewrite the enti
 - Page header with title, subtitle, and actions
 
 ### Sidebar
-- Dark slate background
+- Light neutral background
 - Product/codename or tenant logo at top
 - Role-aware navigation
 - Active item uses accent color
@@ -163,7 +164,7 @@ Should include:
 ### Cards
 - White surface
 - 1px border
-- 12px radius
+- 8px radius
 - Subtle shadow or no shadow
 - Header optional
 
@@ -325,7 +326,7 @@ Cards:
 - Transaction Status
 - Resource Library
 - Referral Tracking
-- Coming Soon AI Assistant
+- AI Assistant
 
 ### Settings
 Basic settings:
@@ -339,7 +340,7 @@ Basic settings:
 v0.1 should prioritize desktop/tablet. Mobile can be functional but does not need final polish.
 
 Minimum:
-- Sidebar collapses or stacks on smaller screens
+- Sidebar hides behind a mobile primary navigation on smaller screens
 - Tables remain usable with horizontal scroll
 - Cards stack on small widths
 

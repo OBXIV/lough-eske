@@ -18,7 +18,11 @@ export default async function TasksPage() {
 
   return (
     <>
-      <PageHeader title="Tasks" subtitle="Operational accountability layer for recruiting, retention, finance, and transaction follow-up." />
+      <PageHeader
+        title="Tasks"
+        subtitle="Accountability queue for recruiting, retention, finance, and transaction follow-up."
+        eyebrow="Operations"
+      />
       <DataTable>
         <thead>
           <tr>
@@ -31,10 +35,10 @@ export default async function TasksPage() {
         </thead>
         <tbody className="divide-y divide-border">
           {tasks.map((task) => (
-            <tr key={task.id} className="hover:bg-background">
+            <tr key={task.id} className="transition hover:bg-surface-muted">
               <TableCell className="font-medium">{task.title}</TableCell>
-              <TableCell>{task.relatedRecord}</TableCell>
-              <TableCell>{formatDate(task.dueDate)}</TableCell>
+              <TableCell className="text-text-secondary">{task.relatedRecord}</TableCell>
+              <TableCell className="text-text-secondary">{formatDate(task.dueDate)}</TableCell>
               <TableCell><Badge variant={priorityVariant(task.priority)}>{task.priority}</Badge></TableCell>
               <TableCell><Badge variant={task.status === "complete" ? "success" : "info"}>{task.status}</Badge></TableCell>
             </tr>

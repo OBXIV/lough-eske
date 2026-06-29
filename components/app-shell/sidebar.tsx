@@ -20,20 +20,20 @@ export function Sidebar({ session }: SidebarProps) {
   const groups = Array.from(new Set(visibleItems.map((item) => item.group)));
 
   return (
-    <aside className="flex min-h-screen w-72 shrink-0 flex-col bg-sidebar px-4 py-5 text-white max-lg:hidden">
-      <div className="mb-8 flex items-center gap-3 px-2">
-        <div className="rounded-lg bg-white/10 p-2">
+    <aside className="flex min-h-screen w-72 shrink-0 flex-col border-r border-border bg-sidebar px-3 py-4 text-text-primary max-lg:hidden">
+      <div className="mb-7 flex items-center gap-3 rounded-lg border border-border bg-surface px-3 py-3 shadow-card">
+        <div className="rounded-md bg-accent p-2 text-white">
           <Building2 className="h-5 w-5" aria-hidden="true" />
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="text-sm font-semibold">Brokerage OS</p>
-          <p className="text-xs text-white/60">Lough Eske v0.1</p>
+          <p className="text-xs text-text-secondary">Lough Eske</p>
         </div>
       </div>
       <nav className="space-y-6" aria-label="Primary navigation">
         {groups.map((group) => (
           <div key={group}>
-            <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-normal text-white/40">{group}</p>
+            <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-normal text-text-secondary">{group}</p>
             <div className="space-y-1">
               {visibleItems
                 .filter((item) => item.group === group)
@@ -46,11 +46,11 @@ export function Sidebar({ session }: SidebarProps) {
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "flex items-center gap-3 rounded-md px-2.5 py-2 text-sm font-medium text-white/72 transition hover:bg-sidebar-hover hover:text-white",
-                        isActive && "bg-white/10 text-white",
+                        "flex items-center gap-3 rounded-md px-2.5 py-2 text-sm font-medium text-text-secondary transition hover:bg-sidebar-hover hover:text-text-primary",
+                        isActive && "bg-accent/10 text-accent",
                       )}
                     >
-                      <Icon className={cn("h-4 w-4", isActive && "text-accent")} aria-hidden />
+                      <Icon className="h-4 w-4" aria-hidden />
                       {item.label}
                     </Link>
                   );
@@ -59,11 +59,11 @@ export function Sidebar({ session }: SidebarProps) {
           </div>
         ))}
       </nav>
-      <div className="mt-auto rounded-lg border border-white/10 bg-white/5 p-3">
-        <p className="text-xs text-white/50">Signed in as</p>
-        <p className="mt-1 text-sm font-semibold">{session.user.name}</p>
+      <div className="mt-auto rounded-lg border border-border bg-surface p-3 shadow-card">
+        <p className="text-xs text-text-secondary">Signed in as</p>
+        <p className="mt-1 truncate text-sm font-semibold">{session.user.name}</p>
         <div className="mt-3">
-          <Badge className="border-white/10 bg-white/10 text-white">{session.role}</Badge>
+          <Badge variant="accent">{session.role}</Badge>
         </div>
       </div>
     </aside>

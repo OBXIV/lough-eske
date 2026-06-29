@@ -2,8 +2,10 @@ import { cn } from "@/lib/utils";
 
 export function DataTable({ className, ...props }: React.TableHTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-border bg-surface shadow-card">
-      <table className={cn("min-w-full divide-y divide-border text-sm", className)} {...props} />
+    <div className="overflow-hidden rounded-lg border border-border bg-surface shadow-card">
+      <div className="overflow-x-auto">
+        <table className={cn("min-w-full divide-y divide-border text-sm", className)} {...props} />
+      </div>
     </div>
   );
 }
@@ -11,12 +13,12 @@ export function DataTable({ className, ...props }: React.TableHTMLAttributes<HTM
 export function TableHead({ className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) {
   return (
     <th
-      className={cn("px-4 py-3 text-left text-xs font-semibold uppercase tracking-normal text-text-secondary", className)}
+      className={cn("bg-surface-muted px-4 py-3 text-left text-xs font-semibold uppercase tracking-normal text-text-secondary", className)}
       {...props}
     />
   );
 }
 
 export function TableCell({ className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className={cn("px-4 py-3 text-text-primary", className)} {...props} />;
+  return <td className={cn("px-4 py-3.5 align-middle text-text-primary", className)} {...props} />;
 }

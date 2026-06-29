@@ -11,7 +11,11 @@ export default async function TransactionsPage() {
 
   return (
     <>
-      <PageHeader title="Transactions" subtitle="Tenant-specific transaction pipeline with estimated GCI and expected close dates." />
+      <PageHeader
+        title="Transactions"
+        subtitle="Deal pipeline with stage, close timing, list price, and estimated GCI."
+        eyebrow="Revenue"
+      />
       <DataTable>
         <thead>
           <tr>
@@ -27,14 +31,14 @@ export default async function TransactionsPage() {
         </thead>
         <tbody className="divide-y divide-border">
           {transactions.map((transaction) => (
-            <tr key={transaction.id} className="hover:bg-background">
+            <tr key={transaction.id} className="transition hover:bg-surface-muted">
               <TableCell className="font-medium">{transaction.agent}</TableCell>
               <TableCell>{transaction.clientName}</TableCell>
-              <TableCell>{transaction.propertyAddress}</TableCell>
+              <TableCell className="min-w-64 text-text-secondary">{transaction.propertyAddress}</TableCell>
               <TableCell><Badge variant="accent">{transaction.stage}</Badge></TableCell>
               <TableCell>{formatCurrency(transaction.listPrice)}</TableCell>
               <TableCell>{formatCurrency(transaction.estimatedGci)}</TableCell>
-              <TableCell>{formatDate(transaction.expectedCloseDate)}</TableCell>
+              <TableCell className="text-text-secondary">{formatDate(transaction.expectedCloseDate)}</TableCell>
               <TableCell><Badge variant="success">{transaction.status}</Badge></TableCell>
             </tr>
           ))}

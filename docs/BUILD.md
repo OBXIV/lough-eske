@@ -7,7 +7,7 @@ Internal project codename: **Lough Eske**
 Product name: **TBD**  
 Current working product label: **Brokerage Operating System**  
 Version: **v0.1**  
-Last updated: **June 28, 2026**
+Last updated: **June 29, 2026**
 
 ## North Star
 Build a multi-tenant SaaS platform for independent real estate brokerages. Do not build a single-brokerage CRM. The system must support Demo Brokerage, Point Realty, and future brokerages as separate tenants inside the same application.
@@ -191,6 +191,15 @@ The application shell should include:
 - Referral tracking card
 - Coming soon AI assistant card
 
+### Sprint 4A - Broker Portal UX Pass
+- Refresh shared design tokens toward a restrained enterprise SaaS palette
+- Move the app shell to a lighter, sharper navigation system
+- Add functional mobile primary navigation
+- Tighten card, badge, table, page header, and KPI primitives
+- Polish dashboard, recruiting, agents, transactions, tasks, reports, agent services, settings, login, and demo entry copy/layout
+- Surface Dev/Stage/Prod/Preview context in the app top bar without exposing secrets
+- Keep data access and database behavior unchanged
+
 ## Folder Structure
 Recommended structure:
 
@@ -267,7 +276,7 @@ Reference feel:
 - Figma
 - Retool
 
-Use neutral colors, clean spacing, sharp typography, white cards, slate sidebar, and one controlled accent color.
+Use neutral colors, clean spacing, sharp typography, white cards, light navigation, and one controlled accent color.
 
 ## Design Tokens
 Use tokens from UI.md. Do not hardcode hex colors in components.

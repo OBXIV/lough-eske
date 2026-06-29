@@ -11,6 +11,7 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         surface: "var(--surface)",
+        "surface-muted": "var(--surface-muted)",
         sidebar: "var(--sidebar)",
         "sidebar-hover": "var(--sidebar-hover)",
         border: "var(--border)",
@@ -26,7 +27,7 @@ const config: Config = {
         sans: ["Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
       },
       boxShadow: {
-        card: "0 1px 2px rgba(17, 24, 39, 0.04)",
+        card: "0 1px 2px rgba(23, 32, 51, 0.06), 0 1px 1px rgba(23, 32, 51, 0.03)",
       },
     },
   },

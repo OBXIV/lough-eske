@@ -20,36 +20,49 @@ export default async function RecruitingPage() {
 
   return (
     <>
-      <PageHeader title="Recruiting pipeline" subtitle="Kanban view of tenant-scoped recruiting records by stage, heat, score, and next follow-up." />
-      <div className="grid gap-4 overflow-x-auto xl:grid-cols-6">
-        {stages.map((stage) => (
-          <section key={stage} className="min-w-64 rounded-xl border border-border bg-surface p-3 shadow-card">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-text-primary">{stage}</h2>
-              <Badge>{recruits.filter((recruit) => recruit.stage === stage).length}</Badge>
-            </div>
-            <div className="space-y-3">
-              {recruits
-                .filter((recruit) => recruit.stage === stage)
-                .map((recruit) => (
-                  <Card key={recruit.id} className="p-3 shadow-none">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h3 className="text-sm font-semibold">{recruit.name}</h3>
-                        <p className="mt-1 text-xs text-text-secondary">{recruit.source}</p>
+      <PageHeader
+        title="Recruiting pipeline"
+        subtitle="Stage-by-stage view of candidate heat, ownership signals, score, and next follow-up timing."
+        eyebrow="Growth"
+      />
+      <div className="overflow-x-auto pb-2">
+        <div className="grid min-w-[88rem] grid-cols-6 gap-3">
+          {stages.map((stage) => {
+            const stageRecruits = recruits.filter((recruit) => recruit.stage === stage);
+
+            return (
+              <section key={stage} className="rounded-lg border border-border bg-surface-muted p-3">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-text-primary">{stage}</h2>
+                  <Badge>{stageRecruits.length}</Badge>
+                </div>
+                <div className="space-y-3">
+                  {stageRecruits.map((recruit) => (
+                    <Card key={recruit.id} className="p-3 shadow-none">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h3 className="truncate text-sm font-semibold">{recruit.name}</h3>
+                          <p className="mt-1 text-xs text-text-secondary">{recruit.source}</p>
+                        </div>
+                        <Badge variant={heatVariant(recruit.heatScore)}>{recruit.heatScore}</Badge>
                       </div>
-                      <Badge variant={heatVariant(recruit.heatScore)}>{recruit.heatScore}</Badge>
+                      <div className="mt-3 flex items-center justify-between gap-3 text-xs text-text-secondary">
+                        <span className="font-medium text-text-primary">Score {recruit.recruitScore}</span>
+                        <span>{formatDate(recruit.nextFollowUpDate)}</span>
+                      </div>
+                      <p className="mt-3 line-clamp-3 text-xs leading-5 text-text-secondary">{recruit.notesSummary}</p>
+                    </Card>
+                  ))}
+                  {stageRecruits.length === 0 ? (
+                    <div className="rounded-md border border-dashed border-border bg-surface px-3 py-8 text-center text-sm text-text-secondary">
+                      No records
                     </div>
-                    <div className="mt-3 flex items-center justify-between text-xs text-text-secondary">
-                      <span>Score {recruit.recruitScore}</span>
-                      <span>{formatDate(recruit.nextFollowUpDate)}</span>
-                    </div>
-                    <p className="mt-3 text-xs leading-5 text-text-secondary">{recruit.notesSummary}</p>
-                  </Card>
-                ))}
-            </div>
-          </section>
-        ))}
+                  ) : null}
+                </div>
+              </section>
+            );
+          })}
+        </div>
       </div>
     </>
   );
