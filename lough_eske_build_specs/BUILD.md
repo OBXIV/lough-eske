@@ -1,0 +1,295 @@
+# Lough Eske - BUILD.md
+
+## Document Purpose
+This document gives Nova the immediate engineering direction required to start building the first deployed SaaS version of the brokerage operating platform.
+
+Internal project codename: **Lough Eske**  
+Product name: **TBD**  
+Current working product label: **Brokerage Operating System**  
+Version: **v0.1**  
+Last updated: **June 28, 2026**
+
+## North Star
+Build a multi-tenant SaaS platform for independent real estate brokerages. Do not build a single-brokerage CRM. The system must support Demo Brokerage, Point Realty, and future brokerages as separate tenants inside the same application.
+
+The CRM is one module. The product is the operating system layer that gives brokerage leadership visibility into recruiting, retention, agent performance, transaction activity, staff accountability, and future agent-facing services.
+
+## First Build Objective
+Create a deployed v0.1 that can be used in sales and discovery meetings. It must look polished, support a demo account, support multiple tenants, and have a secure foundation.
+
+v0.1 must include:
+- Multi-tenant auth foundation
+- Role-based access control
+- Tenant-aware dashboard shell
+- Broker/staff portal
+- Agent database
+- Recruiting pipeline
+- Transaction table
+- Task list
+- Activity log foundation
+- Reports shell
+- Agent portal shell
+- Demo Brokerage tenant with seeded data
+- Point Realty tenant placeholder
+- California Brokerage placeholder
+
+## Technology Stack
+Frontend:
+- Next.js App Router
+- React
+- TypeScript
+- Tailwind CSS
+- shadcn/ui if useful
+- Lucide Icons
+
+Backend/Data:
+- Supabase
+- PostgreSQL
+- Supabase Auth
+- Supabase Row Level Security
+- Supabase Storage later
+
+Hosting:
+- Vercel
+
+Recommended add-ons:
+- Sentry for error tracking
+- Resend for transactional email later
+- Twilio for SMS later
+
+Do not add MLS, Twilio, AI, billing, or complex integrations in v0.1 unless explicitly requested later. Build the foundation first.
+
+## Product Scope v0.1
+### In Scope
+1. Authentication
+2. Tenant membership
+3. Role-aware navigation
+4. Demo tenant
+5. Broker dashboard
+6. Agent database
+7. Recruiting Kanban
+8. Transaction table
+9. Task list
+10. Reports shell
+11. Agent portal shell
+12. Settings shell
+13. Design token system
+14. Tenant theme support
+15. Repeatable Supabase migrations and seed data
+
+### Out of Scope for v0.1
+- Payments/billing
+- MLS sync
+- Gmail/Outlook sync
+- Twilio SMS
+- AI assistant
+- Full agent login workflow beyond shell role support
+- Native mobile app
+- Deep reporting engine
+- Production customer data import
+
+## Core Architecture Rules
+1. This is SaaS-first.
+2. Every brokerage is a tenant.
+3. Every tenant-owned table must include `tenant_id`.
+4. Do not hardcode Point Realty.
+5. Do not hardcode colors into components.
+6. Use design tokens.
+7. Use role-aware navigation.
+8. Use RLS on tenant-owned tables.
+9. Supabase migrations must be committed.
+10. Seed data must be repeatable.
+
+## Required Tenant Model
+The system must support:
+- One user belonging to one tenant
+- One user belonging to many tenants later
+- Platform admins seeing all tenants
+- Tenant users seeing only their tenant data
+
+The key join table is `tenant_memberships`.
+
+## Required Roles
+Seed these roles:
+- Platform Admin
+- Broker Owner
+- CFO / Finance
+- Office Admin
+- Recruiter
+- Transaction Coordinator
+- Read Only
+- Agent Portal User
+
+Agents are mostly business records in v0.1. Agent Portal User exists to support future login-enabled agent access.
+
+## Application Routes
+Use these routes as the initial application structure:
+
+- `/login`
+- `/demo`
+- `/app`
+- `/app/dashboard`
+- `/app/agents`
+- `/app/recruiting`
+- `/app/transactions`
+- `/app/tasks`
+- `/app/reports`
+- `/app/agent-portal`
+- `/app/settings`
+
+## App Shell Requirements
+The application shell should include:
+- Left sidebar navigation
+- Top bar with current tenant name
+- User menu
+- Tenant switcher placeholder
+- Role-aware nav items
+- Card-based content area
+- Clean responsive layout
+
+## Build Order
+### Sprint 0 - Foundation
+- Create repo
+- Install Next.js, TypeScript, Tailwind
+- Add shadcn/ui if used
+- Create Supabase project connection
+- Create migration structure
+- Add environment config
+- Deploy empty app to Vercel
+- Add design token CSS variables
+- Add app shell
+
+### Sprint 1 - Auth + Tenant + RBAC
+- Supabase Auth login
+- Profiles table
+- Tenants table
+- Tenant memberships table
+- Roles and permissions tables
+- Seed demo users and demo tenant
+- Implement role-aware navigation
+- Implement tenant context provider
+
+### Sprint 2 - Brokerage Core
+- Agents table and UI
+- Agent detail drawer/page
+- Recruiting pipeline table and Kanban UI
+- Recruiting activities
+- Tasks table and UI
+- Notes and activity log foundation
+
+### Sprint 3 - Executive Layer
+- Dashboard KPI cards
+- Transaction table
+- Reports shell
+- GCI forecast placeholder
+- Recruiting funnel snapshot
+
+### Sprint 4 - Agent Portal Shell
+- Agent dashboard card
+- Transaction status card
+- Resources card
+- Referral tracking card
+- Coming soon AI assistant card
+
+## Folder Structure
+Recommended structure:
+
+```txt
+/app
+  /(auth)
+  /(app)
+  /login
+  /demo
+/components
+  /app-shell
+  /dashboard
+  /agents
+  /recruiting
+  /transactions
+  /tasks
+  /reports
+  /agent-portal
+  /settings
+  /ui
+/lib
+  /supabase
+  /auth
+  /rbac
+  /tenant
+  /data
+  /utils
+/types
+/supabase
+  /migrations
+  /seed.sql
+/docs
+  BUILD.md
+  DATABASE.md
+  UI.md
+  BACKLOG.md
+```
+
+## Naming Conventions
+- Tables: snake_case plural, e.g. `tenant_memberships`
+- Columns: snake_case
+- React components: PascalCase
+- Hooks: `useSomething`
+- Permission keys: lowercase snake_case, e.g. `view_dashboard`
+- Routes: lowercase kebab case where needed
+
+## Coding Standards
+- TypeScript strict mode where practical
+- No `any` unless justified
+- Centralize Supabase client creation
+- Centralize tenant context
+- Centralize RBAC checks
+- Prefer server components for data where practical
+- Use client components for interactive Kanban, drawers, filters, forms
+- Keep UI components reusable
+- Avoid business logic inside presentational components
+
+## Security Standards
+- All tenant-owned tables must have RLS enabled
+- All queries must be scoped to tenant context
+- No cross-tenant data exposure
+- No service role key in frontend
+- Demo passwords must not be committed in public code
+- Platform Admin logic must be explicit and auditable
+
+## UI Direction
+The UI should feel like a neutral, premium enterprise SaaS platform. It should not feel like a local brokerage-branded app.
+
+Reference feel:
+- Linear
+- Vercel
+- Stripe Dashboard
+- Notion
+- Figma
+- Retool
+
+Use neutral colors, clean spacing, sharp typography, white cards, slate sidebar, and one controlled accent color.
+
+## Design Tokens
+Use tokens from UI.md. Do not hardcode hex colors in components.
+
+## Definition of Done for v0.1
+v0.1 is complete when:
+1. A user can log in.
+2. A user lands inside the correct tenant context.
+3. Demo Brokerage tenant works.
+4. Point Realty tenant placeholder exists.
+5. California Brokerage placeholder exists.
+6. Sidebar navigation changes by role.
+7. Dashboard displays tenant-specific data.
+8. Agent database displays seeded agents.
+9. Recruiting pipeline displays seeded recruits in Kanban stages.
+10. Transactions table displays tenant-specific transactions.
+11. Tasks page displays tenant-specific tasks.
+12. Reports shell exists.
+13. Agent portal shell exists.
+14. RLS blocks cross-tenant access.
+15. App is deployed to Vercel.
+16. Supabase migrations and seed files are committed.
+
+## Strategic Reminder
+Do not present this product as a CRM. The CRM is the base layer. The product is a Brokerage Operating System for executive visibility, recruiting, retention, transaction oversight, and future agent engagement.
