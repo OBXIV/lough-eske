@@ -77,4 +77,4 @@ POSTGRES_URL_NON_POOLING
 POSTGRES_PASSWORD
 ```
 
-Use the IPv4 transaction pooler connection string when the local network cannot reach Supabase direct Postgres over IPv6.
+Use the IPv4 session pooler connection string for migration and seed commands when the local network cannot reach Supabase direct Postgres over IPv6. Transaction pooler mode is useful for short-lived application queries, but it can fail during CLI migration work because prepared statements are not supported in transaction mode.
