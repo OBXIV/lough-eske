@@ -14,6 +14,7 @@ npm run dev
 ```bash
 npm run db:verify
 npm run sprint3:verify
+npm run supabase:verify
 npm run typecheck
 npm run lint
 npm run build
