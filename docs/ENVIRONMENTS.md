@@ -12,6 +12,18 @@ Lough Eske should run as three separate environments:
 
 Each environment should have its own Vercel project environment variables and its own Supabase project. Do not share production data into Dev or Stage.
 
+## Vercel Mapping
+
+Use this deployment mapping:
+
+| Product environment | Supabase project | Vercel target | Purpose |
+| --- | --- | --- | --- |
+| Dev | `lough-eske-dev` | Vercel Development, local `.env.dev.local`, or feature previews explicitly marked as Dev | Active engineering and seed iteration |
+| Stage | `lough-eske-stage` | Vercel Preview or a dedicated staging domain/branch | Release candidate and demo validation |
+| Prod | `lough-eske-prod` | Vercel Production | Customer-facing production |
+
+Do not point Stage at the Dev Supabase project just to make a deployment pass. If Stage does not have its own Supabase credentials yet, Stage is not wired.
+
 ## Dev
 Current Supabase project label:
 - `lough-eske-dev`
@@ -26,11 +38,14 @@ Purpose:
 - Demo data iteration
 
 Expected Vercel environment:
-- Preview or a dedicated dev deployment target
+- Development or explicit Dev preview target
 
 ## Stage
 Future Supabase project label:
 - `lough-eske-stage`
+
+Current Supabase project ref:
+- TBD
 
 Purpose:
 - Release candidate validation
@@ -66,18 +81,58 @@ Each Vercel environment should define:
 ```txt
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-NEXT_PUBLIC_SUPABASE_ANON_KEY
+DATABASE_URL
 ```
+
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` may also be set for compatibility, but the app prefers `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 
 For migration and seed execution, local ignored operator credentials may include one of:
 
 ```txt
 SUPABASE_ACCESS_TOKEN
-DATABASE_URL
-POSTGRES_URL_NON_POOLING
-POSTGRES_PASSWORD
+MIGRATION_DATABASE_URL
 ```
 
 Use the IPv4 session pooler connection string for migration and seed commands when the local network cannot reach Supabase direct Postgres over IPv6. Transaction pooler mode is useful for short-lived application queries, but it can fail during CLI migration work because prepared statements are not supported in transaction mode.
 
 For server-side application reads, set `DATABASE_URL` in the target Vercel environment. The application disables prepared statements for this connection so it can use Supabase pooler URLs safely.
+
+The app intentionally does not use Vercel integration-created `POSTGRES_*` variables. Each environment must opt in through `DATABASE_URL` so Dev, Stage, and Prod cannot accidentally share a database.
+
+## Local Files
+
+Use ignored local files for real secrets:
+
+```txt
+.env.dev.local
+.env.stage.local
+```
+
+Templates are committed:
+
+```txt
+.env.dev.example
+.env.stage.example
+```
+
+Verify local environment files with:
+
+```bash
+npm run env:verify:dev
+npm run env:verify:stage
+```
+
+The verifier fails if Stage points at the documented Dev Supabase project ref.
+
+## Connection Rules
+
+- `DATABASE_URL`: server runtime connection. Use the Supabase Transaction pooler for the matching environment.
+- `MIGRATION_DATABASE_URL`: operator-only migration/seed connection. Use the Supabase Session pooler for the matching environment.
+- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: public browser-safe Supabase values for the matching environment.
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: optional compatibility fallback.
+
+Migration flow for Dev or Stage:
+
+```bash
+npx supabase db push --include-seed --db-url "$MIGRATION_DATABASE_URL"
+```

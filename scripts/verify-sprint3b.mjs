@@ -30,6 +30,7 @@ if (!packageJson.dependencies?.postgres) {
 expectContains("lib/data/database.ts", "set local role authenticated", "RLS role setup");
 expectContains("lib/data/database.ts", "request.jwt.claim.sub", "RLS auth user claim setup");
 expectContains("lib/data/database.ts", "prepare: false", "Supabase pooler prepared-statement guard");
+expectNotContains("lib/data/database.ts", "POSTGRES_URL", "App runtime requires explicit DATABASE_URL");
 
 for (const table of ["agents", "recruits", "transactions", "tasks", "activity_logs"]) {
   expectContains("lib/data/app-data.ts", `where ${table}.tenant_id = $`, `Tenant scoped ${table} query`);

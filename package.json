@@ -9,6 +9,9 @@
     "lint": "eslint app components lib scripts types",
     "typecheck": "tsc --noEmit --incremental false",
     "db:verify": "node scripts/verify-sprint2.mjs",
+    "env:verify": "node scripts/verify-env.mjs",
+    "env:verify:dev": "node scripts/verify-env.mjs --file .env.dev.local --name dev",
+    "env:verify:stage": "node scripts/verify-env.mjs --file .env.stage.local --name stage",
     "sprint3:verify": "node scripts/verify-sprint3.mjs",
     "sprint3b:verify": "node scripts/verify-sprint3b.mjs",
     "supabase:verify": "node scripts/verify-supabase-public.mjs"
