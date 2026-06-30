@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { Archive, Eye, FileText, FolderOpen, Plus, Save, Search } from "lucide-react";
+import { Archive, Eye, FileText, FolderOpen, Plus, Save, Search, X } from "lucide-react";
 
 import { archiveAgentAction, createAgentAction, updateAgentProfileAction, updateAgentStatusAction } from "@/app/app/actions";
 import { ActionFeedback, SubmitButton } from "@/components/broker-portal/action-form";
@@ -19,6 +19,7 @@ type AgentsTableProps = {
   activities: ActivityLog[];
   canCreate: boolean;
   canEdit: boolean;
+  initialSearchTerm?: string;
 };
 
 const agentStatuses: Agent["brokerageStatus"][] = ["active", "inactive", "recruit", "onboarding", "former"];
@@ -360,9 +361,9 @@ function CreateAgentForm({ actionsEnabled }: CreateAgentFormProps) {
   );
 }
 
-export function AgentsTable({ actionsEnabled, agents, activities, canCreate, canEdit }: AgentsTableProps) {
+export function AgentsTable({ actionsEnabled, agents, activities, canCreate, canEdit, initialSearchTerm = "" }: AgentsTableProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | Agent["brokerageStatus"]>("all");
   const filteredAgents = useMemo(
@@ -394,6 +395,16 @@ export function AgentsTable({ actionsEnabled, agents, activities, canCreate, can
               type="search"
               value={searchTerm}
             />
+            {searchTerm ? (
+              <button
+                aria-label="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-text-secondary transition hover:text-text-primary"
+                onClick={() => setSearchTerm("")}
+                type="button"
+              >
+                <X className="h-4 w-4" aria-hidden />
+              </button>
+            ) : null}
           </label>
           <label>
             <span className="sr-only">Filter by status</span>

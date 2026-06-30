@@ -2,8 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 
-import { requirePermission } from "@/lib/auth/session";
+import { requirePermission, requireSession } from "@/lib/auth/session";
 import { initialActionFormState, type ActionFormState } from "@/lib/action-state";
+import { searchWorkspace } from "@/lib/data/app-data";
 import { areTenantWritesEnabled } from "@/lib/data/database";
 import {
   archiveAgent,
@@ -293,4 +294,9 @@ export async function createTaskAction(
     revalidatePath("/app/dashboard");
     return `Task "${input.title}" created.`;
   });
+}
+
+export async function searchWorkspaceAction(query: string) {
+  const session = await requireSession();
+  return searchWorkspace(session, query);
 }

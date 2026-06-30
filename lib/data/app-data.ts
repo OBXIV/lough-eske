@@ -8,6 +8,7 @@ import {
   transactions as fallbackTransactions,
 } from "@/lib/data/demo";
 import { isDatabaseConfigured, withTenantRls } from "@/lib/data/database";
+import { canAccess } from "@/lib/rbac/permissions";
 import { getVisibleTenants } from "@/lib/tenant/access";
 import type { ActivityLog, Agent, Recruit, Task, Tenant, Transaction, UserSession } from "@/types/domain";
 
@@ -314,4 +315,74 @@ export async function getActivityLogs(session: UserSession): Promise<ActivityLog
     actor: row.actor ?? "System",
     createdAt: row.created_at,
   }));
+}
+
+export type WorkspaceSearchResult = {
+  id: string;
+  type: "agent" | "recruit" | "transaction";
+  label: string;
+  subtitle: string;
+  href: string;
+};
+
+const SEARCH_RESULTS_PER_TYPE = 5;
+
+export async function searchWorkspace(session: UserSession, query: string): Promise<WorkspaceSearchResult[]> {
+  const term = query.trim().toLowerCase();
+  if (!term) return [];
+
+  const results: WorkspaceSearchResult[] = [];
+
+  if (canAccess(session.permissions, "view_agents")) {
+    const agents = await getAgents(session);
+    agents
+      .filter((agent) => [`${agent.firstName} ${agent.lastName}`, agent.email, agent.phone, agent.licenseNumber]
+        .some((value) => value.toLowerCase().includes(term)))
+      .slice(0, SEARCH_RESULTS_PER_TYPE)
+      .forEach((agent) => {
+        const name = `${agent.firstName} ${agent.lastName}`;
+        results.push({
+          id: agent.id,
+          type: "agent",
+          label: name,
+          subtitle: agent.email || agent.brokerageStatus,
+          href: `/app/agents?q=${encodeURIComponent(name)}`,
+        });
+      });
+  }
+
+  if (canAccess(session.permissions, "view_recruiting")) {
+    const recruits = await getRecruits(session);
+    recruits
+      .filter((recruit) => [recruit.name, recruit.source].some((value) => value.toLowerCase().includes(term)))
+      .slice(0, SEARCH_RESULTS_PER_TYPE)
+      .forEach((recruit) => {
+        results.push({
+          id: recruit.id,
+          type: "recruit",
+          label: recruit.name,
+          subtitle: `${recruit.stage} - ${recruit.heatScore}`,
+          href: `/app/recruiting?stage=${encodeURIComponent(recruit.stage)}`,
+        });
+      });
+  }
+
+  if (canAccess(session.permissions, "view_transactions")) {
+    const transactions = await getTransactions(session);
+    transactions
+      .filter((transaction) => [transaction.clientName, transaction.propertyAddress, transaction.agent]
+        .some((value) => value.toLowerCase().includes(term)))
+      .slice(0, SEARCH_RESULTS_PER_TYPE)
+      .forEach((transaction) => {
+        results.push({
+          id: transaction.id,
+          type: "transaction",
+          label: transaction.clientName || transaction.propertyAddress,
+          subtitle: `${transaction.stage} - ${transaction.propertyAddress}`,
+          href: "/app/transactions",
+        });
+      });
+  }
+
+  return results;
 }

@@ -5,8 +5,15 @@ import { getActivityLogs, getAgents } from "@/lib/data/app-data";
 import { areTenantWritesEnabled } from "@/lib/data/database";
 import { canAccess } from "@/lib/rbac/permissions";
 
-export default async function AgentsPage() {
+type AgentsPageProps = {
+  searchParams?: Promise<{
+    q?: string;
+  }>;
+};
+
+export default async function AgentsPage({ searchParams }: AgentsPageProps) {
   const session = await requirePermission("view_agents");
+  const params = await searchParams;
   const [agents, activities] = await Promise.all([
     getAgents(session),
     getActivityLogs(session),
@@ -27,6 +34,7 @@ export default async function AgentsPage() {
         agents={agents}
         canCreate={canCreate}
         canEdit={canEdit}
+        initialSearchTerm={params?.q ?? ""}
       />
     </>
   );
