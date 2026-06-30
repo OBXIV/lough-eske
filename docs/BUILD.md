@@ -246,6 +246,45 @@ The application shell should include:
 - Make Agent Portal tiles clickable into populated demo sections
 - Require migration `20260703_add_agent_archive_audit.sql` before deployed archive flows are validated
 
+### Current Position
+- Completed through Sprint 6C
+- Original baseline Sprint 7-11 shell work has been consolidated into completed scope where the route/shell/table already exists
+- Next implementation sprint is Sprint 7A - Transaction Workflow Control
+
+### Sprint 7A - Transaction Workflow Control
+- Make transaction rows clickable, not only the View button
+- Add transaction search and filters by stage, status, close timing, agent, and client
+- Add transaction drawer sections for key dates, contingencies, related tasks, and document placeholders
+- Add cancel/close audit metadata where needed
+- Tighten dashboard transaction and GCI drilldowns
+
+### Sprint 8A - Task and Activity Command Center
+- Add richer task filters by owner, priority, due date, related type, and status
+- Add task assignment and due-date editing
+- Add task detail context for notes and related records
+- Add activity log filtering by entity type and actor
+- Improve dashboard task drilldowns
+
+### Sprint 9A - Reports Drilldowns and Exports
+- Add report drilldown panels for recruiting, production, transactions, and GCI
+- Add date-range controls
+- Add top-agent and at-risk pipeline lists
+- Add print/export-friendly report layout
+
+### Sprint 10A - Agent Portal Data Workflows
+- Scope portal data to the signed-in agent user
+- Add resource library list and filters
+- Add referral tracking details
+- Add transaction status detail panel
+- Keep broker-only data out of portal views
+
+### Sprint 11A - Settings Administration Workflows
+- Add edit flow for tenant name and accent color
+- Add user/member list from tenant memberships
+- Add role detail drawer
+- Add environment and feature-flag display
+- Defer destructive admin actions until audit and permissions are stronger
+
 ## Folder Structure
 Recommended structure:
 

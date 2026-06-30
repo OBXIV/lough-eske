@@ -11,6 +11,33 @@ Last updated: **June 30, 2026**
 ## Delivery Strategy
 Build the SaaS foundation first, then modules. Do not start with a single screen and wire data later. Multi-tenancy, auth, RBAC, and design tokens must come first.
 
+## Execution Status Snapshot
+Current position: **completed through Sprint 6C**.
+
+Completed baseline:
+- Sprint 0 - Project Foundation
+- Sprint 1 - Design System and App Shell
+- Sprint 2 - Supabase Schema and Seed Data
+- Sprint 3 - Authentication, Tenant Context, and RBAC
+- Sprint 4 - Dashboard
+- Sprint 4A - Broker Portal UX Pass
+- Sprint 4B - Broker Portal Action Layer
+- Sprint 4C - Broker Portal Workflow Hardening
+- Sprint 5 - Agent Database
+- Sprint 6 - Recruiting Pipeline
+- Sprint 6A - Recruiting Pipeline Operations
+- Sprint 6B - Agent Document Dossier
+- Sprint 6C - Agent Archive and Portal Clickthrough
+
+Consolidated original backlog:
+- Original Sprint 7 transaction visibility is already covered by the transactions route, table, badges, GCI fields, drawer, stage update action, and dashboard drilldowns.
+- Original Sprint 8 task/activity foundation is already covered by the tasks route, status and overdue filters, task create/update flows, and activity logs.
+- Original Sprint 9 reports shell is already covered by the tenant-scoped reports route with recruiting, production, transaction volume, and GCI cards.
+- Original Sprint 10 agent portal shell is already covered by the agent portal route and clickable demo sections.
+- Original Sprint 11 settings shell is already covered by the tenant profile, role visibility, and environment/admin shell.
+
+Next implementation sprint: **Sprint 7A - Transaction Workflow Control**.
+
 ## Sprint 0 - Project Foundation
 ### Epic: Repository and Framework Setup
 Goal: Create deployable app shell.
@@ -348,116 +375,113 @@ Acceptance Criteria:
 - Agent Portal tiles navigate to visible demo content
 - Existing lint, typecheck, build, and route smoke checks pass
 
-## Sprint 7 - Transactions
-### Epic: Transaction Visibility
-Goal: Staff and ownership can see active transaction pipeline.
+## Sprint 7A - Transaction Workflow Control
+### Epic: Deal Operations
+Goal: Make transactions operate like a real deal control surface instead of a basic visibility table.
 
 Stories:
-1. As broker owner, I can see transaction pipeline.
-2. As CFO, I can see estimated GCI and close dates.
-3. As transaction coordinator, I can see transaction status.
+1. As staff, I can click a transaction row to open the transaction drawer.
+2. As staff, I can search and filter transactions by stage, status, agent, client, and close timing.
+3. As a transaction coordinator, I can see key dates, contingency status, related tasks, and file placeholders in the drawer.
+4. As leadership, I can audit cancelled and closed transaction status changes.
 
 Tasks:
-- Build transactions route
-- Build transaction table
-- Add transaction stage badges
-- Add estimated GCI formatting
-- Add transaction detail drawer/page if time allows
+- Make transaction rows clickable
+- Add transaction search
+- Add stage and close-date filters
+- Add drawer sections for key dates, contingencies, related tasks, and document placeholders
+- Add cancel/close audit metadata where needed
+- Tighten dashboard transaction and GCI drilldowns
 
 Acceptance Criteria:
-- Transactions table loads tenant data
-- Estimated GCI is visible
-- Stage/status are clear
+- Transaction row clicks open the drawer
+- Filters work without leaving the page
+- Drawer shows operational context beyond the base record fields
+- Cancelled/closed transitions are auditable
 
-## Sprint 8 - Tasks, Notes, and Activity Logs
-### Epic: Accountability Layer
-Goal: Track operational follow-up.
+## Sprint 8A - Task and Activity Command Center
+### Epic: Accountability Operations
+Goal: Turn the task table and activity log into a stronger daily work queue.
 
 Stories:
-1. As staff, I can view tasks.
-2. As staff, I can see priority and due date.
-3. As ownership, I can see recent activity.
+1. As staff, I can work tasks from a focused queue.
+2. As staff, I can attach tasks to agents, recruits, transactions, or reports.
+3. As ownership, I can scan overdue, upcoming, completed, and blocked work.
 
 Tasks:
-- Build tasks route
-- Build task list/table
-- Add status badges
-- Add priority badges
-- Add overdue logic
-- Display recent activity on dashboard
-- Create note/activity display components
+- Add richer task filters by owner, priority, due date, related type, and status
+- Add task detail drawer sections for notes and related record context
+- Add task assignment and due-date editing
+- Add activity log filtering by entity type and actor
+- Add dashboard task drilldowns for overdue and upcoming work
 
 Acceptance Criteria:
-- Tasks are visible by tenant
-- Overdue tasks are visually distinct
-- Activity log supports dashboard feed
+- Staff can move through task work without leaving the page
+- Related-record context is visible from each task
+- Task edits preserve tenant isolation and activity history
 
-## Sprint 9 - Reports Shell
-### Epic: Executive Intelligence
-Goal: Create first reporting surface.
+## Sprint 9A - Reports Drilldowns and Exports
+### Epic: Executive Intelligence Depth
+Goal: Move reports from summary cards to actionable drilldowns and meeting-ready exports.
 
 Stories:
-1. As broker owner, I can view recruiting funnel summary.
-2. As CFO, I can view GCI forecast shell.
-3. As leadership, I can view production snapshot.
+1. As broker owner, I can drill into recruiting funnel details.
+2. As CFO, I can inspect GCI forecast components.
+3. As leadership, I can export or print a clean snapshot for meetings.
 
 Tasks:
-- Build reports route
-- Add recruiting funnel card
-- Add agent production snapshot card
-- Add transaction volume snapshot card
-- Add GCI forecast card
-- Use seeded/query-driven values
+- Add report drilldown panels for recruiting, production, transactions, and GCI
+- Add date-range controls
+- Add top-agent and at-risk pipeline lists
+- Add print/export-friendly report layout
+- Add report empty/loading states
 
 Acceptance Criteria:
-- Reports route exists
-- Cards are polished
-- Data is tenant-scoped
+- Reports are tenant-scoped and query-driven
+- Drilldowns explain the summary numbers
+- Meeting snapshot is usable without manual cleanup
 
-## Sprint 10 - Agent Portal Shell
-### Epic: Future Differentiator
-Goal: Demonstrate future agent-facing platform.
+## Sprint 10A - Agent Portal Data Workflows
+### Epic: Agent-Facing Value
+Goal: Convert the clickable agent portal demo sections into role-scoped workflows.
 
 Stories:
-1. As an agent, I can see an agent portal shell.
-2. As broker owner, I can understand future agent value.
-3. As sales user, I can demo the differentiation.
+1. As an agent, I can see my production, tasks, resources, referrals, and transactions.
+2. As a broker owner, I can control what agents can see.
+3. As staff, I can publish resources for agent consumption.
 
 Tasks:
-- Build agent portal route
-- Add dashboard card
-- Add transaction status card
-- Add resource library card
-- Add referral tracking card
-- Add coming soon AI assistant card
-- Show seeded resources
+- Scope portal data to the signed-in agent user
+- Add resource library list and filters
+- Add referral tracking details
+- Add transaction status detail panel
+- Add portal-specific empty states and permission checks
 
 Acceptance Criteria:
-- Agent portal communicates future value
-- Shell is visually polished
-- Role can access view_agent_portal permission
+- Agent portal shows user-relevant data
+- Portal views do not expose broker-only data
+- Tiles navigate to populated, role-appropriate workflows
 
-## Sprint 11 - Settings Shell
+## Sprint 11A - Settings Administration Workflows
 ### Epic: Tenant Administration
-Goal: Provide basic tenant administration.
+Goal: Move settings from read-only admin shell to controlled tenant administration.
 
 Stories:
-1. As broker owner, I can see tenant settings.
-2. As admin, I can see users and roles.
-3. As tenant, I can see theme settings placeholder.
+1. As broker owner, I can edit safe tenant profile fields.
+2. As admin, I can inspect users and roles clearly.
+3. As tenant, I can preview theme and branding settings without breaking the app.
 
 Tasks:
-- Build settings route
-- Show tenant name
-- Show logo placeholder
-- Show accent color field
-- Show user list
-- Show role list
+- Add edit flow for tenant name and accent color
+- Add user/member list from tenant memberships
+- Add role detail drawer
+- Add environment and feature-flag display
+- Keep destructive admin actions deferred until audit and permission model are stronger
 
 Acceptance Criteria:
-- Settings route exists
-- Tenant details appear
-- Role/user display works
+- Settings updates are permission-gated
+- Tenant profile edits are auditable
+- User and role visibility is clearer than the current shell
 
 ## Final v0.1 QA Checklist
 - Auth works
@@ -481,8 +505,8 @@ Acceptance Criteria:
 
 ## Deferred Backlog
 After v0.1:
-- Drag-and-drop Kanban
 - Full CRUD for all modules
+- Storage-backed agent and transaction documents
 - MLS integration
 - Email integration
 - Twilio SMS
