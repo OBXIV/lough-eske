@@ -224,6 +224,14 @@ The application shell should include:
 - Add RLS insert policy for `create_agents`
 - Work on feature branches and validate Stage Preview before Production promotion
 
+### Sprint 6A - Recruiting Pipeline Operations
+- Make recruit cards clickable and draggable
+- Allow drag-and-drop movement between Kanban stages
+- Add stage and heat dropdown controls for recruiting workflow edits
+- Add stage and heat filters on the recruiting board
+- Link dashboard KPI and recruiting momentum tiles to the relevant data routes
+- Keep Stage Preview validation ahead of Production promotion
+
 ## Folder Structure
 Recommended structure:
 

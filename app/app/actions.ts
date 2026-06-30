@@ -11,7 +11,7 @@ import {
   createTask,
   updateAgentProfile,
   updateAgentStatus,
-  updateRecruitStage,
+  updateRecruitPipeline,
   updateTaskStatus,
   updateTransactionStage,
 } from "@/lib/data/mutations";
@@ -79,6 +79,11 @@ function assertAllowed<T extends string>(value: string, allowed: readonly T[], l
   }
 
   return value as T;
+}
+
+function optionalAllowed<T extends string>(formData: FormData, key: string, allowed: readonly T[], label: string): T | null {
+  const value = optionalFormValue(formData, key);
+  return value ? assertAllowed(value, allowed, label) : null;
 }
 
 function recruitScoreValue(formData: FormData) {
@@ -179,11 +184,12 @@ export async function updateRecruitStageAction(
   return runAction(session, async () => {
     const recruitId = requiredFormValue(formData, "recruitId");
     const stage = assertAllowed(requiredFormValue(formData, "stage"), recruitStages, "recruit stage");
+    const heatScore = optionalAllowed(formData, "heatScore", recruitHeatScores, "heat score");
 
-    await updateRecruitStage(session, recruitId, stage);
+    await updateRecruitPipeline(session, recruitId, { heatScore, stage });
     revalidatePath("/app/recruiting");
     revalidatePath("/app/dashboard");
-    return `Recruit moved to ${stage}.`;
+    return heatScore ? `Recruit moved to ${stage} and marked ${heatScore}.` : `Recruit moved to ${stage}.`;
   });
 }
 

@@ -75,6 +75,11 @@ export type UpdateAgentProfileInput = {
   source: string | null;
 };
 
+export type UpdateRecruitPipelineInput = {
+  heatScore?: Recruit["heatScore"] | null;
+  stage: Recruit["stage"];
+};
+
 function agentLabel(agent: Pick<UpdatedAgentRow, "first_name" | "last_name">) {
   return `${agent.first_name} ${agent.last_name}`.trim() || "Agent";
 }
@@ -201,12 +206,23 @@ export async function updateRecruitStage(
   recruitId: string,
   stage: Recruit["stage"],
 ) {
+  return updateRecruitPipeline(session, recruitId, { stage });
+}
+
+export async function updateRecruitPipeline(
+  session: UserSession,
+  recruitId: string,
+  input: UpdateRecruitPipelineInput,
+) {
   if (!isDatabaseConfigured()) return;
 
   await withTenantRls(session, async (sql) => {
     const rows = await sql<UpdatedRecruitRow[]>`
       update public.recruits
-      set stage = ${stage}, updated_at = now()
+      set
+        stage = ${input.stage},
+        heat_score = coalesce(${input.heatScore ?? null}, heat_score),
+        updated_at = now()
       where id = ${recruitId}
         and tenant_id = ${session.tenant.id}
       returning coalesce(prospect_name, '') as name
@@ -223,7 +239,7 @@ export async function updateRecruitStage(
         ${session.tenant.id},
         ${recruitId},
         'Stage Change',
-        ${`Moved ${recruitName} to ${stage}`},
+        ${input.heatScore ? `Moved ${recruitName} to ${input.stage} and marked ${input.heatScore}` : `Moved ${recruitName} to ${input.stage}`},
         ${actorId(session)}
       )
     `;
@@ -233,7 +249,7 @@ export async function updateRecruitStage(
       values (
         ${session.tenant.id},
         ${actorId(session)},
-        ${`Moved ${recruitName} to ${stage}`},
+        ${input.heatScore ? `Moved ${recruitName} to ${input.stage} and marked ${input.heatScore}` : `Moved ${recruitName} to ${input.stage}`},
         'recruit',
         ${recruitId}
       )

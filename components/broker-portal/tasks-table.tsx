@@ -17,11 +17,20 @@ type TasksTableProps = {
   actionsEnabled: boolean;
   activities: ActivityLog[];
   canCreate: boolean;
+  initialStatusFilter?: TaskStatusFilter;
   tasks: Task[];
 };
 
 const taskStatuses: Task["status"][] = ["open", "in_progress", "complete", "cancelled"];
 const taskPriorities: Task["priority"][] = ["low", "normal", "high", "urgent"];
+type TaskStatusFilter = "all" | "overdue" | Task["status"];
+const taskStatusFilters: TaskStatusFilter[] = ["all", "overdue", ...taskStatuses];
+
+function taskStatusLabel(status: TaskStatusFilter) {
+  if (status === "all") return "All tasks";
+  if (status === "overdue") return "Overdue tasks";
+  return status;
+}
 
 function priorityVariant(priority: Task["priority"]) {
   if (priority === "urgent") return "danger";
@@ -166,9 +175,22 @@ function CreateTaskForm({ actionsEnabled }: CreateTaskFormProps) {
   );
 }
 
-export function TasksTable({ actionsEnabled, activities, canCreate, tasks }: TasksTableProps) {
+function isOverdue(task: Task) {
+  return task.status !== "complete" && new Date(task.dueDate) < new Date();
+}
+
+export function TasksTable({ actionsEnabled, activities, canCreate, initialStatusFilter = "all", tasks }: TasksTableProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<TaskStatusFilter>(initialStatusFilter);
+  const filteredTasks = useMemo(
+    () => tasks.filter((task) => {
+      if (statusFilter === "all") return true;
+      if (statusFilter === "overdue") return isOverdue(task);
+      return task.status === statusFilter;
+    }),
+    [statusFilter, tasks],
+  );
   const selectedTask = useMemo(
     () => tasks.find((task) => task.id === selectedTaskId) ?? null,
     [selectedTaskId, tasks],
@@ -180,8 +202,23 @@ export function TasksTable({ actionsEnabled, activities, canCreate, tasks }: Tas
 
   return (
     <>
-      {canCreate ? (
-        <div className="mb-4 flex justify-end">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <label>
+            <span className="sr-only">Filter tasks by status</span>
+            <select
+              className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text-primary shadow-card sm:w-52"
+              onChange={(event) => setStatusFilter(event.target.value as TaskStatusFilter)}
+              value={statusFilter}
+            >
+              {taskStatusFilters.map((status) => (
+                <option key={status} value={status}>{taskStatusLabel(status)}</option>
+              ))}
+            </select>
+          </label>
+          <p className="text-sm font-medium text-text-secondary">{filteredTasks.length} of {tasks.length} tasks</p>
+        </div>
+        {canCreate ? (
           <button
             className="inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-card transition hover:bg-accent/90"
             onClick={() => {
@@ -193,8 +230,8 @@ export function TasksTable({ actionsEnabled, activities, canCreate, tasks }: Tas
             <Plus className="h-4 w-4" aria-hidden />
             New task
           </button>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
       <DataTable>
         <thead>
           <tr>
@@ -207,7 +244,7 @@ export function TasksTable({ actionsEnabled, activities, canCreate, tasks }: Tas
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
-          {tasks.map((task) => (
+          {filteredTasks.map((task) => (
             <tr key={task.id} className="transition hover:bg-surface-muted">
               <TableCell className="font-medium">{task.title}</TableCell>
               <TableCell className="text-text-secondary">{task.relatedRecord}</TableCell>
@@ -234,6 +271,13 @@ export function TasksTable({ actionsEnabled, activities, canCreate, tasks }: Tas
               </TableCell>
             </tr>
           ))}
+          {filteredTasks.length === 0 ? (
+            <tr>
+              <TableCell className="py-10 text-center text-text-secondary" colSpan={6}>
+                No tasks match this filter.
+              </TableCell>
+            </tr>
+          ) : null}
         </tbody>
       </DataTable>
       <DetailDrawer

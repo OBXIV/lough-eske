@@ -281,6 +281,30 @@ Acceptance Criteria:
 - Recruit detail is accessible
 - Tenant isolation holds
 
+## Sprint 6A - Recruiting Pipeline Operations
+### Epic: Kanban Workflow Control
+Goal: Make recruiting movement and dashboard drill-downs behave like an operations board.
+
+Stories:
+1. As staff, I can click a recruit tile to open the recruit record.
+2. As authorized staff, I can drag a recruit tile between stages.
+3. As authorized staff, I can update stage and heat from dropdown controls.
+4. As ownership, I can click dashboard KPI tiles and land on the related module.
+
+Tasks:
+- Make recruit cards clickable
+- Add drag-and-drop stage changes to the Kanban
+- Add stage and heat filters to the recruiting board
+- Add heat dropdown to recruit pipeline updates
+- Link dashboard KPI cards to filtered recruiting, transactions, and tasks views
+- Link dashboard recruiting momentum tiles to filtered recruiting stages
+
+Acceptance Criteria:
+- Recruit tile clicks open the drawer
+- Dragging a recruit between columns uses the same permissioned server action as form edits
+- Stage and heat can be adjusted through dropdowns
+- Dashboard KPI and recruiting momentum tiles route to the relevant data area
+
 ## Sprint 7 - Transactions
 ### Epic: Transaction Visibility
 Goal: Staff and ownership can see active transaction pipeline.

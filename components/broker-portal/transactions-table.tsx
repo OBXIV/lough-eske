@@ -17,6 +17,7 @@ type TransactionsTableProps = {
   actionsEnabled: boolean;
   activities: ActivityLog[];
   canEdit: boolean;
+  initialStatusFilter?: "all" | Transaction["status"];
   transactions: Transaction[];
 };
 
@@ -34,6 +35,11 @@ function statusVariant(status: Transaction["status"]) {
   if (status === "active") return "success";
   if (status === "cancelled") return "danger";
   return "default";
+}
+
+function transactionStatusLabel(status: "all" | Transaction["status"]) {
+  if (status === "all") return "All transactions";
+  return status;
 }
 
 function matchesTransactionActivity(activity: ActivityLog, transaction: Transaction) {
@@ -83,8 +89,19 @@ function TransactionStageForm({ actionsEnabled, transaction }: TransactionStageF
   );
 }
 
-export function TransactionsTable({ actionsEnabled, activities, canEdit, transactions }: TransactionsTableProps) {
+export function TransactionsTable({
+  actionsEnabled,
+  activities,
+  canEdit,
+  initialStatusFilter = "all",
+  transactions,
+}: TransactionsTableProps) {
+  const [statusFilter, setStatusFilter] = useState<"all" | Transaction["status"]>(initialStatusFilter);
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
+  const filteredTransactions = useMemo(
+    () => transactions.filter((transaction) => statusFilter === "all" || transaction.status === statusFilter),
+    [statusFilter, transactions],
+  );
   const selectedTransaction = useMemo(
     () => transactions.find((transaction) => transaction.id === selectedTransactionId) ?? null,
     [selectedTransactionId, transactions],
@@ -96,6 +113,21 @@ export function TransactionsTable({ actionsEnabled, activities, canEdit, transac
 
   return (
     <>
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <label>
+          <span className="sr-only">Filter transactions by status</span>
+          <select
+            className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text-primary shadow-card sm:w-56"
+            onChange={(event) => setStatusFilter(event.target.value as "all" | Transaction["status"])}
+            value={statusFilter}
+          >
+            {(["all", "active", "closed", "cancelled"] as const).map((status) => (
+              <option key={status} value={status}>{transactionStatusLabel(status)}</option>
+            ))}
+          </select>
+        </label>
+        <p className="text-sm font-medium text-text-secondary">{filteredTransactions.length} of {transactions.length} transactions</p>
+      </div>
       <DataTable>
         <thead>
           <tr>
@@ -111,7 +143,7 @@ export function TransactionsTable({ actionsEnabled, activities, canEdit, transac
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
-          {transactions.map((transaction) => (
+          {filteredTransactions.map((transaction) => (
             <tr key={transaction.id} className="transition hover:bg-surface-muted">
               <TableCell className="font-medium">{transaction.agent}</TableCell>
               <TableCell>{transaction.clientName}</TableCell>
@@ -133,6 +165,13 @@ export function TransactionsTable({ actionsEnabled, activities, canEdit, transac
               </TableCell>
             </tr>
           ))}
+          {filteredTransactions.length === 0 ? (
+            <tr>
+              <TableCell className="py-10 text-center text-text-secondary" colSpan={9}>
+                No transactions match this filter.
+              </TableCell>
+            </tr>
+          ) : null}
         </tbody>
       </DataTable>
       <DetailDrawer

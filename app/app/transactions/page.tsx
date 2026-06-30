@@ -4,9 +4,23 @@ import { requirePermission } from "@/lib/auth/session";
 import { getActivityLogs, getTransactions } from "@/lib/data/app-data";
 import { areTenantWritesEnabled } from "@/lib/data/database";
 import { canAccess } from "@/lib/rbac/permissions";
+import type { Transaction } from "@/types/domain";
 
-export default async function TransactionsPage() {
+type TransactionsPageProps = {
+  searchParams?: Promise<{
+    status?: string;
+  }>;
+};
+
+const transactionStatuses: Transaction["status"][] = ["active", "closed", "cancelled"];
+
+function transactionStatusFilterFromQuery(status?: string): "all" | Transaction["status"] {
+  return transactionStatuses.includes(status as Transaction["status"]) ? (status as Transaction["status"]) : "all";
+}
+
+export default async function TransactionsPage({ searchParams }: TransactionsPageProps) {
   const session = await requirePermission("view_transactions");
+  const params = await searchParams;
   const [transactions, activities] = await Promise.all([
     getTransactions(session),
     getActivityLogs(session),
@@ -24,6 +38,7 @@ export default async function TransactionsPage() {
         actionsEnabled={areTenantWritesEnabled(session)}
         activities={activities}
         canEdit={canEdit}
+        initialStatusFilter={transactionStatusFilterFromQuery(params?.status)}
         transactions={transactions}
       />
     </>

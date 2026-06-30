@@ -1,4 +1,5 @@
 import { Activity, BriefcaseBusiness, ClipboardList, TrendingUp, UserPlus } from "lucide-react";
+import Link from "next/link";
 
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { Badge } from "@/components/ui/badge";
@@ -32,11 +33,11 @@ export default async function DashboardPage() {
         eyebrow="Command center"
       />
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <KpiCard label="Active Recruits" value={String(activeRecruits)} delta="2 hot prospects need follow-up" icon={UserPlus} />
-        <KpiCard label="Agents Joined" value={String(joinedAgents)} delta="This month from recruiting" icon={TrendingUp} />
-        <KpiCard label="Transactions" value={String(activeTransactions)} delta="Active pipeline records" icon={BriefcaseBusiness} />
-        <KpiCard label="GCI Pipeline" value={formatCurrency(gciPipeline)} delta="Estimated from active deals" icon={Activity} />
-        <KpiCard label="Overdue Tasks" value={String(overdueTasks)} delta="Tenant-scoped task queue" icon={ClipboardList} />
+        <KpiCard href="/app/recruiting?status=active" label="Active Recruits" value={String(activeRecruits)} delta="2 hot prospects need follow-up" icon={UserPlus} />
+        <KpiCard href="/app/recruiting?stage=Joined" label="Agents Joined" value={String(joinedAgents)} delta="This month from recruiting" icon={TrendingUp} />
+        <KpiCard href="/app/transactions?status=active" label="Transactions" value={String(activeTransactions)} delta="Active pipeline records" icon={BriefcaseBusiness} />
+        <KpiCard href="/app/transactions?status=active" label="GCI Pipeline" value={formatCurrency(gciPipeline)} delta="Estimated from active deals" icon={Activity} />
+        <KpiCard href="/app/tasks?status=overdue" label="Overdue Tasks" value={String(overdueTasks)} delta="Tenant-scoped task queue" icon={ClipboardList} />
       </section>
       <section className="mt-6 grid gap-4 xl:grid-cols-[1fr_0.8fr]">
         <Card className="p-5">
@@ -53,7 +54,11 @@ export default async function DashboardPage() {
               const width = activeRecruits > 0 ? Math.max(12, Math.round((count / activeRecruits) * 100)) : 0;
 
               return (
-                <div key={stage} className="rounded-md border border-border bg-surface-muted p-4">
+                <Link
+                  key={stage}
+                  className="rounded-md border border-border bg-surface-muted p-4 transition hover:border-accent/40 hover:bg-surface"
+                  href={`/app/recruiting?stage=${encodeURIComponent(stage)}`}
+                >
                   <div className="flex items-center justify-between gap-3">
                     <p className="text-sm font-medium text-text-primary">{stage}</p>
                     <p className="text-sm font-semibold text-text-primary">{count}</p>
@@ -61,7 +66,7 @@ export default async function DashboardPage() {
                   <div className="mt-3 h-2 overflow-hidden rounded-full bg-border">
                     <div className="h-full rounded-full bg-accent" style={{ width: `${width}%` }} />
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
