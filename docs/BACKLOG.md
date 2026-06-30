@@ -228,26 +228,32 @@ Acceptance Criteria:
 
 ## Sprint 5 - Agent Database
 ### Epic: Agent Records
-Goal: Brokerage staff can view agent records.
+Goal: Brokerage staff can find, inspect, create, and maintain agent records.
 
 Stories:
 1. As staff, I can view all agents in my tenant.
 2. As staff, I can click an agent and view detail.
 3. As staff, I can see production and GCI fields.
+4. As authorized staff, I can create a new agent record.
+5. As authorized staff, I can update agent contact, license, source, and status fields.
 
 Tasks:
 - Build agents route
 - Build agents table
-- Add search placeholder
-- Add status filters placeholder
+- Add search
+- Add status filters
 - Build agent detail drawer/page
-- Add create agent form if time allows
-- Add edit agent form if time allows
+- Add create agent form
+- Add edit agent profile form
+- Add `create_agents` RLS insert policy
 
 Acceptance Criteria:
 - Agents table loads tenant data
 - Clicking row opens detail
 - No cross-tenant data appears
+- Search and status filters work without leaving the page
+- Create and edit actions return useful form feedback
+- Agent creation is protected by `create_agents`
 
 ## Sprint 6 - Recruiting Pipeline
 ### Epic: Recruiting Kanban

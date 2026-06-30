@@ -10,6 +10,8 @@ Lough Eske should run as three separate environments:
 2. Stage
 3. Prod
 
+QA is a future formal environment. Until then, QA work happens in Dev/local and feature Preview deployments before Stage validation.
+
 Each environment should have its own Vercel project environment variables and its own Supabase project. Do not share production data into Dev or Stage.
 
 ## Vercel Mapping
@@ -91,6 +93,9 @@ Current decision:
 - Prod schema changes must come from committed Supabase migrations.
 - Seed files should remain safe, repeatable, and demo-data only unless explicitly split by environment.
 - Demo tenants are read-only application workspaces. Do not use `tenant.status = 'demo'` for editable customer workspaces.
+- Work should happen on feature branches first. Validate against Stage Preview before merging or pushing release work to Production.
+- If Stage fails, the fix goes back to Dev/local or the future QA environment before returning to Stage.
+- If Stage passes, the same commit can be promoted to Production.
 
 ## Required Variables
 Each Vercel environment should define:

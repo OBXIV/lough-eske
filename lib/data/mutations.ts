@@ -8,6 +8,12 @@ type UpdatedAgentRow = {
   last_name: string;
 };
 
+type CreatedAgentRow = {
+  id: string;
+  first_name: string;
+  last_name: string;
+};
+
 type UpdatedRecruitRow = {
   name: string | null;
 };
@@ -52,6 +58,112 @@ export type CreateTaskInput = {
   title: string;
 };
 
+export type CreateAgentInput = {
+  email: string | null;
+  firstName: string;
+  lastName: string;
+  licenseNumber: string | null;
+  phone: string | null;
+  source: string | null;
+  status: Agent["brokerageStatus"];
+};
+
+export type UpdateAgentProfileInput = {
+  email: string | null;
+  licenseNumber: string | null;
+  phone: string | null;
+  source: string | null;
+};
+
+function agentLabel(agent: Pick<UpdatedAgentRow, "first_name" | "last_name">) {
+  return `${agent.first_name} ${agent.last_name}`.trim() || "Agent";
+}
+
+export async function createAgent(session: UserSession, input: CreateAgentInput) {
+  if (!isDatabaseConfigured()) return null;
+
+  return withTenantRls(session, async (sql) => {
+    const rows = await sql<CreatedAgentRow[]>`
+      insert into public.agents (
+        tenant_id,
+        first_name,
+        last_name,
+        email,
+        phone,
+        brokerage_status,
+        license_number,
+        source,
+        assigned_owner_id
+      )
+      values (
+        ${session.tenant.id},
+        ${input.firstName},
+        ${input.lastName},
+        ${input.email},
+        ${input.phone},
+        ${input.status},
+        ${input.licenseNumber},
+        ${input.source},
+        ${actorId(session)}
+      )
+      returning id, first_name, last_name
+    `;
+
+    const agent = rows[0];
+    if (!agent) throw new Error("Agent could not be created.");
+
+    await sql`
+      insert into public.activity_logs (tenant_id, actor_id, action, entity_type, entity_id)
+      values (
+        ${session.tenant.id},
+        ${actorId(session)},
+        ${`Created agent ${agentLabel(agent)}`},
+        'agent',
+        ${agent.id}
+      )
+    `;
+
+    return agent.id;
+  });
+}
+
+export async function updateAgentProfile(
+  session: UserSession,
+  agentId: string,
+  input: UpdateAgentProfileInput,
+) {
+  if (!isDatabaseConfigured()) return;
+
+  await withTenantRls(session, async (sql) => {
+    const rows = await sql<UpdatedAgentRow[]>`
+      update public.agents
+      set
+        email = ${input.email},
+        phone = ${input.phone},
+        license_number = ${input.licenseNumber},
+        source = ${input.source},
+        updated_at = now()
+      where id = ${agentId}
+        and tenant_id = ${session.tenant.id}
+      returning first_name, last_name
+    `;
+
+    const agent = rows[0];
+    if (!agent) throw new Error("Agent was not found or is outside the current tenant.");
+
+    await sql`
+      insert into public.activity_logs (tenant_id, actor_id, action, entity_type, entity_id)
+      values (
+        ${session.tenant.id},
+        ${actorId(session)},
+        ${`Updated profile for ${agentLabel(agent)}`},
+        'agent',
+        ${agentId}
+      )
+    `;
+  });
+}
+
 export async function updateAgentStatus(
   session: UserSession,
   agentId: string,
@@ -76,7 +188,7 @@ export async function updateAgentStatus(
       values (
         ${session.tenant.id},
         ${actorId(session)},
-        ${`Updated ${agent.first_name} ${agent.last_name} to ${status}`},
+        ${`Updated ${agentLabel(agent)} to ${status}`},
         'agent',
         ${agentId}
       )

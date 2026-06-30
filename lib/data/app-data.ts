@@ -26,6 +26,8 @@ type AgentRow = {
   email: string | null;
   phone: string | null;
   brokerage_status: Agent["brokerageStatus"];
+  license_number: string | null;
+  source: string | null;
   production_ytd: string | number | null;
   gci_ytd: string | number | null;
   last_close_date: string | null;
@@ -131,6 +133,8 @@ export async function getAgents(session: UserSession): Promise<Agent[]> {
       agents.email,
       agents.phone,
       agents.brokerage_status,
+      agents.license_number,
+      agents.source,
       agents.production_ytd,
       agents.gci_ytd,
       agents.last_close_date::text as last_close_date,
@@ -148,6 +152,8 @@ export async function getAgents(session: UserSession): Promise<Agent[]> {
     email: row.email ?? "",
     phone: row.phone ?? "",
     brokerageStatus: row.brokerage_status,
+    licenseNumber: row.license_number ?? "",
+    source: row.source ?? "Unknown",
     productionYtd: toNumber(row.production_ytd),
     gciYtd: toNumber(row.gci_ytd),
     lastCloseDate: row.last_close_date ?? "",

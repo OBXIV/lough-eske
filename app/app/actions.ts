@@ -6,8 +6,10 @@ import { requirePermission } from "@/lib/auth/session";
 import { initialActionFormState, type ActionFormState } from "@/lib/action-state";
 import { areTenantWritesEnabled } from "@/lib/data/database";
 import {
+  createAgent,
   createRecruit,
   createTask,
+  updateAgentProfile,
   updateAgentStatus,
   updateRecruitStage,
   updateTaskStatus,
@@ -61,6 +63,16 @@ function optionalFormValue(formData: FormData, key: string) {
   return value || null;
 }
 
+function optionalEmailValue(formData: FormData, key: string) {
+  const value = optionalFormValue(formData, key);
+
+  if (value && !value.includes("@")) {
+    throw new Error("Email must include @.");
+  }
+
+  return value;
+}
+
 function assertAllowed<T extends string>(value: string, allowed: readonly T[], label: string): T {
   if (!allowed.includes(value as T)) {
     throw new Error(`Invalid ${label}.`);
@@ -107,6 +119,53 @@ export async function updateAgentStatusAction(
     revalidatePath("/app/agents");
     revalidatePath("/app/dashboard");
     return `Agent status updated to ${status}.`;
+  });
+}
+
+export async function createAgentAction(
+  previousStateOrFormData: ActionFormState | FormData = initialActionFormState,
+  maybeFormData?: FormData,
+) {
+  const session = await requirePermission("create_agents");
+  const formData = formDataFromArgs(previousStateOrFormData, maybeFormData);
+
+  return runAction(session, async () => {
+    const input = {
+      email: optionalEmailValue(formData, "email"),
+      firstName: requiredFormValue(formData, "firstName"),
+      lastName: requiredFormValue(formData, "lastName"),
+      licenseNumber: optionalFormValue(formData, "licenseNumber"),
+      phone: optionalFormValue(formData, "phone"),
+      source: optionalFormValue(formData, "source"),
+      status: assertAllowed(requiredFormValue(formData, "status"), agentStatuses, "agent status"),
+    };
+
+    await createAgent(session, input);
+    revalidatePath("/app/agents");
+    revalidatePath("/app/dashboard");
+    return `Agent ${input.firstName} ${input.lastName} created.`;
+  });
+}
+
+export async function updateAgentProfileAction(
+  previousStateOrFormData: ActionFormState | FormData = initialActionFormState,
+  maybeFormData?: FormData,
+) {
+  const session = await requirePermission("edit_agents");
+  const formData = formDataFromArgs(previousStateOrFormData, maybeFormData);
+
+  return runAction(session, async () => {
+    const agentId = requiredFormValue(formData, "agentId");
+
+    await updateAgentProfile(session, agentId, {
+      email: optionalEmailValue(formData, "email"),
+      licenseNumber: optionalFormValue(formData, "licenseNumber"),
+      phone: optionalFormValue(formData, "phone"),
+      source: optionalFormValue(formData, "source"),
+    });
+    revalidatePath("/app/agents");
+    revalidatePath("/app/dashboard");
+    return "Agent profile updated.";
   });
 }
 

@@ -68,6 +68,8 @@ export type Agent = {
   email: string;
   phone: string;
   brokerageStatus: "active" | "inactive" | "recruit" | "onboarding" | "former";
+  licenseNumber: string;
+  source: string;
   productionYtd: number;
   gciYtd: number;
   lastCloseDate: string;

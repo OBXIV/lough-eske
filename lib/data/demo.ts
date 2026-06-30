@@ -121,16 +121,16 @@ export function getDemoSession(): UserSession {
 }
 
 export const agents: Agent[] = [
-  { id: "a1", firstName: "Avery", lastName: "Stone", email: "avery@example.com", phone: "(415) 555-0130", brokerageStatus: "active", productionYtd: 12800000, gciYtd: 358400, lastCloseDate: "2026-06-11", assignedOwner: "Morgan Hale" },
-  { id: "a2", firstName: "Jordan", lastName: "Reed", email: "jordan@example.com", phone: "(415) 555-0178", brokerageStatus: "active", productionYtd: 9650000, gciYtd: 270200, lastCloseDate: "2026-05-29", assignedOwner: "Morgan Hale" },
-  { id: "a3", firstName: "Casey", lastName: "Lin", email: "casey@example.com", phone: "(415) 555-0199", brokerageStatus: "onboarding", productionYtd: 4200000, gciYtd: 117600, lastCloseDate: "2026-04-18", assignedOwner: "Riley Moss" },
-  { id: "a4", firstName: "Taylor", lastName: "Brooks", email: "taylor@example.com", phone: "(415) 555-0144", brokerageStatus: "active", productionYtd: 15100000, gciYtd: 422800, lastCloseDate: "2026-06-20", assignedOwner: "Morgan Hale" },
-  { id: "a5", firstName: "Jamie", lastName: "Quinn", email: "jamie@example.com", phone: "(415) 555-0186", brokerageStatus: "active", productionYtd: 7350000, gciYtd: 205800, lastCloseDate: "2026-05-08", assignedOwner: "Riley Moss" },
-  { id: "a6", firstName: "Mina", lastName: "Foster", email: "mina@example.com", phone: "(415) 555-0121", brokerageStatus: "active", productionYtd: 6100000, gciYtd: 170800, lastCloseDate: "2026-06-02", assignedOwner: "Riley Moss" },
-  { id: "a7", firstName: "Noah", lastName: "Patel", email: "noah@example.com", phone: "(415) 555-0163", brokerageStatus: "active", productionYtd: 11200000, gciYtd: 313600, lastCloseDate: "2026-06-18", assignedOwner: "Morgan Hale" },
-  { id: "a8", firstName: "Sofia", lastName: "Mercer", email: "sofia@example.com", phone: "(415) 555-0157", brokerageStatus: "inactive", productionYtd: 2800000, gciYtd: 78400, lastCloseDate: "2026-03-21", assignedOwner: "Morgan Hale" },
-  { id: "a9", firstName: "Owen", lastName: "Clarke", email: "owen@example.com", phone: "(415) 555-0172", brokerageStatus: "recruit", productionYtd: 5100000, gciYtd: 142800, lastCloseDate: "2026-02-12", assignedOwner: "Riley Moss" },
-  { id: "a10", firstName: "Elena", lastName: "Park", email: "elena@example.com", phone: "(415) 555-0191", brokerageStatus: "onboarding", productionYtd: 3200000, gciYtd: 89600, lastCloseDate: "2026-05-17", assignedOwner: "Riley Moss" },
+  { id: "a1", firstName: "Avery", lastName: "Stone", email: "avery@example.com", phone: "(415) 555-0130", brokerageStatus: "active", licenseNumber: "CA-010001", source: "Internal", productionYtd: 12800000, gciYtd: 358400, lastCloseDate: "2026-06-11", assignedOwner: "Morgan Hale" },
+  { id: "a2", firstName: "Jordan", lastName: "Reed", email: "jordan@example.com", phone: "(415) 555-0178", brokerageStatus: "active", licenseNumber: "CA-010002", source: "Internal", productionYtd: 9650000, gciYtd: 270200, lastCloseDate: "2026-05-29", assignedOwner: "Morgan Hale" },
+  { id: "a3", firstName: "Casey", lastName: "Lin", email: "casey@example.com", phone: "(415) 555-0199", brokerageStatus: "onboarding", licenseNumber: "CA-010003", source: "Recruiting", productionYtd: 4200000, gciYtd: 117600, lastCloseDate: "2026-04-18", assignedOwner: "Riley Moss" },
+  { id: "a4", firstName: "Taylor", lastName: "Brooks", email: "taylor@example.com", phone: "(415) 555-0144", brokerageStatus: "active", licenseNumber: "CA-010004", source: "Internal", productionYtd: 15100000, gciYtd: 422800, lastCloseDate: "2026-06-20", assignedOwner: "Morgan Hale" },
+  { id: "a5", firstName: "Jamie", lastName: "Quinn", email: "jamie@example.com", phone: "(415) 555-0186", brokerageStatus: "active", licenseNumber: "CA-010005", source: "Internal", productionYtd: 7350000, gciYtd: 205800, lastCloseDate: "2026-05-08", assignedOwner: "Riley Moss" },
+  { id: "a6", firstName: "Mina", lastName: "Foster", email: "mina@example.com", phone: "(415) 555-0121", brokerageStatus: "active", licenseNumber: "CA-010006", source: "Recruiting", productionYtd: 6100000, gciYtd: 170800, lastCloseDate: "2026-06-02", assignedOwner: "Riley Moss" },
+  { id: "a7", firstName: "Noah", lastName: "Patel", email: "noah@example.com", phone: "(415) 555-0163", brokerageStatus: "active", licenseNumber: "CA-010007", source: "Referral", productionYtd: 11200000, gciYtd: 313600, lastCloseDate: "2026-06-18", assignedOwner: "Morgan Hale" },
+  { id: "a8", firstName: "Sofia", lastName: "Mercer", email: "sofia@example.com", phone: "(415) 555-0157", brokerageStatus: "inactive", licenseNumber: "CA-010008", source: "Internal", productionYtd: 2800000, gciYtd: 78400, lastCloseDate: "2026-03-21", assignedOwner: "Morgan Hale" },
+  { id: "a9", firstName: "Owen", lastName: "Clarke", email: "owen@example.com", phone: "(415) 555-0172", brokerageStatus: "recruit", licenseNumber: "CA-010009", source: "Recruiting", productionYtd: 5100000, gciYtd: 142800, lastCloseDate: "2026-02-12", assignedOwner: "Riley Moss" },
+  { id: "a10", firstName: "Elena", lastName: "Park", email: "elena@example.com", phone: "(415) 555-0191", brokerageStatus: "onboarding", licenseNumber: "CA-010010", source: "Independent", productionYtd: 3200000, gciYtd: 89600, lastCloseDate: "2026-05-17", assignedOwner: "Riley Moss" },
 ];
 
 export const recruits: Recruit[] = [

@@ -216,6 +216,14 @@ The application shell should include:
 - Add RLS insert policies and `tasks.related_label` for create flows
 - Require migration `20260701_add_create_flow_support.sql` before deployed create actions are expected to succeed
 
+### Sprint 5 - Agent Database Workflows
+- Add agent search and status filters
+- Add create agent drawer and server action
+- Add edit agent profile form for contact, license, and source fields
+- Carry license and source through the agent domain model
+- Add RLS insert policy for `create_agents`
+- Work on feature branches and validate Stage Preview before Production promotion
+
 ## Folder Structure
 Recommended structure:
 

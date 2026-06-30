@@ -11,6 +11,7 @@ export default async function AgentsPage() {
     getAgents(session),
     getActivityLogs(session),
   ]);
+  const canCreate = canAccess(session.permissions, "create_agents");
   const canEdit = canAccess(session.permissions, "edit_agents");
 
   return (
@@ -20,7 +21,13 @@ export default async function AgentsPage() {
         subtitle="Production, contact, status, and ownership view for brokerage agents."
         eyebrow="Brokerage"
       />
-      <AgentsTable actionsEnabled={areTenantWritesEnabled(session)} activities={activities} agents={agents} canEdit={canEdit} />
+      <AgentsTable
+        actionsEnabled={areTenantWritesEnabled(session)}
+        activities={activities}
+        agents={agents}
+        canCreate={canCreate}
+        canEdit={canEdit}
+      />
     </>
   );
 }
