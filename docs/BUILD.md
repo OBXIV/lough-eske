@@ -232,6 +232,12 @@ The application shell should include:
 - Link dashboard KPI and recruiting momentum tiles to the relevant data routes
 - Keep Stage Preview validation ahead of Production promotion
 
+### Sprint 6B - Agent Document Dossier
+- Add a read-only agent files section inside the agent detail drawer
+- Show E&O insurance, brokerage contract, independent contractor agreement, and license copy coverage
+- Surface file category, status, and updated-date metadata without claiming storage-backed uploads yet
+- Defer Supabase Storage buckets, document tables, and upload/download actions to the storage sprint
+
 ## Folder Structure
 Recommended structure:
 

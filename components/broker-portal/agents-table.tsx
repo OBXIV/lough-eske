@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { Eye, Plus, Save, Search } from "lucide-react";
+import { Eye, FileText, FolderOpen, Plus, Save, Search } from "lucide-react";
 
 import { createAgentAction, updateAgentProfileAction, updateAgentStatusAction } from "@/app/app/actions";
 import { ActionFeedback, SubmitButton } from "@/components/broker-portal/action-form";
@@ -22,12 +22,19 @@ type AgentsTableProps = {
 };
 
 const agentStatuses: Agent["brokerageStatus"][] = ["active", "inactive", "recruit", "onboarding", "former"];
+type AgentFileStatus = "On file" | "Needs review" | "Missing";
 
 function statusVariant(status: Agent["brokerageStatus"]) {
   if (status === "active") return "success";
   if (status === "onboarding") return "info";
   if (status === "recruit") return "warning";
   return "default";
+}
+
+function fileStatusVariant(status: AgentFileStatus) {
+  if (status === "On file") return "success";
+  if (status === "Needs review") return "warning";
+  return "danger";
 }
 
 function matchesAgentActivity(activity: ActivityLog, agent: Agent) {
@@ -48,6 +55,43 @@ function matchesSearch(agent: Agent, searchTerm: string) {
     agent.source,
     agent.assignedOwner,
   ].some((value) => value.toLowerCase().includes(query));
+}
+
+function agentFileRows(agent: Agent) {
+  const hasLicense = Boolean(agent.licenseNumber.trim());
+  const activeAgent = agent.brokerageStatus === "active" || agent.brokerageStatus === "onboarding";
+
+  return [
+    {
+      category: "Insurance",
+      name: "E&O insurance",
+      status: activeAgent ? "On file" : "Needs review",
+      updatedAt: agent.lastCloseDate,
+    },
+    {
+      category: "Agreement",
+      name: "Brokerage contract",
+      status: activeAgent ? "On file" : "Needs review",
+      updatedAt: agent.lastCloseDate,
+    },
+    {
+      category: "Agreement",
+      name: "Independent contractor agreement",
+      status: agent.brokerageStatus === "former" ? "Needs review" : "On file",
+      updatedAt: agent.lastCloseDate,
+    },
+    {
+      category: "License",
+      name: "License copy",
+      status: hasLicense ? "On file" : "Missing",
+      updatedAt: agent.lastCloseDate,
+    },
+  ] satisfies {
+    category: string;
+    name: string;
+    status: AgentFileStatus;
+    updatedAt: string;
+  }[];
 }
 
 type AgentStatusFormProps = {
@@ -147,6 +191,48 @@ function AgentProfileForm({ actionsEnabled, agent }: AgentStatusFormProps) {
         state={state}
       />
     </DrawerFormShell>
+  );
+}
+
+type AgentFilesSectionProps = {
+  agent: Agent;
+};
+
+function AgentFilesSection({ agent }: AgentFilesSectionProps) {
+  const files = agentFileRows(agent);
+  const onFileCount = files.filter((file) => file.status === "On file").length;
+
+  return (
+    <section className="rounded-lg border border-border bg-surface">
+      <div className="flex items-center justify-between gap-4 border-b border-border px-4 py-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-accent/10 text-accent">
+            <FolderOpen className="h-4 w-4" aria-hidden />
+          </span>
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-text-primary">Agent files</h3>
+            <p className="mt-0.5 text-xs text-text-secondary">Compliance and brokerage documents</p>
+          </div>
+        </div>
+        <Badge variant={onFileCount === files.length ? "success" : "warning"}>{onFileCount}/{files.length}</Badge>
+      </div>
+      <div className="divide-y divide-border">
+        {files.map((file) => (
+          <div key={file.name} className="grid gap-3 px-4 py-3 sm:grid-cols-[1fr_auto] sm:items-center">
+            <div className="flex min-w-0 gap-3">
+              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-surface-muted text-text-secondary">
+                <FileText className="h-4 w-4" aria-hidden />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-text-primary">{file.name}</p>
+                <p className="mt-1 text-xs text-text-secondary">{file.category} - Updated {formatDate(file.updatedAt)}</p>
+              </div>
+            </div>
+            <Badge className="w-fit" variant={fileStatusVariant(file.status)}>{file.status}</Badge>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -380,6 +466,7 @@ export function AgentsTable({ actionsEnabled, agents, activities, canCreate, can
               <DetailField label="GCI YTD" value={formatCurrency(selectedAgent.gciYtd)} />
               <DetailField label="Last close" value={formatDate(selectedAgent.lastCloseDate)} />
             </dl>
+            <AgentFilesSection agent={selectedAgent} />
             {canEdit ? (
               <>
                 <AgentProfileForm key={`${selectedAgent.id}-profile`} actionsEnabled={actionsEnabled} agent={selectedAgent} />

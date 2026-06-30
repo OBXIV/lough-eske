@@ -305,6 +305,26 @@ Acceptance Criteria:
 - Stage and heat can be adjusted through dropdowns
 - Dashboard KPI and recruiting momentum tiles route to the relevant data area
 
+## Sprint 6B - Agent Document Dossier
+### Epic: Agent Compliance Readiness
+Goal: Let staff see required agent file coverage from the agent record drawer.
+
+Stories:
+1. As staff, I can see whether key agent documents are on file.
+2. As ownership, I can spot missing or review-needed compliance files.
+3. As a developer, I have a UI target for the later storage-backed document model.
+
+Tasks:
+- Add an agent files section to the agent detail drawer
+- Show E&O insurance, brokerage contract, independent contractor agreement, and license copy rows
+- Add file category, status, and updated-date metadata
+- Keep the first pass read-only until Supabase Storage and document tables are designed
+
+Acceptance Criteria:
+- Clicking View on an agent shows agent files in the drawer
+- File rows match the existing drawer visual system
+- The UI does not imply uploads are persisted before storage exists
+
 ## Sprint 7 - Transactions
 ### Epic: Transaction Visibility
 Goal: Staff and ownership can see active transaction pipeline.
