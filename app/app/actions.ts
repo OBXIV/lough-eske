@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { requirePermission } from "@/lib/auth/session";
 import { initialActionFormState, type ActionFormState } from "@/lib/action-state";
-import { isDatabaseConfigured } from "@/lib/data/database";
+import { areTenantWritesEnabled } from "@/lib/data/database";
 import {
   createRecruit,
   createTask,
@@ -13,7 +13,7 @@ import {
   updateTaskStatus,
   updateTransactionStage,
 } from "@/lib/data/mutations";
-import type { Agent, Recruit, Task, Transaction } from "@/types/domain";
+import type { Agent, Recruit, Task, Transaction, UserSession } from "@/types/domain";
 
 const agentStatuses: Agent["brokerageStatus"][] = ["active", "inactive", "recruit", "onboarding", "former"];
 const recruitStages: Recruit["stage"][] = ["Identified", "Contacted", "Engaged", "Offer Pending", "Joined", "Lost"];
@@ -43,7 +43,7 @@ function error(message: string): ActionFormState {
 }
 
 function writesDisabled() {
-  return error("Writes are not configured for this environment.");
+  return error("Writes are disabled for this workspace.");
 }
 
 function requiredFormValue(formData: FormData, key: string) {
@@ -79,8 +79,8 @@ function recruitScoreValue(formData: FormData) {
   return Math.round(parsed);
 }
 
-async function runAction(work: () => Promise<void | string | null> | void | string | null) {
-  if (!isDatabaseConfigured()) {
+async function runAction(session: UserSession, work: () => Promise<void | string | null> | void | string | null) {
+  if (!areTenantWritesEnabled(session)) {
     return writesDisabled();
   }
 
@@ -99,7 +99,7 @@ export async function updateAgentStatusAction(
   const session = await requirePermission("edit_agents");
   const formData = formDataFromArgs(previousStateOrFormData, maybeFormData);
 
-  return runAction(async () => {
+  return runAction(session, async () => {
     const agentId = requiredFormValue(formData, "agentId");
     const status = assertAllowed(requiredFormValue(formData, "status"), agentStatuses, "agent status");
 
@@ -117,7 +117,7 @@ export async function updateRecruitStageAction(
   const session = await requirePermission("edit_recruits");
   const formData = formDataFromArgs(previousStateOrFormData, maybeFormData);
 
-  return runAction(async () => {
+  return runAction(session, async () => {
     const recruitId = requiredFormValue(formData, "recruitId");
     const stage = assertAllowed(requiredFormValue(formData, "stage"), recruitStages, "recruit stage");
 
@@ -135,7 +135,7 @@ export async function updateTransactionStageAction(
   const session = await requirePermission("edit_transactions");
   const formData = formDataFromArgs(previousStateOrFormData, maybeFormData);
 
-  return runAction(async () => {
+  return runAction(session, async () => {
     const transactionId = requiredFormValue(formData, "transactionId");
     const stage = assertAllowed(requiredFormValue(formData, "stage"), transactionStages, "transaction stage");
 
@@ -154,7 +154,7 @@ export async function updateTaskStatusAction(
   const session = await requirePermission("manage_tasks");
   const formData = formDataFromArgs(previousStateOrFormData, maybeFormData);
 
-  return runAction(async () => {
+  return runAction(session, async () => {
     const taskId = requiredFormValue(formData, "taskId");
     const status = assertAllowed(requiredFormValue(formData, "status"), taskStatuses, "task status");
 
@@ -172,7 +172,7 @@ export async function createRecruitAction(
   const session = await requirePermission("create_recruits");
   const formData = formDataFromArgs(previousStateOrFormData, maybeFormData);
 
-  return runAction(async () => {
+  return runAction(session, async () => {
     const input = {
       heatScore: assertAllowed(requiredFormValue(formData, "heatScore"), recruitHeatScores, "heat score"),
       name: requiredFormValue(formData, "name"),
@@ -197,7 +197,7 @@ export async function createTaskAction(
   const session = await requirePermission("manage_tasks");
   const formData = formDataFromArgs(previousStateOrFormData, maybeFormData);
 
-  return runAction(async () => {
+  return runAction(session, async () => {
     const input = {
       dueDate: optionalFormValue(formData, "dueDate"),
       priority: assertAllowed(requiredFormValue(formData, "priority"), taskPriorities, "task priority"),

@@ -20,6 +20,10 @@ export function isDatabaseConfigured() {
   return Boolean(getDatabaseUrl());
 }
 
+export function areTenantWritesEnabled(session: UserSession) {
+  return isDatabaseConfigured() && session.tenant.status !== "demo";
+}
+
 function createDatabaseClient() {
   const databaseUrl = getDatabaseUrl();
 

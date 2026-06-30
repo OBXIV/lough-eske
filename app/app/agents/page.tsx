@@ -2,7 +2,7 @@ import { AgentsTable } from "@/components/broker-portal/agents-table";
 import { PageHeader } from "@/components/ui/page-header";
 import { requirePermission } from "@/lib/auth/session";
 import { getActivityLogs, getAgents } from "@/lib/data/app-data";
-import { isDatabaseConfigured } from "@/lib/data/database";
+import { areTenantWritesEnabled } from "@/lib/data/database";
 import { canAccess } from "@/lib/rbac/permissions";
 
 export default async function AgentsPage() {
@@ -20,7 +20,7 @@ export default async function AgentsPage() {
         subtitle="Production, contact, status, and ownership view for brokerage agents."
         eyebrow="Brokerage"
       />
-      <AgentsTable actionsEnabled={isDatabaseConfigured()} activities={activities} agents={agents} canEdit={canEdit} />
+      <AgentsTable actionsEnabled={areTenantWritesEnabled(session)} activities={activities} agents={agents} canEdit={canEdit} />
     </>
   );
 }

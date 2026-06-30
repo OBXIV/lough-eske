@@ -2,7 +2,7 @@ import { RecruitingBoard } from "@/components/broker-portal/recruiting-board";
 import { PageHeader } from "@/components/ui/page-header";
 import { requirePermission } from "@/lib/auth/session";
 import { getActivityLogs, getRecruits } from "@/lib/data/app-data";
-import { isDatabaseConfigured } from "@/lib/data/database";
+import { areTenantWritesEnabled } from "@/lib/data/database";
 import { canAccess } from "@/lib/rbac/permissions";
 
 export default async function RecruitingPage() {
@@ -22,7 +22,7 @@ export default async function RecruitingPage() {
         eyebrow="Growth"
       />
       <RecruitingBoard
-        actionsEnabled={isDatabaseConfigured()}
+        actionsEnabled={areTenantWritesEnabled(session)}
         activities={activities}
         canCreate={canCreate}
         canEdit={canEdit}

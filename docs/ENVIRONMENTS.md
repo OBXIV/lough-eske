@@ -19,8 +19,8 @@ Use this deployment mapping:
 | Product environment | Supabase project | Vercel target | Purpose |
 | --- | --- | --- | --- |
 | Dev | `lough-eske-dev` | Vercel Development, local `.env.dev.local`, or feature previews explicitly marked as Dev | Active engineering and seed iteration |
-| Stage | `lough-eske-stage` | Vercel Preview or a dedicated staging domain/branch | Release candidate and demo validation |
-| Prod | `lough-eske-prod` | Vercel Production | Customer-facing production |
+| Stage | `lough-eske-stage` | Vercel Preview behind Vercel SSO | Release candidate and demo validation |
+| Prod | `lough-eske-prod` | Vercel Production | Customer-facing production with a dedicated Prod Supabase project |
 
 Do not point Stage at the Dev Supabase project just to make a deployment pass. If Stage does not have its own Supabase credentials yet, Stage is not wired.
 
@@ -62,9 +62,10 @@ Expected Vercel environment:
 Current Vercel Preview variables:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-
-Still required before deployed Preview can use Stage database-backed reads:
 - `DATABASE_URL`
+
+Access rule:
+- Stage Preview should stay behind Vercel SSO.
 
 ## Prod
 Future Supabase project label:
@@ -78,6 +79,10 @@ Purpose:
 Expected Vercel environment:
 - Production deployment and production domain
 
+Current decision:
+- Production should use a real Prod Supabase project once credentials are available.
+- Demo Brokerage remains a read-only demo workspace even when `DATABASE_URL` is configured.
+
 ## Rules
 - Never commit secrets.
 - Never run destructive migration or seed commands against Prod without an explicit production confirmation.
@@ -85,6 +90,7 @@ Expected Vercel environment:
 - Stage should be reset only when validating a release candidate.
 - Prod schema changes must come from committed Supabase migrations.
 - Seed files should remain safe, repeatable, and demo-data only unless explicitly split by environment.
+- Demo tenants are read-only application workspaces. Do not use `tenant.status = 'demo'` for editable customer workspaces.
 
 ## Required Variables
 Each Vercel environment should define:

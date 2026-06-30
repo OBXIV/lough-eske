@@ -2,7 +2,7 @@ import { TransactionsTable } from "@/components/broker-portal/transactions-table
 import { PageHeader } from "@/components/ui/page-header";
 import { requirePermission } from "@/lib/auth/session";
 import { getActivityLogs, getTransactions } from "@/lib/data/app-data";
-import { isDatabaseConfigured } from "@/lib/data/database";
+import { areTenantWritesEnabled } from "@/lib/data/database";
 import { canAccess } from "@/lib/rbac/permissions";
 
 export default async function TransactionsPage() {
@@ -21,7 +21,7 @@ export default async function TransactionsPage() {
         eyebrow="Revenue"
       />
       <TransactionsTable
-        actionsEnabled={isDatabaseConfigured()}
+        actionsEnabled={areTenantWritesEnabled(session)}
         activities={activities}
         canEdit={canEdit}
         transactions={transactions}
