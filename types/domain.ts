@@ -100,6 +100,8 @@ export type Transaction = {
   estimatedGci: number;
   expectedCloseDate: string;
   status: "active" | "closed" | "cancelled";
+  finalizedAt?: string | null;
+  finalizedBy?: string | null;
 };
 
 export type Task = {

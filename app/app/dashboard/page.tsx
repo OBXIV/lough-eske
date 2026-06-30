@@ -20,8 +20,9 @@ export default async function DashboardPage() {
 
   const activeRecruits = recruits.filter((recruit) => recruit.stage !== "Joined" && recruit.stage !== "Lost").length;
   const joinedAgents = recruits.filter((recruit) => recruit.stage === "Joined").length;
-  const activeTransactions = transactions.filter((transaction) => transaction.status === "active").length;
-  const gciPipeline = transactions.reduce((total, transaction) => total + transaction.estimatedGci, 0);
+  const activeDeals = transactions.filter((transaction) => transaction.status === "active");
+  const activeTransactions = activeDeals.length;
+  const gciPipeline = activeDeals.reduce((total, transaction) => total + transaction.estimatedGci, 0);
   const overdueTasks = tasks.filter((task) => task.status !== "complete" && new Date(task.dueDate) < new Date()).length;
   const recruitingStages = ["Identified", "Contacted", "Engaged", "Offer Pending"] as const;
 

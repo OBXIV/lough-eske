@@ -21,6 +21,7 @@ type UpdatedRecruitRow = {
 type UpdatedTransactionRow = {
   client_name: string | null;
   property_address: string | null;
+  finalized_at: string | null;
 };
 
 type UpdatedTaskRow = {
@@ -307,14 +308,20 @@ export async function updateTransactionStage(
   if (!isDatabaseConfigured()) return;
 
   const status: Transaction["status"] = stage === "Closed" ? "closed" : stage === "Cancelled" ? "cancelled" : "active";
+  const isFinal = status !== "active";
 
   await withTenantRls(session, async (sql) => {
     const rows = await sql<UpdatedTransactionRow[]>`
       update public.transactions
-      set stage = ${stage}, status = ${status}, updated_at = now()
+      set
+        stage = ${stage},
+        status = ${status},
+        finalized_at = ${isFinal ? sql`now()` : sql`null`},
+        finalized_by = ${isFinal ? actorId(session) : null},
+        updated_at = now()
       where id = ${transactionId}
         and tenant_id = ${session.tenant.id}
-      returning client_name, property_address
+      returning client_name, property_address, finalized_at::text as finalized_at
     `;
 
     const transaction = rows[0];
@@ -323,13 +330,18 @@ export async function updateTransactionStage(
     const label = transaction.client_name || transaction.property_address || "Transaction";
 
     await sql`
-      insert into public.activity_logs (tenant_id, actor_id, action, entity_type, entity_id)
+      insert into public.activity_logs (tenant_id, actor_id, action, entity_type, entity_id, metadata)
       values (
         ${session.tenant.id},
         ${actorId(session)},
         ${`Moved ${label} to ${stage}`},
         'transaction',
-        ${transactionId}
+        ${transactionId},
+        ${
+          isFinal
+            ? sql`jsonb_build_object('status', ${status}, 'finalized_at', ${transaction.finalized_at}, 'finalized_by', ${actorId(session)})`
+            : sql`jsonb_build_object('status', ${status})`
+        }
       )
     `;
   });

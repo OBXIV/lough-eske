@@ -150,7 +150,7 @@ export const transactions: Transaction[] = [
   { id: "t3", agent: "Jordan Reed", clientName: "A. Nguyen", propertyAddress: "77 Laurel Street", transactionType: "Seller", stage: "Listing", listPrice: 975000, estimatedGci: 27300, expectedCloseDate: "2026-08-03", status: "active" },
   { id: "t4", agent: "Jamie Quinn", clientName: "R. Ellis", propertyAddress: "510 Mission Bay", transactionType: "Dual", stage: "Clear to Close", listPrice: 2140000, estimatedGci: 59900, expectedCloseDate: "2026-07-02", status: "active" },
   { id: "t5", agent: "Noah Patel", clientName: "M. Torres", propertyAddress: "912 Valley Ridge", transactionType: "Buyer", stage: "Lead", listPrice: 1185000, estimatedGci: 33180, expectedCloseDate: "2026-08-14", status: "active" },
-  { id: "t6", agent: "Mina Foster", clientName: "D. Shaw", propertyAddress: "46 Lake Street", transactionType: "Referral", stage: "Closed", listPrice: 740000, estimatedGci: 10360, expectedCloseDate: "2026-06-24", status: "closed" },
+  { id: "t6", agent: "Mina Foster", clientName: "D. Shaw", propertyAddress: "46 Lake Street", transactionType: "Referral", stage: "Closed", listPrice: 740000, estimatedGci: 10360, expectedCloseDate: "2026-06-24", status: "closed", finalizedAt: "2026-06-24T22:15:00Z", finalizedBy: "Sam Ortiz" },
 ];
 
 export const tasks: Task[] = [

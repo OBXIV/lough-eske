@@ -59,6 +59,8 @@ type TransactionRow = {
   estimated_gci: string | number | null;
   expected_close_date: string | null;
   status: Transaction["status"];
+  finalized_at: string | null;
+  finalized_by: string | null;
 };
 
 type TaskRow = {
@@ -227,9 +229,12 @@ export async function getTransactions(session: UserSession): Promise<Transaction
       transactions.list_price,
       transactions.estimated_gci,
       transactions.expected_close_date::text as expected_close_date,
-      transactions.status
+      transactions.status,
+      transactions.finalized_at::text as finalized_at,
+      nullif(concat_ws(' ', finalized_by.first_name, finalized_by.last_name), '') as finalized_by
     from public.transactions
     left join public.agents on agents.id = transactions.agent_id
+    left join public.profiles finalized_by on finalized_by.id = transactions.finalized_by
     where transactions.tenant_id = ${session.tenant.id}
     order by transactions.expected_close_date nulls last, transactions.created_at desc
   `);
@@ -245,6 +250,8 @@ export async function getTransactions(session: UserSession): Promise<Transaction
     estimatedGci: toNumber(row.estimated_gci),
     expectedCloseDate: row.expected_close_date ?? "",
     status: row.status,
+    finalizedAt: row.finalized_at,
+    finalizedBy: row.finalized_by,
   }));
 }
 

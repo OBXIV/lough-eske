@@ -247,9 +247,10 @@ The application shell should include:
 - Require migration `20260703_add_agent_archive_audit.sql` before deployed archive flows are validated
 
 ### Current Position
-- Completed through Sprint 6C
+- Completed through Sprint 7A
 - Original baseline Sprint 7-11 shell work has been consolidated into completed scope where the route/shell/table already exists
-- Next implementation sprint is Sprint 7A - Transaction Workflow Control
+- Next implementation sprint is Sprint 8A - Task and Activity Command Center
+- Sprint 7A requires migration `20260704_add_transaction_status_audit.sql` before deployed close/cancel audit is validated
 
 ### Sprint 7A - Transaction Workflow Control
 - Make transaction rows clickable, not only the View button

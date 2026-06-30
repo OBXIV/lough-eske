@@ -1,7 +1,7 @@
 import { TransactionsTable } from "@/components/broker-portal/transactions-table";
 import { PageHeader } from "@/components/ui/page-header";
 import { requirePermission } from "@/lib/auth/session";
-import { getActivityLogs, getTransactions } from "@/lib/data/app-data";
+import { getActivityLogs, getTasks, getTransactions } from "@/lib/data/app-data";
 import { areTenantWritesEnabled } from "@/lib/data/database";
 import { canAccess } from "@/lib/rbac/permissions";
 import type { Transaction } from "@/types/domain";
@@ -21,9 +21,10 @@ function transactionStatusFilterFromQuery(status?: string): "all" | Transaction[
 export default async function TransactionsPage({ searchParams }: TransactionsPageProps) {
   const session = await requirePermission("view_transactions");
   const params = await searchParams;
-  const [transactions, activities] = await Promise.all([
+  const [transactions, activities, tasks] = await Promise.all([
     getTransactions(session),
     getActivityLogs(session),
+    getTasks(session),
   ]);
   const canEdit = canAccess(session.permissions, "edit_transactions");
 
@@ -39,6 +40,7 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
         activities={activities}
         canEdit={canEdit}
         initialStatusFilter={transactionStatusFilterFromQuery(params?.status)}
+        tasks={tasks}
         transactions={transactions}
       />
     </>

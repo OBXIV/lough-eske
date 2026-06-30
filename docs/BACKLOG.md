@@ -12,7 +12,7 @@ Last updated: **June 30, 2026**
 Build the SaaS foundation first, then modules. Do not start with a single screen and wire data later. Multi-tenancy, auth, RBAC, and design tokens must come first.
 
 ## Execution Status Snapshot
-Current position: **completed through Sprint 6C**.
+Current position: **completed through Sprint 7A**.
 
 Completed baseline:
 - Sprint 0 - Project Foundation
@@ -28,6 +28,7 @@ Completed baseline:
 - Sprint 6A - Recruiting Pipeline Operations
 - Sprint 6B - Agent Document Dossier
 - Sprint 6C - Agent Archive and Portal Clickthrough
+- Sprint 7A - Transaction Workflow Control
 
 Consolidated original backlog:
 - Original Sprint 7 transaction visibility is already covered by the transactions route, table, badges, GCI fields, drawer, stage update action, and dashboard drilldowns.
@@ -36,7 +37,9 @@ Consolidated original backlog:
 - Original Sprint 10 agent portal shell is already covered by the agent portal route and clickable demo sections.
 - Original Sprint 11 settings shell is already covered by the tenant profile, role visibility, and environment/admin shell.
 
-Next implementation sprint: **Sprint 7A - Transaction Workflow Control**.
+Next implementation sprint: **Sprint 8A - Task and Activity Command Center**.
+
+Sprint 7A shipped clickable transaction rows, search plus stage/status/close-timing filters, drawer sections for contingencies, related tasks, and document readiness, close/cancel audit metadata, and active-only dashboard GCI. Requires migration `20260704_add_transaction_status_audit.sql` before deployed close/cancel audit is validated.
 
 ## Sprint 0 - Project Foundation
 ### Epic: Repository and Framework Setup
