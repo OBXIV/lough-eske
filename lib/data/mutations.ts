@@ -80,6 +80,10 @@ export type UpdateRecruitPipelineInput = {
   stage: Recruit["stage"];
 };
 
+type ArchivedAgentRow = UpdatedAgentRow & {
+  archived_at: string;
+};
+
 function agentLabel(agent: Pick<UpdatedAgentRow, "first_name" | "last_name">) {
   return `${agent.first_name} ${agent.last_name}`.trim() || "Agent";
 }
@@ -198,6 +202,44 @@ export async function updateAgentStatus(
         ${agentId}
       )
     `;
+  });
+}
+
+export async function archiveAgent(session: UserSession, agentId: string) {
+  if (!isDatabaseConfigured()) return null;
+
+  return withTenantRls(session, async (sql) => {
+    const rows = await sql<ArchivedAgentRow[]>`
+      update public.agents
+      set
+        brokerage_status = 'former',
+        archived_at = now(),
+        archived_by = ${actorId(session)},
+        updated_at = now()
+      where id = ${agentId}
+        and tenant_id = ${session.tenant.id}
+      returning first_name, last_name, archived_at::text as archived_at
+    `;
+
+    const agent = rows[0];
+    if (!agent) throw new Error("Agent was not found or is outside the current tenant.");
+
+    await sql`
+      insert into public.activity_logs (tenant_id, actor_id, action, entity_type, entity_id, metadata)
+      values (
+        ${session.tenant.id},
+        ${actorId(session)},
+        ${`Archived ${agentLabel(agent)}`},
+        'agent',
+        ${agentId},
+        jsonb_build_object(
+          'archived_at', ${agent.archived_at},
+          'archived_by', ${actorId(session)}
+        )
+      )
+    `;
+
+    return agent.archived_at;
   });
 }
 

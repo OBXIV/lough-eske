@@ -73,6 +73,8 @@ export type Agent = {
   productionYtd: number;
   gciYtd: number;
   lastCloseDate: string;
+  archivedAt?: string | null;
+  archivedBy?: string | null;
   assignedOwner: string;
 };
 

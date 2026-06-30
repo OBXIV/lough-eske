@@ -325,6 +325,29 @@ Acceptance Criteria:
 - File rows match the existing drawer visual system
 - The UI does not imply uploads are persisted before storage exists
 
+## Sprint 6C - Agent Archive and Portal Clickthrough
+### Epic: Agent Lifecycle and Portal Usability
+Goal: Replace ambiguous agent ownership UI with an auditable archive action and make Agent Portal demo tiles interactive.
+
+Stories:
+1. As a broker owner, I can archive an agent when they leave.
+2. As leadership, I can see who archived an agent and when.
+3. As an agent portal user, I can click tiles and land on populated demo sections.
+
+Tasks:
+- Remove the visible Owner column and drawer field from Agents
+- Add archive audit fields to agents
+- Add a dedicated Archive agent action in the agent drawer
+- Prevent normal status edits from setting an agent to former without audit
+- Make Agent Portal tiles clickable
+- Add populated in-page demo panels for portal tile destinations
+
+Acceptance Criteria:
+- Agent archive sets status to former and records archived timestamp plus user
+- Archive activity appears in the record activity trail
+- Agent Portal tiles navigate to visible demo content
+- Existing lint, typecheck, build, and route smoke checks pass
+
 ## Sprint 7 - Transactions
 ### Epic: Transaction Visibility
 Goal: Staff and ownership can see active transaction pipeline.

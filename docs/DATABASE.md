@@ -167,6 +167,8 @@ Columns:
 - gci_ytd numeric default 0
 - last_close_date date
 - assigned_owner_id uuid references profiles(id)
+- archived_at timestamptz
+- archived_by uuid references profiles(id)
 - created_at timestamptz default now()
 - updated_at timestamptz default now()
 

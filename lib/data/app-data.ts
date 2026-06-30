@@ -31,6 +31,8 @@ type AgentRow = {
   production_ytd: string | number | null;
   gci_ytd: string | number | null;
   last_close_date: string | null;
+  archived_at: string | null;
+  archived_by: string | null;
   assigned_owner: string | null;
 };
 
@@ -138,9 +140,12 @@ export async function getAgents(session: UserSession): Promise<Agent[]> {
       agents.production_ytd,
       agents.gci_ytd,
       agents.last_close_date::text as last_close_date,
+      agents.archived_at::text as archived_at,
+      nullif(concat_ws(' ', archived_by.first_name, archived_by.last_name), '') as archived_by,
       nullif(concat_ws(' ', owners.first_name, owners.last_name), '') as assigned_owner
     from public.agents
     left join public.profiles owners on owners.id = agents.assigned_owner_id
+    left join public.profiles archived_by on archived_by.id = agents.archived_by
     where agents.tenant_id = ${session.tenant.id}
     order by agents.production_ytd desc, agents.last_name
   `);
@@ -157,6 +162,8 @@ export async function getAgents(session: UserSession): Promise<Agent[]> {
     productionYtd: toNumber(row.production_ytd),
     gciYtd: toNumber(row.gci_ytd),
     lastCloseDate: row.last_close_date ?? "",
+    archivedAt: row.archived_at,
+    archivedBy: row.archived_by,
     assignedOwner: row.assigned_owner ?? "Unassigned",
   }));
 }

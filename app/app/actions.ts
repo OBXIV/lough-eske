@@ -6,6 +6,7 @@ import { requirePermission } from "@/lib/auth/session";
 import { initialActionFormState, type ActionFormState } from "@/lib/action-state";
 import { areTenantWritesEnabled } from "@/lib/data/database";
 import {
+  archiveAgent,
   createAgent,
   createRecruit,
   createTask,
@@ -17,7 +18,7 @@ import {
 } from "@/lib/data/mutations";
 import type { Agent, Recruit, Task, Transaction, UserSession } from "@/types/domain";
 
-const agentStatuses: Agent["brokerageStatus"][] = ["active", "inactive", "recruit", "onboarding", "former"];
+const editableAgentStatuses: Agent["brokerageStatus"][] = ["active", "inactive", "recruit", "onboarding"];
 const recruitStages: Recruit["stage"][] = ["Identified", "Contacted", "Engaged", "Offer Pending", "Joined", "Lost"];
 const transactionStages: Transaction["stage"][] = [
   "Lead",
@@ -118,7 +119,7 @@ export async function updateAgentStatusAction(
 
   return runAction(session, async () => {
     const agentId = requiredFormValue(formData, "agentId");
-    const status = assertAllowed(requiredFormValue(formData, "status"), agentStatuses, "agent status");
+    const status = assertAllowed(requiredFormValue(formData, "status"), editableAgentStatuses, "agent status");
 
     await updateAgentStatus(session, agentId, status);
     revalidatePath("/app/agents");
@@ -142,7 +143,7 @@ export async function createAgentAction(
       licenseNumber: optionalFormValue(formData, "licenseNumber"),
       phone: optionalFormValue(formData, "phone"),
       source: optionalFormValue(formData, "source"),
-      status: assertAllowed(requiredFormValue(formData, "status"), agentStatuses, "agent status"),
+      status: assertAllowed(requiredFormValue(formData, "status"), editableAgentStatuses, "agent status"),
     };
 
     await createAgent(session, input);
@@ -171,6 +172,23 @@ export async function updateAgentProfileAction(
     revalidatePath("/app/agents");
     revalidatePath("/app/dashboard");
     return "Agent profile updated.";
+  });
+}
+
+export async function archiveAgentAction(
+  previousStateOrFormData: ActionFormState | FormData = initialActionFormState,
+  maybeFormData?: FormData,
+) {
+  const session = await requirePermission("edit_agents");
+  const formData = formDataFromArgs(previousStateOrFormData, maybeFormData);
+
+  return runAction(session, async () => {
+    const agentId = requiredFormValue(formData, "agentId");
+
+    await archiveAgent(session, agentId);
+    revalidatePath("/app/agents");
+    revalidatePath("/app/dashboard");
+    return "Agent archived and audit timestamp recorded.";
   });
 }
 

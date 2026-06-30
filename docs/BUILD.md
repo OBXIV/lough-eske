@@ -238,6 +238,14 @@ The application shell should include:
 - Surface file category, status, and updated-date metadata without claiming storage-backed uploads yet
 - Defer Supabase Storage buckets, document tables, and upload/download actions to the storage sprint
 
+### Sprint 6C - Agent Archive and Portal Clickthrough
+- Remove visible Agent Owner fields until the product meaning is clear
+- Add archive audit columns on agents: `archived_at` and `archived_by`
+- Add an Archive agent action that sets status to `former` and records actor/timestamp
+- Keep `former` out of normal create/status dropdown workflows
+- Make Agent Portal tiles clickable into populated demo sections
+- Require migration `20260703_add_agent_archive_audit.sql` before deployed archive flows are validated
+
 ## Folder Structure
 Recommended structure:
 

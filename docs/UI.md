@@ -296,7 +296,11 @@ Table columns:
 - Production YTD
 - GCI YTD
 - Last Close Date
-- Assigned Owner
+
+Agent detail drawer actions:
+- Edit profile
+- Update active/onboarding/recruit/inactive status
+- Archive agent when they leave, with archived timestamp and user recorded for audit
 
 Click row to open detail drawer/page.
 

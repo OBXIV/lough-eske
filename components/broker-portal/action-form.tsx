@@ -43,7 +43,7 @@ type SubmitButtonProps = {
   icon: LucideIcon;
   label: string;
   pendingLabel?: string;
-  variant?: "primary" | "success";
+  variant?: "danger" | "primary" | "success";
 };
 
 export function SubmitButton({
@@ -59,6 +59,7 @@ export function SubmitButton({
     <button
       className={cn(
         "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold shadow-card disabled:cursor-not-allowed disabled:opacity-50",
+        variant === "danger" && "border border-danger/20 bg-danger/10 text-danger hover:bg-danger/15",
         variant === "primary" && "bg-accent text-white",
         variant === "success" && "border border-success/20 bg-success/10 text-success hover:bg-success/15",
       )}

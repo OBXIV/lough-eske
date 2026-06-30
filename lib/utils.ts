@@ -30,3 +30,20 @@ export function formatDate(value: string) {
     year: "numeric",
   }).format(date);
 }
+
+export function formatDateTime(value: string) {
+  if (!value) {
+    return "No timestamp";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "No timestamp";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}

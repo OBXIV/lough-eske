@@ -1,16 +1,16 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { Eye, FileText, FolderOpen, Plus, Save, Search } from "lucide-react";
+import { Archive, Eye, FileText, FolderOpen, Plus, Save, Search } from "lucide-react";
 
-import { createAgentAction, updateAgentProfileAction, updateAgentStatusAction } from "@/app/app/actions";
+import { archiveAgentAction, createAgentAction, updateAgentProfileAction, updateAgentStatusAction } from "@/app/app/actions";
 import { ActionFeedback, SubmitButton } from "@/components/broker-portal/action-form";
 import { ActivityList, DetailField, DrawerFormShell } from "@/components/broker-portal/detail-fields";
 import { Badge } from "@/components/ui/badge";
 import { DetailDrawer } from "@/components/ui/detail-drawer";
 import { DataTable, TableCell, TableHead } from "@/components/ui/table";
 import { initialActionFormState } from "@/lib/action-state";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import type { ActivityLog, Agent } from "@/types/domain";
 
 type AgentsTableProps = {
@@ -22,6 +22,7 @@ type AgentsTableProps = {
 };
 
 const agentStatuses: Agent["brokerageStatus"][] = ["active", "inactive", "recruit", "onboarding", "former"];
+const editableAgentStatuses: Agent["brokerageStatus"][] = ["active", "inactive", "recruit", "onboarding"];
 type AgentFileStatus = "On file" | "Needs review" | "Missing";
 
 function statusVariant(status: Agent["brokerageStatus"]) {
@@ -53,7 +54,6 @@ function matchesSearch(agent: Agent, searchTerm: string) {
     agent.phone,
     agent.licenseNumber,
     agent.source,
-    agent.assignedOwner,
   ].some((value) => value.toLowerCase().includes(query));
 }
 
@@ -101,10 +101,12 @@ type AgentStatusFormProps = {
 
 function AgentStatusForm({ actionsEnabled, agent }: AgentStatusFormProps) {
   const [state, formAction] = useActionState(updateAgentStatusAction, initialActionFormState);
+  const isFormer = agent.brokerageStatus === "former";
+  const currentStatus = editableAgentStatuses.includes(agent.brokerageStatus) ? agent.brokerageStatus : "inactive";
 
   return (
     <DrawerFormShell
-      description="Change the brokerage status and record the update in recent activity."
+      description={isFormer ? "Former agents are archived records. Use archive audit details for who and when." : "Change the brokerage status and record the update in recent activity."}
       title="Update status"
     >
       <form action={formAction} className="flex flex-col gap-3 sm:flex-row">
@@ -113,17 +115,50 @@ function AgentStatusForm({ actionsEnabled, agent }: AgentStatusFormProps) {
           <span className="sr-only">Agent status</span>
           <select
             className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text-primary"
-            defaultValue={agent.brokerageStatus}
-            disabled={!actionsEnabled}
+            defaultValue={currentStatus}
+            disabled={!actionsEnabled || isFormer}
             name="status"
           >
-            {agentStatuses.map((status) => (
+            {editableAgentStatuses.map((status) => (
               <option key={status} value={status}>{status}</option>
             ))}
           </select>
         </label>
-        <SubmitButton disabled={!actionsEnabled} icon={Save} label="Save" pendingLabel="Saving" />
+        <SubmitButton disabled={!actionsEnabled || isFormer} icon={Save} label="Save" pendingLabel="Saving" />
       </form>
+      <ActionFeedback
+        disabledMessage={!actionsEnabled ? "Writes are disabled for this workspace." : isFormer ? "Archived agents cannot be changed through the status dropdown." : undefined}
+        state={state}
+      />
+    </DrawerFormShell>
+  );
+}
+
+function ArchiveAgentForm({ actionsEnabled, agent }: AgentStatusFormProps) {
+  const [state, formAction] = useActionState(archiveAgentAction, initialActionFormState);
+  const isArchived = Boolean(agent.archivedAt);
+
+  return (
+    <DrawerFormShell
+      description="Use this only when an agent leaves the brokerage. The archive action records the timestamp and the user who performed it."
+      title="Archive agent"
+    >
+      {isArchived ? (
+        <p className="rounded-md border border-border bg-surface px-3 py-2 text-sm font-medium text-text-secondary">
+          Archived by {agent.archivedBy ?? "Unknown user"} on {formatDateTime(agent.archivedAt ?? "")}.
+        </p>
+      ) : (
+        <form action={formAction} className="space-y-3">
+          <input name="agentId" type="hidden" value={agent.id} />
+          <SubmitButton
+            disabled={!actionsEnabled}
+            icon={Archive}
+            label="Archive agent"
+            pendingLabel="Archiving"
+            variant="danger"
+          />
+        </form>
+      )}
       <ActionFeedback
         disabledMessage={!actionsEnabled ? "Writes are disabled for this workspace." : undefined}
         state={state}
@@ -292,7 +327,7 @@ function CreateAgentForm({ actionsEnabled }: CreateAgentFormProps) {
             disabled={!actionsEnabled}
             name="status"
           >
-            {agentStatuses.map((status) => (
+            {editableAgentStatuses.map((status) => (
               <option key={status} value={status}>{status}</option>
             ))}
           </select>
@@ -401,7 +436,6 @@ export function AgentsTable({ actionsEnabled, agents, activities, canCreate, can
             <TableHead>Production YTD</TableHead>
             <TableHead>GCI YTD</TableHead>
             <TableHead>Last Close</TableHead>
-            <TableHead>Owner</TableHead>
             <TableHead>Action</TableHead>
           </tr>
         </thead>
@@ -422,7 +456,6 @@ export function AgentsTable({ actionsEnabled, agents, activities, canCreate, can
               <TableCell>{formatCurrency(agent.productionYtd)}</TableCell>
               <TableCell>{formatCurrency(agent.gciYtd)}</TableCell>
               <TableCell className="text-text-secondary">{formatDate(agent.lastCloseDate)}</TableCell>
-              <TableCell className="text-text-secondary">{agent.assignedOwner}</TableCell>
               <TableCell>
                 <button
                   className="inline-flex items-center gap-2 rounded-md border border-border bg-surface px-3 py-2 text-sm font-medium text-text-primary shadow-card transition hover:bg-surface-muted"
@@ -440,7 +473,7 @@ export function AgentsTable({ actionsEnabled, agents, activities, canCreate, can
           ))}
           {filteredAgents.length === 0 ? (
             <tr>
-              <TableCell className="py-10 text-center text-text-secondary" colSpan={9}>
+              <TableCell className="py-10 text-center text-text-secondary" colSpan={8}>
                 No agents match the current filters
               </TableCell>
             </tr>
@@ -461,16 +494,22 @@ export function AgentsTable({ actionsEnabled, agents, activities, canCreate, can
               <DetailField label="Status" value={<Badge variant={statusVariant(selectedAgent.brokerageStatus)}>{selectedAgent.brokerageStatus}</Badge>} />
               <DetailField label="License" value={selectedAgent.licenseNumber} />
               <DetailField label="Source" value={selectedAgent.source} />
-              <DetailField label="Owner" value={selectedAgent.assignedOwner} />
               <DetailField label="Production YTD" value={formatCurrency(selectedAgent.productionYtd)} />
               <DetailField label="GCI YTD" value={formatCurrency(selectedAgent.gciYtd)} />
               <DetailField label="Last close" value={formatDate(selectedAgent.lastCloseDate)} />
+              {selectedAgent.archivedAt ? (
+                <>
+                  <DetailField label="Archived at" value={formatDateTime(selectedAgent.archivedAt)} />
+                  <DetailField label="Archived by" value={selectedAgent.archivedBy ?? "Unknown user"} />
+                </>
+              ) : null}
             </dl>
             <AgentFilesSection agent={selectedAgent} />
             {canEdit ? (
               <>
                 <AgentProfileForm key={`${selectedAgent.id}-profile`} actionsEnabled={actionsEnabled} agent={selectedAgent} />
                 <AgentStatusForm key={`${selectedAgent.id}-status`} actionsEnabled={actionsEnabled} agent={selectedAgent} />
+                <ArchiveAgentForm key={`${selectedAgent.id}-archive`} actionsEnabled={actionsEnabled} agent={selectedAgent} />
               </>
             ) : null}
             <ActivityList activities={selectedActivities} />
