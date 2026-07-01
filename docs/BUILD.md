@@ -250,8 +250,9 @@ The application shell should include:
 - Completed through Sprint 8A
 - Original baseline Sprint 7-11 shell work has been consolidated into completed scope where the route/shell/table already exists
 - Next implementation sprint is Sprint 8B - Plans, Seats, and Entitlements (launch-blocking, must precede Sprint 9A and 10A)
-- Sprint 7A requires migration `20260704_add_transaction_status_audit.sql` before deployed close/cancel audit is validated
+- Migrations `20260630` through `20260704` applied to `lough-eske-dev` on July 1, 2026; dev schema is current with the repo
 - Sprint 8A required no new migration; task assignment uses existing columns and the column-agnostic manage_tasks update policy
+- Open: Vercel Production `DATABASE_URL` unconfirmed (app falls back to demo mode without it); Stage/Prod Supabase projects not yet wired
 
 ### Sprint 7A - Transaction Workflow Control
 - Make transaction rows clickable, not only the View button

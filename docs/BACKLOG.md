@@ -40,7 +40,7 @@ Consolidated original backlog:
 
 Next implementation sprint: **Sprint 8B - Plans, Seats, and Entitlements**.
 
-Sprint 7A shipped clickable transaction rows, search plus stage/status/close-timing filters, drawer sections for contingencies, related tasks, and document readiness, close/cancel audit metadata, and active-only dashboard GCI. Requires migration `20260704_add_transaction_status_audit.sql` before deployed close/cancel audit is validated.
+Sprint 7A shipped clickable transaction rows, search plus stage/status/close-timing filters, drawer sections for contingencies, related tasks, and document readiness, close/cancel audit metadata, and active-only dashboard GCI. Migrations `20260630` through `20260704` were applied to `lough-eske-dev` on July 1, 2026, so the schema is current with the repo. Stage and Prod Supabase projects remain unwired, and Vercel Production still needs `DATABASE_URL` confirmed before deployed flows run against a real database.
 
 Sprint 8A shipped task search plus owner/priority/related-type/status/due-timing filters, clickable task rows, drawer sections for notes, related record context, and assignment/due-date editing, a filterable activity log panel, and dashboard task accountability drilldowns. No new migration; assignment edits ride the existing manage_tasks update policy with tenant-membership validation on assignees.
 
