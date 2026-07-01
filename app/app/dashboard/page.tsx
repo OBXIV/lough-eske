@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { requirePermission } from "@/lib/auth/session";
 import { getActivityLogs, getRecruits, getTasks, getTransactions } from "@/lib/data/app-data";
+import { currentDateKey, isTaskOverdue, matchesTaskDueFilter } from "@/lib/task-filters";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default async function DashboardPage() {
@@ -23,8 +24,35 @@ export default async function DashboardPage() {
   const activeDeals = transactions.filter((transaction) => transaction.status === "active");
   const activeTransactions = activeDeals.length;
   const gciPipeline = activeDeals.reduce((total, transaction) => total + transaction.estimatedGci, 0);
-  const overdueTasks = tasks.filter((task) => task.status !== "complete" && new Date(task.dueDate) < new Date()).length;
+  const todayKey = currentDateKey();
+  const overdueTasks = tasks.filter((task) => isTaskOverdue(task, todayKey)).length;
   const recruitingStages = ["Identified", "Contacted", "Engaged", "Offer Pending"] as const;
+  const taskQueueTiles = [
+    {
+      label: "Overdue",
+      value: overdueTasks,
+      hint: "Past due and still open",
+      href: "/app/tasks?due=overdue",
+    },
+    {
+      label: "Due next 7 days",
+      value: tasks.filter((task) => matchesTaskDueFilter(task, "next_7", todayKey)).length,
+      hint: "Due today through day seven",
+      href: "/app/tasks?due=next_7",
+    },
+    {
+      label: "In progress",
+      value: tasks.filter((task) => task.status === "in_progress").length,
+      hint: "Currently being worked",
+      href: "/app/tasks?status=in_progress",
+    },
+    {
+      label: "Completed",
+      value: tasks.filter((task) => task.status === "complete").length,
+      hint: "Closed out work",
+      href: "/app/tasks?status=complete",
+    },
+  ];
 
   return (
     <>
@@ -38,7 +66,7 @@ export default async function DashboardPage() {
         <KpiCard href="/app/recruiting?stage=Joined" label="Agents Joined" value={String(joinedAgents)} delta="This month from recruiting" icon={TrendingUp} />
         <KpiCard href="/app/transactions?status=active" label="Transactions" value={String(activeTransactions)} delta="Active pipeline records" icon={BriefcaseBusiness} />
         <KpiCard href="/app/transactions?status=active" label="GCI Pipeline" value={formatCurrency(gciPipeline)} delta="Estimated from active deals" icon={Activity} />
-        <KpiCard href="/app/tasks?status=overdue" label="Overdue Tasks" value={String(overdueTasks)} delta="Tenant-scoped task queue" icon={ClipboardList} />
+        <KpiCard href="/app/tasks?due=overdue" label="Overdue Tasks" value={String(overdueTasks)} delta="Tenant-scoped task queue" icon={ClipboardList} />
       </section>
       <section className="mt-6 grid gap-4 xl:grid-cols-[1fr_0.8fr]">
         <Card className="p-5">
@@ -91,6 +119,32 @@ export default async function DashboardPage() {
                   </p>
                 </div>
               </div>
+            ))}
+          </div>
+        </Card>
+      </section>
+      <section className="mt-6">
+        <Card className="p-5">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-base font-semibold text-text-primary">Task accountability</h2>
+              <p className="mt-1 text-sm text-text-secondary">Overdue, upcoming, and in-flight work across the tenant queue.</p>
+            </div>
+            <Badge variant="accent">{tasks.length} tasks</Badge>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {taskQueueTiles.map((tile) => (
+              <Link
+                key={tile.label}
+                className="rounded-md border border-border bg-surface-muted p-4 transition hover:border-accent/40 hover:bg-surface"
+                href={tile.href}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium text-text-primary">{tile.label}</p>
+                  <p className="text-sm font-semibold text-text-primary">{tile.value}</p>
+                </div>
+                <p className="mt-2 text-xs text-text-secondary">{tile.hint}</p>
+              </Link>
             ))}
           </div>
         </Card>

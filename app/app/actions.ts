@@ -14,6 +14,7 @@ import {
   updateAgentProfile,
   updateAgentStatus,
   updateRecruitPipeline,
+  updateTaskDetails,
   updateTaskStatus,
   updateTransactionStage,
 } from "@/lib/data/mutations";
@@ -63,6 +64,16 @@ function requiredFormValue(formData: FormData, key: string) {
 function optionalFormValue(formData: FormData, key: string) {
   const value = String(formData.get(key) ?? "").trim();
   return value || null;
+}
+
+function optionalDateValue(formData: FormData, key: string) {
+  const value = optionalFormValue(formData, key);
+
+  if (value && !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new Error("Due date must be a valid date.");
+  }
+
+  return value;
 }
 
 function optionalEmailValue(formData: FormData, key: string) {
@@ -283,7 +294,9 @@ export async function createTaskAction(
 
   return runAction(session, async () => {
     const input = {
-      dueDate: optionalFormValue(formData, "dueDate"),
+      assigneeId: optionalFormValue(formData, "assigneeId"),
+      description: optionalFormValue(formData, "description"),
+      dueDate: optionalDateValue(formData, "dueDate"),
       priority: assertAllowed(requiredFormValue(formData, "priority"), taskPriorities, "task priority"),
       relatedLabel: optionalFormValue(formData, "relatedLabel"),
       title: requiredFormValue(formData, "title"),
@@ -293,6 +306,27 @@ export async function createTaskAction(
     revalidatePath("/app/tasks");
     revalidatePath("/app/dashboard");
     return `Task "${input.title}" created.`;
+  });
+}
+
+export async function updateTaskDetailsAction(
+  previousStateOrFormData: ActionFormState | FormData = initialActionFormState,
+  maybeFormData?: FormData,
+) {
+  const session = await requirePermission("manage_tasks");
+  const formData = formDataFromArgs(previousStateOrFormData, maybeFormData);
+
+  return runAction(session, async () => {
+    const taskId = requiredFormValue(formData, "taskId");
+    const input = {
+      assigneeId: optionalFormValue(formData, "assigneeId"),
+      dueDate: optionalDateValue(formData, "dueDate"),
+    };
+
+    await updateTaskDetails(session, taskId, input);
+    revalidatePath("/app/tasks");
+    revalidatePath("/app/dashboard");
+    return "Task assignment and schedule updated.";
   });
 }
 

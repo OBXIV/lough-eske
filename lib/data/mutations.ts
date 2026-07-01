@@ -1,6 +1,7 @@
 import "server-only";
 
 import { isDatabaseConfigured, withTenantRls } from "@/lib/data/database";
+import { formatDateOnly } from "@/lib/utils";
 import type { Agent, Recruit, Task, Transaction, UserSession } from "@/types/domain";
 
 type UpdatedAgentRow = {
@@ -53,10 +54,17 @@ export type CreateRecruitInput = {
 };
 
 export type CreateTaskInput = {
+  assigneeId: string | null;
+  description: string | null;
   dueDate: string | null;
   priority: Task["priority"];
   relatedLabel: string | null;
   title: string;
+};
+
+export type UpdateTaskDetailsInput = {
+  assigneeId: string | null;
+  dueDate: string | null;
 };
 
 export type CreateAgentInput = {
@@ -339,8 +347,8 @@ export async function updateTransactionStage(
         ${transactionId},
         ${
           isFinal
-            ? sql`jsonb_build_object('status', ${status}, 'finalized_at', ${transaction.finalized_at}, 'finalized_by', ${actorId(session)})`
-            : sql`jsonb_build_object('status', ${status})`
+            ? sql`jsonb_build_object('status', ${status}::text, 'finalized_at', ${transaction.finalized_at}::text, 'finalized_by', ${actorId(session)}::text)`
+            : sql`jsonb_build_object('status', ${status}::text)`
         }
       )
     `;
@@ -438,16 +446,47 @@ export async function createRecruit(session: UserSession, input: CreateRecruitIn
   });
 }
 
+type TenantMemberNameRow = {
+  name: string | null;
+};
+
+async function requireActiveTenantMemberName(
+  sql: Parameters<Parameters<typeof withTenantRls>[1]>[0],
+  session: UserSession,
+  profileId: string,
+) {
+  const rows = await sql<TenantMemberNameRow[]>`
+    select nullif(concat_ws(' ', profiles.first_name, profiles.last_name), '') as name
+    from public.tenant_memberships
+    join public.profiles on profiles.id = tenant_memberships.profile_id
+    where tenant_memberships.tenant_id = ${session.tenant.id}
+      and tenant_memberships.profile_id = ${profileId}
+      and tenant_memberships.status = 'active'
+    limit 1
+  `;
+
+  const member = rows[0];
+  if (!member) throw new Error("Assignee is not an active member of this workspace.");
+
+  return member.name ?? "Unnamed member";
+}
+
 export async function createTask(session: UserSession, input: CreateTaskInput) {
   if (!isDatabaseConfigured()) return null;
 
   return withTenantRls(session, async (sql) => {
+    if (input.assigneeId) {
+      await requireActiveTenantMemberName(sql, session, input.assigneeId);
+    }
+
     const rows = await sql<CreatedTaskRow[]>`
       insert into public.tasks (
         tenant_id,
         title,
+        description,
         related_label,
         related_type,
+        assigned_to,
         due_date,
         priority,
         status,
@@ -456,8 +495,10 @@ export async function createTask(session: UserSession, input: CreateTaskInput) {
       values (
         ${session.tenant.id},
         ${input.title},
+        ${input.description},
         ${input.relatedLabel},
         'manual',
+        ${input.assigneeId},
         ${input.dueDate},
         ${input.priority},
         'open',
@@ -481,5 +522,45 @@ export async function createTask(session: UserSession, input: CreateTaskInput) {
     `;
 
     return task.id;
+  });
+}
+
+export async function updateTaskDetails(
+  session: UserSession,
+  taskId: string,
+  input: UpdateTaskDetailsInput,
+) {
+  if (!isDatabaseConfigured()) return;
+
+  await withTenantRls(session, async (sql) => {
+    const assigneeName = input.assigneeId
+      ? await requireActiveTenantMemberName(sql, session, input.assigneeId)
+      : null;
+
+    const rows = await sql<UpdatedTaskRow[]>`
+      update public.tasks
+      set assigned_to = ${input.assigneeId}, due_date = ${input.dueDate}, updated_at = now()
+      where id = ${taskId}
+        and tenant_id = ${session.tenant.id}
+      returning title
+    `;
+
+    const task = rows[0];
+    if (!task) throw new Error("Task was not found or is outside the current tenant.");
+
+    const ownerLabel = assigneeName ?? "Unassigned";
+    const dueLabel = input.dueDate ? formatDateOnly(input.dueDate) : "no due date";
+
+    await sql`
+      insert into public.activity_logs (tenant_id, actor_id, action, entity_type, entity_id, metadata)
+      values (
+        ${session.tenant.id},
+        ${actorId(session)},
+        ${`Updated task "${task.title}" (owner ${ownerLabel}, due ${dueLabel})`},
+        'task',
+        ${taskId},
+        jsonb_build_object('assigned_to', ${input.assigneeId}::text, 'due_date', ${input.dueDate}::text)
+      )
+    `;
   });
 }

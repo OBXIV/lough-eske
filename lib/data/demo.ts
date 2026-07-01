@@ -1,5 +1,5 @@
 import { rolePermissions } from "@/lib/rbac/permissions";
-import type { ActivityLog, Agent, DemoUser, Recruit, Task, Tenant, Transaction, UserSession } from "@/types/domain";
+import type { ActivityLog, Agent, DemoUser, Recruit, Task, Tenant, TenantMember, Transaction, UserSession } from "@/types/domain";
 
 export const demoTenant: Tenant & { metrics: { agents: number; recruits: number; transactions: number } } = {
   id: "11111111-1111-4111-8111-111111111111",
@@ -153,19 +153,34 @@ export const transactions: Transaction[] = [
   { id: "t6", agent: "Mina Foster", clientName: "D. Shaw", propertyAddress: "46 Lake Street", transactionType: "Referral", stage: "Closed", listPrice: 740000, estimatedGci: 10360, expectedCloseDate: "2026-06-24", status: "closed", finalizedAt: "2026-06-24T22:15:00Z", finalizedBy: "Sam Ortiz" },
 ];
 
+export const tenantMembers: TenantMember[] = demoUsers
+  .filter((user) => user.role !== "Platform Admin")
+  .map((user) => ({
+    profileId: user.profileId,
+    name: `${user.firstName} ${user.lastName}`,
+    role: user.role,
+  }));
+
+const memberIds = {
+  morgan: "91000000-0000-4000-8000-000000000001",
+  parker: "91000000-0000-4000-8000-000000000002",
+  riley: "91000000-0000-4000-8000-000000000003",
+  sam: "91000000-0000-4000-8000-000000000004",
+};
+
 export const tasks: Task[] = [
-  { id: "task1", title: "Prepare owner retention packet", relatedRecord: "Avery Stone", dueDate: "2026-06-29", priority: "high", status: "open" },
-  { id: "task2", title: "Follow up on offer package", relatedRecord: "Owen Clarke", dueDate: "2026-07-01", priority: "urgent", status: "in_progress" },
-  { id: "task3", title: "Review commission forecast", relatedRecord: "Q3 GCI forecast", dueDate: "2026-07-03", priority: "normal", status: "open" },
-  { id: "task4", title: "Send onboarding resources", relatedRecord: "Elena Park", dueDate: "2026-07-05", priority: "normal", status: "complete" },
-  { id: "task5", title: "Confirm inspection contingency date", relatedRecord: "L. Vega", dueDate: "2026-06-30", priority: "high", status: "open" },
-  { id: "task6", title: "Upload clear to close package", relatedRecord: "R. Ellis", dueDate: "2026-07-02", priority: "urgent", status: "in_progress" },
-  { id: "task7", title: "Invite prospect to broker call", relatedRecord: "Harper Lane", dueDate: "2026-07-08", priority: "normal", status: "open" },
-  { id: "task8", title: "Review inactive agent status", relatedRecord: "Sofia Mercer", dueDate: "2026-07-10", priority: "low", status: "open" },
-  { id: "task9", title: "Prepare month-end GCI snapshot", relatedRecord: "Reports", dueDate: "2026-07-15", priority: "normal", status: "open" },
-  { id: "task10", title: "Verify buyer agency agreement", relatedRecord: "M. Torres", dueDate: "2026-07-06", priority: "normal", status: "open" },
-  { id: "task11", title: "Research early-stage prospect", relatedRecord: "Theo Hayes", dueDate: "2026-07-12", priority: "low", status: "open" },
-  { id: "task12", title: "Schedule top agent check-in", relatedRecord: "Taylor Brooks", dueDate: "2026-07-09", priority: "high", status: "open" },
+  { id: "task1", title: "Prepare owner retention packet", description: "Assemble YTD production summary and retention offer comparison before the check-in.", relatedRecord: "Avery Stone", relatedType: "agent", assignee: "Morgan Hale", assigneeId: memberIds.morgan, dueDate: "2026-06-29", priority: "high", status: "open", createdAt: "2026-06-20T16:00:00Z" },
+  { id: "task2", title: "Follow up on offer package", description: "Offer expires Friday. Confirm split questions are answered before the follow-up call.", relatedRecord: "Owen Clarke", relatedType: "recruit", assignee: "Riley Moss", assigneeId: memberIds.riley, dueDate: "2026-07-01", priority: "urgent", status: "in_progress", createdAt: "2026-06-27T18:10:00Z" },
+  { id: "task3", title: "Review commission forecast", description: null, relatedRecord: "Q3 GCI forecast", relatedType: "report", assignee: "Parker Vale", assigneeId: memberIds.parker, dueDate: "2026-07-03", priority: "normal", status: "open", createdAt: "2026-06-25T15:30:00Z" },
+  { id: "task4", title: "Send onboarding resources", description: "Send the onboarding packet and confirm license transfer paperwork.", relatedRecord: "Elena Park", relatedType: "recruit", assignee: "Riley Moss", assigneeId: memberIds.riley, dueDate: "2026-07-05", priority: "normal", status: "complete", createdAt: "2026-06-22T17:45:00Z" },
+  { id: "task5", title: "Confirm inspection contingency date", description: "Inspection window closes July 1. Confirm the extension request status with the listing side.", relatedRecord: "L. Vega", relatedType: "transaction", assignee: "Sam Ortiz", assigneeId: memberIds.sam, dueDate: "2026-06-30", priority: "high", status: "open", createdAt: "2026-06-26T14:20:00Z" },
+  { id: "task6", title: "Upload clear to close package", description: null, relatedRecord: "R. Ellis", relatedType: "transaction", assignee: "Sam Ortiz", assigneeId: memberIds.sam, dueDate: "2026-07-02", priority: "urgent", status: "in_progress", createdAt: "2026-06-28T13:05:00Z" },
+  { id: "task7", title: "Invite prospect to broker call", description: null, relatedRecord: "Harper Lane", relatedType: "recruit", assignee: "Riley Moss", assigneeId: memberIds.riley, dueDate: "2026-07-08", priority: "normal", status: "open", createdAt: "2026-06-27T19:40:00Z" },
+  { id: "task8", title: "Review inactive agent status", description: "Decide on reactivation plan or offboarding before month end.", relatedRecord: "Sofia Mercer", relatedType: "agent", assignee: "Morgan Hale", assigneeId: memberIds.morgan, dueDate: "2026-07-10", priority: "low", status: "open", createdAt: "2026-06-23T19:00:00Z" },
+  { id: "task9", title: "Prepare month-end GCI snapshot", description: null, relatedRecord: "Reports", relatedType: "report", assignee: "Parker Vale", assigneeId: memberIds.parker, dueDate: "2026-07-15", priority: "normal", status: "open", createdAt: "2026-06-28T11:00:00Z" },
+  { id: "task10", title: "Verify buyer agency agreement", description: null, relatedRecord: "M. Torres", relatedType: "transaction", assignee: "Sam Ortiz", assigneeId: memberIds.sam, dueDate: "2026-07-06", priority: "normal", status: "open", createdAt: "2026-06-29T16:10:00Z" },
+  { id: "task11", title: "Research early-stage prospect", description: null, relatedRecord: "Theo Hayes", relatedType: "recruit", assignee: null, assigneeId: null, dueDate: "2026-07-12", priority: "low", status: "open", createdAt: "2026-06-29T18:30:00Z" },
+  { id: "task12", title: "Schedule top agent check-in", description: "Top producer retention. Book time before the July sales meeting.", relatedRecord: "Taylor Brooks", relatedType: "agent", assignee: "Morgan Hale", assigneeId: memberIds.morgan, dueDate: "2026-07-09", priority: "high", status: "open", createdAt: "2026-06-26T20:05:00Z" },
 ];
 
 export const activityLogs: ActivityLog[] = [

@@ -5,12 +5,13 @@ import {
   agents as fallbackAgents,
   recruits as fallbackRecruits,
   tasks as fallbackTasks,
+  tenantMembers as fallbackTenantMembers,
   transactions as fallbackTransactions,
 } from "@/lib/data/demo";
 import { isDatabaseConfigured, withTenantRls } from "@/lib/data/database";
 import { canAccess } from "@/lib/rbac/permissions";
 import { getVisibleTenants } from "@/lib/tenant/access";
-import type { ActivityLog, Agent, Recruit, Task, Tenant, Transaction, UserSession } from "@/types/domain";
+import type { ActivityLog, Agent, Recruit, Task, Tenant, TenantMember, Transaction, UserSession } from "@/types/domain";
 
 type TenantRow = {
   id: string;
@@ -66,11 +67,22 @@ type TransactionRow = {
 type TaskRow = {
   id: string;
   title: string;
+  description: string | null;
   related_record: string | null;
   related_label: string | null;
+  related_type: string | null;
+  assigned_to: string | null;
+  assignee: string | null;
   due_date: string | null;
   priority: Task["priority"];
   status: Task["status"];
+  created_at: string | null;
+};
+
+type TenantMemberRow = {
+  profile_id: string;
+  name: string | null;
+  role: string;
 };
 
 type ActivityLogRow = {
@@ -264,6 +276,7 @@ export async function getTasks(session: UserSession): Promise<Task[]> {
     select
       tasks.id,
       tasks.title,
+      tasks.description,
       tasks.related_label,
       case
         when tasks.related_type = 'agent' then nullif(concat_ws(' ', related_agents.first_name, related_agents.last_name), '')
@@ -272,14 +285,19 @@ export async function getTasks(session: UserSession): Promise<Task[]> {
         when tasks.related_type = 'report' then 'Reports'
         else tasks.related_type
       end as related_record,
+      tasks.related_type,
+      tasks.assigned_to::text as assigned_to,
+      nullif(concat_ws(' ', assignees.first_name, assignees.last_name), '') as assignee,
       tasks.due_date::text as due_date,
       tasks.priority,
-      tasks.status
+      tasks.status,
+      tasks.created_at::text as created_at
     from public.tasks
     left join public.agents related_agents on tasks.related_type = 'agent' and related_agents.id = tasks.related_id
     left join public.recruits related_recruits on tasks.related_type = 'recruit' and related_recruits.id = tasks.related_id
     left join public.agents recruit_agents on recruit_agents.id = related_recruits.agent_id
     left join public.transactions related_transactions on tasks.related_type = 'transaction' and related_transactions.id = tasks.related_id
+    left join public.profiles assignees on assignees.id = tasks.assigned_to
     where tasks.tenant_id = ${session.tenant.id}
     order by tasks.due_date nulls last, tasks.priority desc
   `);
@@ -287,16 +305,21 @@ export async function getTasks(session: UserSession): Promise<Task[]> {
   return rows.map((row) => ({
     id: row.id,
     title: row.title,
+    description: row.description,
     relatedRecord: row.related_label ?? row.related_record ?? "Unassigned",
+    relatedType: row.related_type ?? "manual",
+    assignee: row.assignee,
+    assigneeId: row.assigned_to,
     dueDate: row.due_date ?? "",
     priority: row.priority,
     status: row.status,
+    createdAt: row.created_at ?? "",
   }));
 }
 
-export async function getActivityLogs(session: UserSession): Promise<ActivityLog[]> {
+export async function getActivityLogs(session: UserSession, limit = 10): Promise<ActivityLog[]> {
   if (!isDatabaseConfigured()) {
-    return fallbackActivityLogs;
+    return fallbackActivityLogs.slice(0, limit);
   }
 
   const rows = await withTenantRls(session, (sql) => sql<ActivityLogRow[]>`
@@ -311,7 +334,7 @@ export async function getActivityLogs(session: UserSession): Promise<ActivityLog
     left join public.profiles actors on actors.id = activity_logs.actor_id
     where activity_logs.tenant_id = ${session.tenant.id}
     order by activity_logs.created_at desc
-    limit 10
+    limit ${limit}
   `);
 
   return rows.map((row) => ({
@@ -321,6 +344,31 @@ export async function getActivityLogs(session: UserSession): Promise<ActivityLog
     entityType: row.entity_type ?? "Activity",
     actor: row.actor ?? "System",
     createdAt: row.created_at,
+  }));
+}
+
+export async function getTenantMembers(session: UserSession): Promise<TenantMember[]> {
+  if (!isDatabaseConfigured()) {
+    return fallbackTenantMembers;
+  }
+
+  const rows = await withTenantRls(session, (sql) => sql<TenantMemberRow[]>`
+    select
+      profiles.id::text as profile_id,
+      nullif(concat_ws(' ', profiles.first_name, profiles.last_name), '') as name,
+      roles.name as role
+    from public.tenant_memberships
+    join public.profiles on profiles.id = tenant_memberships.profile_id
+    join public.roles on roles.id = tenant_memberships.role_id
+    where tenant_memberships.tenant_id = ${session.tenant.id}
+      and tenant_memberships.status = 'active'
+    order by name
+  `);
+
+  return rows.map((row) => ({
+    profileId: row.profile_id,
+    name: row.name ?? "Unnamed member",
+    role: row.role,
   }));
 }
 

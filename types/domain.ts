@@ -107,10 +107,21 @@ export type Transaction = {
 export type Task = {
   id: string;
   title: string;
+  description: string | null;
   relatedRecord: string;
+  relatedType: string;
+  assignee: string | null;
+  assigneeId: string | null;
   dueDate: string;
   priority: "low" | "normal" | "high" | "urgent";
   status: "open" | "in_progress" | "complete" | "cancelled";
+  createdAt: string;
+};
+
+export type TenantMember = {
+  profileId: string;
+  name: string;
+  role: string;
 };
 
 export type ActivityLog = {
