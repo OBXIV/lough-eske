@@ -6,7 +6,7 @@ This document defines the v0.1 execution backlog for Nova.
 Internal project codename: **Lough Eske**  
 Product name: **TBD**  
 Version: **v0.1**  
-Last updated: **June 30, 2026**
+Last updated: **July 1, 2026**
 
 ## Delivery Strategy
 Build the SaaS foundation first, then modules. Do not start with a single screen and wire data later. Multi-tenancy, auth, RBAC, and design tokens must come first.
@@ -40,6 +40,8 @@ Consolidated original backlog:
 Next implementation sprint: **Sprint 8A - Task and Activity Command Center**.
 
 Sprint 7A shipped clickable transaction rows, search plus stage/status/close-timing filters, drawer sections for contingencies, related tasks, and document readiness, close/cancel audit metadata, and active-only dashboard GCI. Requires migration `20260704_add_transaction_status_audit.sql` before deployed close/cancel audit is validated.
+
+Launch-blocking addition: **Sprint 8B - Plans, Seats, and Entitlements** must be working at v0.1 go-live. Every tenant resolves to a plan on day one and feature access follows the plan. Sequence it before Sprint 9A and Sprint 10A, which gate on plan features.
 
 ## Sprint 0 - Project Foundation
 ### Epic: Repository and Framework Setup
@@ -423,6 +425,58 @@ Acceptance Criteria:
 - Related-record context is visible from each task
 - Task edits preserve tenant isolation and activity history
 
+## Sprint 8B - Plans, Seats, and Entitlements
+### Epic: Billing Foundation and Feature Gating
+Launch-blocking: this must be working at v0.1 go-live. Every tenant resolves to a plan on day one, and feature access follows the plan. Sequence it before Sprint 9A (Reports) and Sprint 10A (Agent Portal), since both gate on plan features (`reports`, `agent_portal`).
+
+Goal: Introduce plan tiers, per-seat pricing, and plan-scoped feature flags so tenant entitlements drive what each brokerage can access.
+
+Stories:
+1. As the platform, I assign every tenant a plan and seat count so billing and access are defined from day one.
+2. As a broker owner, I can see my plan, seat usage, and included features.
+3. As the app, I gate feature areas (reports, agent portal, MLS sync) by the tenant's plan.
+
+Schema:
+```sql
+-- plans catalog (global, not tenant-owned)
+create table plans (
+  id uuid primary key default gen_random_uuid(),
+  key text unique not null,            -- 'core', 'growth', 'scale'
+  name text not null,
+  base_seat_limit int not null,
+  per_seat_price_cents int not null,
+  base_price_cents int not null
+);
+
+-- feature flags per plan
+create table plan_features (
+  plan_id uuid references plans(id),
+  feature_key text not null,           -- 'reports', 'agent_portal', 'mls_sync'
+  primary key (plan_id, feature_key)
+);
+
+-- tenants get a plan reference
+alter table tenants add column plan_id uuid references plans(id);
+alter table tenants add column seat_count int default 1;
+```
+
+Tasks:
+- Add migration `20260705_add_plans_and_entitlements.sql` for the `plans` and `plan_features` tables and the `tenants.plan_id` / `tenants.seat_count` columns
+- Seed the three plans (core, growth, scale) with base seat limit, per-seat price, and base price, plus their `plan_features` rows; keep the seed repeatable
+- Backfill existing tenants (demo, Point Realty, California placeholders) to the core plan, then set `tenants.plan_id` not null so no tenant is planless at launch
+- Add RLS: any authenticated tenant member can read `plans` and `plan_features` (the catalog is shared), and only Platform Admin can write those tables or change a tenant's `plan_id` / `seat_count`
+- Add a `tenant_has_feature(target_tenant_id uuid, feature_key text)` helper and gate reports, agent_portal, and mls_sync in the app on it
+- Enforce seat limits on member add and invite against `base_seat_limit` and `seat_count`, and expose the billing math `base_price_cents + max(0, seat_count - base_seat_limit) * per_seat_price_cents`
+- Surface plan, seat usage, and included features in Settings for broker owners
+- Update docs/DATABASE.md with the `plans` and `plan_features` tables and the `tenants` column additions
+
+Acceptance Criteria:
+- Every tenant, including demo and placeholder tenants, resolves to a plan at launch
+- Feature-gated areas are hidden or blocked when the plan lacks the feature key
+- Plan and seat changes are Platform Admin only and cannot be self-served by tenant members
+- `plans` and `plan_features` are readable by members but not writable by them
+- Billing math and seat counts are correct for core, growth, and scale
+
 ## Sprint 9A - Reports Drilldowns and Exports
 ### Epic: Executive Intelligence Depth
 Goal: Move reports from summary cards to actionable drilldowns and meeting-ready exports.
@@ -500,6 +554,9 @@ Acceptance Criteria:
 - Reports shell works
 - Agent portal shell works
 - Settings shell works
+- Plans and entitlements work
+- Feature gating by plan works
+- Every tenant has a plan and seat count
 - Seed data works
 - Vercel deployment works
 - No secrets committed
