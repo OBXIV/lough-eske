@@ -250,9 +250,12 @@ The application shell should include:
 - Completed through Sprint 8A
 - Original baseline Sprint 7-11 shell work has been consolidated into completed scope where the route/shell/table already exists
 - Next implementation sprint is Sprint 8B - Plans, Seats, and Entitlements (launch-blocking, must precede Sprint 9A and 10A)
-- Migrations `20260630` through `20260704` applied to `lough-eske-dev` on July 1, 2026; dev schema is current with the repo
+- Migrations `20260630` through `20260705` applied to `lough-eske-dev` on July 1, 2026; dev schema is current with the repo
 - Sprint 8A required no new migration; task assignment uses existing columns and the column-agnostic manage_tasks update policy
-- Open: Vercel Production `DATABASE_URL` unconfirmed (app falls back to demo mode without it); Stage/Prod Supabase projects not yet wired
+- Migration `20260705` adds the profiles read policy; the live table had RLS enabled with no policy, which blanked every owner/actor name in database mode
+- Vercel `DATABASE_URL` wired for Production and Preview on July 1, 2026 via CLI (dashboard saves did not persist, and `vercel redeploy` reuses the source deployment's env snapshot; use git deploys after env changes)
+- Production serves `lough-eske-dev` data read-only; the demo tenant keeps writes disabled by design
+- Open: Stage/Prod Supabase projects not yet wired
 
 ### Sprint 7A - Transaction Workflow Control
 - Make transaction rows clickable, not only the View button
