@@ -262,7 +262,7 @@ The application shell should include:
 - Point Realty is now the writable pilot workspace (July 6, 2026): status `active`, one seeded Broker Owner login (Devon Pierce, point.owner@obliox.io) with agents, recruits, transactions, tasks, and activity; verified on Stage with RLS write and cross-tenant isolation tests
 - Write gating tightened: `areTenantWritesEnabled` now requires tenant status `active` (demo, prospect, and inactive tenants are read-only); a tenant row invisible under RLS resolves as `inactive` so an unseeded database degrades to read-only instead of surfacing RLS errors
 - Pilot logins are hidden and rejected on Prod deployments (login tile filter plus session-layer checks in `setDemoSession` and `getCurrentSession`); pilot write testing happens on Stage Preview and local only
-- Dev database has not been reseeded yet; Point Realty stays `prospect` (read-only) there until `supabase/seed.sql` is re-run against dev
+- Dev database reseeded July 6, 2026; dev and stage both carry the Point Realty pilot workspace, and Prod remains the only unwired environment
 
 ### Sprint 7A - Transaction Workflow Control
 - Make transaction rows clickable, not only the View button
