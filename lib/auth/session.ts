@@ -1,8 +1,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { getDemoSessionByEmail, getDemoUserByEmail } from "@/lib/data/demo";
+import { getDemoSessionByEmail, getDemoUserByEmail, isPilotDemoUser } from "@/lib/data/demo";
 import { getTenantProfile } from "@/lib/data/app-data";
+import { isProductionDeployment } from "@/lib/deployment/environment";
 import { canAccess, getDefaultRoute } from "@/lib/rbac/permissions";
 import type { PermissionKey, UserSession } from "@/types/domain";
 
@@ -14,6 +15,11 @@ export async function getCurrentSession(): Promise<UserSession | null> {
   const email = cookieStore.get(SESSION_COOKIE)?.value;
 
   if (!email) {
+    return null;
+  }
+
+  const demoUser = getDemoUserByEmail(email);
+  if (!demoUser || (isPilotDemoUser(demoUser) && isProductionDeployment())) {
     return null;
   }
 
@@ -51,7 +57,7 @@ export async function requirePermission(permission: PermissionKey) {
 export async function setDemoSession(email: string) {
   const demoUser = getDemoUserByEmail(email);
 
-  if (!demoUser) {
+  if (!demoUser || (isPilotDemoUser(demoUser) && isProductionDeployment())) {
     throw new Error("Invalid demo user.");
   }
 

@@ -120,7 +120,9 @@ export async function getTenantProfile(session: UserSession) {
     limit 1
   `);
 
-  return rows[0] ? mapTenant(rows[0]) : session.tenant;
+  // No visible row means the tenant is not provisioned for this user in this
+  // database; mark it inactive so writes stay disabled instead of failing RLS.
+  return rows[0] ? mapTenant(rows[0]) : { ...session.tenant, status: "inactive" as const };
 }
 
 export async function getVisibleTenantsForSession(session: UserSession) {

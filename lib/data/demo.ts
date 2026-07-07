@@ -19,7 +19,7 @@ export const placeholderTenants: Tenant[] = [
     id: "22222222-2222-4222-8222-222222222222",
     name: "Point Realty",
     slug: "point-realty",
-    status: "prospect",
+    status: "active",
     primaryColor: "#0F766E",
   },
   {
@@ -86,10 +86,27 @@ export const demoUsers: DemoUser[] = [
     role: "Agent Portal User",
     tenantId: demoTenant.id,
   },
+  {
+    id: "90000000-0000-4000-8000-000000000006",
+    profileId: "91000000-0000-4000-8000-000000000006",
+    firstName: "Devon",
+    lastName: "Pierce",
+    email: "point.owner@obliox.io",
+    role: "Broker Owner",
+    tenantId: "22222222-2222-4222-8222-222222222222",
+  },
 ];
 
 export function getDemoUserByEmail(email: string) {
   return demoUsers.find((user) => user.email === email) ?? null;
+}
+
+export function getDemoTenantById(tenantId: string): Tenant | null {
+  return [demoTenant, ...placeholderTenants].find((tenant) => tenant.id === tenantId) ?? null;
+}
+
+export function isPilotDemoUser(user: DemoUser) {
+  return user.tenantId !== demoTenant.id;
 }
 
 export function getDemoSessionByEmail(email = "demo.owner@obliox.io"): UserSession | null {
@@ -98,6 +115,8 @@ export function getDemoSessionByEmail(email = "demo.owner@obliox.io"): UserSessi
     return null;
   }
 
+  const tenant = getDemoTenantById(demoUser.tenantId) ?? demoTenant;
+
   return {
     user: {
       id: demoUser.id,
@@ -105,7 +124,7 @@ export function getDemoSessionByEmail(email = "demo.owner@obliox.io"): UserSessi
       name: `${demoUser.firstName} ${demoUser.lastName}`,
       email: demoUser.email,
     },
-    tenant: demoTenant,
+    tenant,
     role: demoUser.role,
     permissions: rolePermissions[demoUser.role],
   };
@@ -154,7 +173,7 @@ export const transactions: Transaction[] = [
 ];
 
 export const tenantMembers: TenantMember[] = demoUsers
-  .filter((user) => user.role !== "Platform Admin")
+  .filter((user) => user.role !== "Platform Admin" && user.tenantId === demoTenant.id)
   .map((user) => ({
     profileId: user.profileId,
     name: `${user.firstName} ${user.lastName}`,

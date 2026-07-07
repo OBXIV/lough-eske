@@ -22,3 +22,7 @@ export function getDeploymentEnvironmentLabel() {
   if (process.env.VERCEL_ENV === "preview") return "Preview";
   return "Local";
 }
+
+export function isProductionDeployment() {
+  return getDeploymentEnvironmentLabel() === "Prod";
+}

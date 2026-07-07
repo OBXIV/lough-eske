@@ -259,7 +259,10 @@ The application shell should include:
 - Setting sensitive Vercel env values reliably: interactive `vercel env add` corrupts pasted values too easily (clipboard overwrites, dropped characters, prompt redraw artifacts); use the REST API `POST /v10/projects/{id}/env?upsert=true` with the value read from the local env file
 - Branch pushes do not trigger Preview deployments (only main triggers Production builds); check the Vercel dashboard Git settings to enable them, or cut Preview builds with `vercel deploy`
 - Open: Prod Supabase project (`lough-eske-prod`) not yet created; Production still serves dev data as a stopgap
-- Open: Stage write-path testing needs a writable tenant (all demo logins map to the read-only demo tenant); planned as a seed plus fixture change
+- Point Realty is now the writable pilot workspace (July 6, 2026): status `active`, one seeded Broker Owner login (Devon Pierce, point.owner@obliox.io) with agents, recruits, transactions, tasks, and activity; verified on Stage with RLS write and cross-tenant isolation tests
+- Write gating tightened: `areTenantWritesEnabled` now requires tenant status `active` (demo, prospect, and inactive tenants are read-only); a tenant row invisible under RLS resolves as `inactive` so an unseeded database degrades to read-only instead of surfacing RLS errors
+- Pilot logins are hidden and rejected on Prod deployments (login tile filter plus session-layer checks in `setDemoSession` and `getCurrentSession`); pilot write testing happens on Stage Preview and local only
+- Dev database has not been reseeded yet; Point Realty stays `prospect` (read-only) there until `supabase/seed.sql` is re-run against dev
 
 ### Sprint 7A - Transaction Workflow Control
 - Make transaction rows clickable, not only the View button

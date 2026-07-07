@@ -94,6 +94,7 @@ Current decision:
 - Prod schema changes must come from committed Supabase migrations.
 - Seed files should remain safe, repeatable, and demo-data only unless explicitly split by environment.
 - Demo tenants are read-only application workspaces. Do not use `tenant.status = 'demo'` for editable customer workspaces.
+- Only tenants with status `active` accept writes. Point Realty is the seeded writable pilot workspace for write-path testing; its login is hidden and rejected on Prod deployments.
 - Work should happen on feature branches first. Validate against Stage Preview before merging or pushing release work to Production.
 - If Stage fails, the fix goes back to Dev/local or the future QA environment before returning to Stage.
 - If Stage passes, the same commit can be promoted to Production.

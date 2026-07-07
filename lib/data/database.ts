@@ -21,7 +21,7 @@ export function isDatabaseConfigured() {
 }
 
 export function areTenantWritesEnabled(session: UserSession) {
-  return isDatabaseConfigured() && session.tenant.status !== "demo";
+  return isDatabaseConfigured() && session.tenant.status === "active";
 }
 
 function createDatabaseClient() {

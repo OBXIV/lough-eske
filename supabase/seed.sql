@@ -1,7 +1,7 @@
 insert into public.tenants (id, name, slug, status, primary_color)
 values
   ('11111111-1111-4111-8111-111111111111', 'Demo Brokerage', 'demo-brokerage', 'demo', '#2563EB'),
-  ('22222222-2222-4222-8222-222222222222', 'Point Realty', 'point-realty', 'prospect', '#0F766E'),
+  ('22222222-2222-4222-8222-222222222222', 'Point Realty', 'point-realty', 'active', '#0F766E'),
   ('33333333-3333-4333-8333-333333333333', 'California Brokerage', 'california-brokerage', 'prospect', '#B45309')
 on conflict (slug) do update set
   name = excluded.name,
@@ -137,7 +137,8 @@ values
   ('90000000-0000-4000-8000-000000000002', 'authenticated', 'authenticated', 'demo.cfo@obliox.io', null, now(), '{"provider":"email","providers":["email"]}'::jsonb, '{"first_name":"Parker","last_name":"Vale"}'::jsonb, now(), now()),
   ('90000000-0000-4000-8000-000000000003', 'authenticated', 'authenticated', 'demo.recruiter@obliox.io', null, now(), '{"provider":"email","providers":["email"]}'::jsonb, '{"first_name":"Riley","last_name":"Moss"}'::jsonb, now(), now()),
   ('90000000-0000-4000-8000-000000000004', 'authenticated', 'authenticated', 'demo.tc@obliox.io', null, now(), '{"provider":"email","providers":["email"]}'::jsonb, '{"first_name":"Sam","last_name":"Ortiz"}'::jsonb, now(), now()),
-  ('90000000-0000-4000-8000-000000000005', 'authenticated', 'authenticated', 'demo.agent@obliox.io', null, now(), '{"provider":"email","providers":["email"]}'::jsonb, '{"first_name":"Elena","last_name":"Park"}'::jsonb, now(), now())
+  ('90000000-0000-4000-8000-000000000005', 'authenticated', 'authenticated', 'demo.agent@obliox.io', null, now(), '{"provider":"email","providers":["email"]}'::jsonb, '{"first_name":"Elena","last_name":"Park"}'::jsonb, now(), now()),
+  ('90000000-0000-4000-8000-000000000006', 'authenticated', 'authenticated', 'point.owner@obliox.io', null, now(), '{"provider":"email","providers":["email"]}'::jsonb, '{"first_name":"Devon","last_name":"Pierce"}'::jsonb, now(), now())
 on conflict (id) do update set
   email = excluded.email,
   raw_app_meta_data = excluded.raw_app_meta_data,
@@ -151,7 +152,8 @@ values
   ('91000000-0000-4000-8000-000000000002', '90000000-0000-4000-8000-000000000002', 'Parker', 'Vale', 'demo.cfo@obliox.io'),
   ('91000000-0000-4000-8000-000000000003', '90000000-0000-4000-8000-000000000003', 'Riley', 'Moss', 'demo.recruiter@obliox.io'),
   ('91000000-0000-4000-8000-000000000004', '90000000-0000-4000-8000-000000000004', 'Sam', 'Ortiz', 'demo.tc@obliox.io'),
-  ('91000000-0000-4000-8000-000000000005', '90000000-0000-4000-8000-000000000005', 'Elena', 'Park', 'demo.agent@obliox.io')
+  ('91000000-0000-4000-8000-000000000005', '90000000-0000-4000-8000-000000000005', 'Elena', 'Park', 'demo.agent@obliox.io'),
+  ('91000000-0000-4000-8000-000000000006', '90000000-0000-4000-8000-000000000006', 'Devon', 'Pierce', 'point.owner@obliox.io')
 on conflict (auth_user_id) do update set
   first_name = excluded.first_name,
   last_name = excluded.last_name,
@@ -333,6 +335,112 @@ values
   ('f2000000-0008-4000-8000-000000000008', '11111111-1111-4111-8111-111111111111', '91000000-0000-4000-8000-000000000004', 'Closed referral transaction for D. Shaw', 'transaction', 'cccccccc-0006-4000-8000-000000000006', '{"status":"closed"}'::jsonb, '2026-06-24 22:15:00+00'),
   ('f2000000-0009-4000-8000-000000000009', '11111111-1111-4111-8111-111111111111', '91000000-0000-4000-8000-000000000003', 'Created onboarding activity for Elena Park', 'recruit', 'bbbbbbbb-0005-4000-8000-000000000005', '{}'::jsonb, '2026-06-24 18:45:00+00'),
   ('f2000000-0010-4000-8000-000000000010', '11111111-1111-4111-8111-111111111111', '91000000-0000-4000-8000-000000000001', 'Reviewed inactive agent status', 'agent', 'aaaaaaaa-0008-4000-8000-000000000008', '{}'::jsonb, '2026-06-23 19:00:00+00')
+on conflict (id) do update set
+  actor_id = excluded.actor_id,
+  action = excluded.action,
+  entity_type = excluded.entity_type,
+  entity_id = excluded.entity_id,
+  metadata = excluded.metadata,
+  created_at = excluded.created_at;
+
+-- Point Realty pilot workspace: a writable tenant for exercising the full
+-- write path outside the read-only demo tenant. Re-running the seed
+-- re-asserts these fixture rows; rows created through the app are kept.
+insert into public.tenant_memberships (tenant_id, profile_id, role_id, status)
+select '22222222-2222-4222-8222-222222222222', profiles.id, roles.id, 'active'
+from (
+  values
+    ('91000000-0000-4000-8000-000000000006'::uuid, 'Broker Owner')
+) as point_members(profile_id, role_name)
+join public.profiles on profiles.id = point_members.profile_id
+join public.roles on roles.name = point_members.role_name
+on conflict (tenant_id, profile_id) do update set
+  role_id = excluded.role_id,
+  status = excluded.status,
+  updated_at = now();
+
+insert into public.agents (id, tenant_id, first_name, last_name, email, phone, brokerage_status, license_number, source, production_ytd, gci_ytd, last_close_date, assigned_owner_id)
+values
+  ('aaaaaaaa-2001-4000-8222-000000002001', '22222222-2222-4222-8222-222222222222', 'Nina', 'Alvarez', 'nina@example.com', '(415) 555-0210', 'active', 'CA-020001', 'Internal', 8400000, 235200, '2026-06-15', '91000000-0000-4000-8000-000000000006'),
+  ('aaaaaaaa-2002-4000-8222-000000002002', '22222222-2222-4222-8222-222222222222', 'Marcus', 'Webb', 'marcus@example.com', '(415) 555-0220', 'active', 'CA-020002', 'Referral', 6900000, 193200, '2026-05-30', '91000000-0000-4000-8000-000000000006'),
+  ('aaaaaaaa-2003-4000-8222-000000002003', '22222222-2222-4222-8222-222222222222', 'Lena', 'Kowalski', 'lena@example.com', '(415) 555-0230', 'onboarding', 'CA-020003', 'Recruiting', 2100000, 58800, '2026-04-25', '91000000-0000-4000-8000-000000000006')
+on conflict (id) do update set
+  first_name = excluded.first_name,
+  last_name = excluded.last_name,
+  email = excluded.email,
+  phone = excluded.phone,
+  brokerage_status = excluded.brokerage_status,
+  license_number = excluded.license_number,
+  source = excluded.source,
+  production_ytd = excluded.production_ytd,
+  gci_ytd = excluded.gci_ytd,
+  last_close_date = excluded.last_close_date,
+  assigned_owner_id = excluded.assigned_owner_id,
+  updated_at = now();
+
+insert into public.recruits (id, tenant_id, agent_id, prospect_name, stage, heat_score, recruit_score, source, assigned_recruiter_id, next_follow_up_date, notes_summary)
+values
+  ('bbbbbbbb-2001-4000-8222-000000002001', '22222222-2222-4222-8222-222222222222', null, 'Iris Delgado', 'Contacted', 'Hot', 79, 'Keller Williams', '91000000-0000-4000-8000-000000000006', '2026-07-09', 'Strong listing pipeline in coastal markets.'),
+  ('bbbbbbbb-2002-4000-8222-000000002002', '22222222-2222-4222-8222-222222222222', null, 'Paul Ngo', 'Engaged', 'Warm', 68, 'Referral', '91000000-0000-4000-8000-000000000006', '2026-07-11', 'Evaluating cap structure and support model.')
+on conflict (id) do update set
+  agent_id = excluded.agent_id,
+  prospect_name = excluded.prospect_name,
+  stage = excluded.stage,
+  heat_score = excluded.heat_score,
+  recruit_score = excluded.recruit_score,
+  source = excluded.source,
+  assigned_recruiter_id = excluded.assigned_recruiter_id,
+  next_follow_up_date = excluded.next_follow_up_date,
+  notes_summary = excluded.notes_summary,
+  updated_at = now();
+
+insert into public.recruiting_activities (id, tenant_id, recruit_id, activity_type, activity_date, notes, created_by)
+values
+  ('bca00000-2001-4000-8222-000000002001', '22222222-2222-4222-8222-222222222222', 'bbbbbbbb-2001-4000-8222-000000002001', 'Call', '2026-07-01 16:00:00+00', 'Intro call went well.', '91000000-0000-4000-8000-000000000006'),
+  ('bca00000-2002-4000-8222-000000002002', '22222222-2222-4222-8222-222222222222', 'bbbbbbbb-2002-4000-8222-000000002002', 'Meeting', '2026-07-02 18:00:00+00', 'Office tour scheduled.', '91000000-0000-4000-8000-000000000006')
+on conflict (id) do update set
+  activity_type = excluded.activity_type,
+  activity_date = excluded.activity_date,
+  notes = excluded.notes,
+  created_by = excluded.created_by;
+
+insert into public.transactions (id, tenant_id, agent_id, client_name, property_address, transaction_type, stage, list_price, estimated_gci, expected_close_date, status)
+values
+  ('cccccccc-2001-4000-8222-000000002001', '22222222-2222-4222-8222-222222222222', 'aaaaaaaa-2001-4000-8222-000000002001', 'B. Osei', '14 Seacliff Drive', 'Seller', 'Under Contract', 1250000, 35000, '2026-07-21', 'active'),
+  ('cccccccc-2002-4000-8222-000000002002', '22222222-2222-4222-8222-222222222222', 'aaaaaaaa-2002-4000-8222-000000002002', 'T. Ramos', '88 Cypress Lane', 'Buyer', 'Lead', 890000, 24920, '2026-08-08', 'active')
+on conflict (id) do update set
+  agent_id = excluded.agent_id,
+  client_name = excluded.client_name,
+  property_address = excluded.property_address,
+  transaction_type = excluded.transaction_type,
+  stage = excluded.stage,
+  list_price = excluded.list_price,
+  estimated_gci = excluded.estimated_gci,
+  expected_close_date = excluded.expected_close_date,
+  status = excluded.status,
+  updated_at = now();
+
+insert into public.tasks (id, tenant_id, assigned_to, related_type, related_id, title, description, due_date, status, priority, created_by)
+values
+  ('dddddddd-2001-4000-8222-000000002001', '22222222-2222-4222-8222-222222222222', '91000000-0000-4000-8000-000000000006', 'agent', 'aaaaaaaa-2001-4000-8222-000000002001', 'Review Q3 listing strategy', 'Walk through seasonal pricing plan with Nina.', '2026-07-09 16:00:00+00', 'open', 'high', '91000000-0000-4000-8000-000000000006'),
+  ('dddddddd-2002-4000-8222-000000002002', '22222222-2222-4222-8222-222222222222', '91000000-0000-4000-8000-000000000006', 'transaction', 'cccccccc-2001-4000-8222-000000002001', 'Confirm appraisal timeline', 'Appraisal ordered; confirm access window with seller.', '2026-07-08 15:00:00+00', 'in_progress', 'urgent', '91000000-0000-4000-8000-000000000006'),
+  ('dddddddd-2003-4000-8222-000000002003', '22222222-2222-4222-8222-222222222222', null, 'recruit', 'bbbbbbbb-2001-4000-8222-000000002001', 'Prepare recruiting offer draft', 'Draft cap and split terms for review.', '2026-07-14 12:00:00+00', 'open', 'normal', '91000000-0000-4000-8000-000000000006')
+on conflict (id) do update set
+  assigned_to = excluded.assigned_to,
+  related_type = excluded.related_type,
+  related_id = excluded.related_id,
+  title = excluded.title,
+  description = excluded.description,
+  due_date = excluded.due_date,
+  status = excluded.status,
+  priority = excluded.priority,
+  created_by = excluded.created_by,
+  updated_at = now();
+
+insert into public.activity_logs (id, tenant_id, actor_id, action, entity_type, entity_id, metadata, created_at)
+values
+  ('f2000000-2001-4000-8222-000000002001', '22222222-2222-4222-8222-222222222222', '91000000-0000-4000-8000-000000000006', 'Moved Iris Delgado to Contacted', 'recruit', 'bbbbbbbb-2001-4000-8222-000000002001', '{"stage":"Contacted"}'::jsonb, '2026-07-01 17:10:00+00'),
+  ('f2000000-2002-4000-8222-000000002002', '22222222-2222-4222-8222-222222222222', '91000000-0000-4000-8000-000000000006', 'Created task for appraisal timeline', 'task', 'dddddddd-2002-4000-8222-000000002002', '{}'::jsonb, '2026-07-02 14:30:00+00')
 on conflict (id) do update set
   actor_id = excluded.actor_id,
   action = excluded.action,

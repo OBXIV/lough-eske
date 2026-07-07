@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { signInDemoAction } from "@/lib/auth/actions";
 import { getCurrentSession } from "@/lib/auth/session";
-import { demoUsers } from "@/lib/data/demo";
+import { demoUsers, getDemoTenantById, isPilotDemoUser } from "@/lib/data/demo";
+import { isProductionDeployment } from "@/lib/deployment/environment";
 import { getDefaultRoute } from "@/lib/rbac/permissions";
 
 export default async function LoginPage() {
@@ -14,6 +15,8 @@ export default async function LoginPage() {
   if (session) {
     redirect(getDefaultRoute(session.permissions));
   }
+
+  const visibleUsers = demoUsers.filter((user) => !isPilotDemoUser(user) || !isProductionDeployment());
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-6">
@@ -24,7 +27,7 @@ export default async function LoginPage() {
           <p className="mt-2 text-sm text-text-secondary">Choose a workspace role or enter a demo email.</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
-          {demoUsers.map((user) => (
+          {visibleUsers.map((user) => (
             <form key={user.email} action={signInDemoAction}>
               <input name="email" type="hidden" value={user.email} />
               <button
@@ -36,8 +39,9 @@ export default async function LoginPage() {
                     {user.firstName} {user.lastName}
                   </span>
                   <span className="mt-1 block text-xs text-text-secondary">{user.email}</span>
-                  <span className="mt-3 block">
+                  <span className="mt-3 flex items-center gap-2">
                     <Badge variant={user.role === "Platform Admin" ? "accent" : "default"}>{user.role}</Badge>
+                    <span className="text-xs text-text-secondary">{getDemoTenantById(user.tenantId)?.name}</span>
                   </span>
                 </span>
                 <LogIn className="h-4 w-4 shrink-0 text-accent" aria-hidden="true" />
