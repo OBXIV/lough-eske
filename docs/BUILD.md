@@ -255,7 +255,11 @@ The application shell should include:
 - Migration `20260705` adds the profiles read policy; the live table had RLS enabled with no policy, which blanked every owner/actor name in database mode
 - Vercel `DATABASE_URL` wired for Production and Preview on July 1, 2026 via CLI (dashboard saves did not persist, and `vercel redeploy` reuses the source deployment's env snapshot; use git deploys after env changes)
 - Production serves `lough-eske-dev` data read-only; the demo tenant keeps writes disabled by design
-- Open: Stage/Prod Supabase projects not yet wired
+- Stage wired on July 6, 2026: migrations `20260703` through `20260705` pushed to `lough-eske-stage` via `supabase db push` (ledger now records `20260628` through `20260705`), seed verified current, Preview `DATABASE_URL` points at the Stage transaction pooler, verified end to end with a temporary tenant-name marker on a Preview deployment
+- Setting sensitive Vercel env values reliably: interactive `vercel env add` corrupts pasted values too easily (clipboard overwrites, dropped characters, prompt redraw artifacts); use the REST API `POST /v10/projects/{id}/env?upsert=true` with the value read from the local env file
+- Branch pushes do not trigger Preview deployments (only main triggers Production builds); check the Vercel dashboard Git settings to enable them, or cut Preview builds with `vercel deploy`
+- Open: Prod Supabase project (`lough-eske-prod`) not yet created; Production still serves dev data as a stopgap
+- Open: Stage write-path testing needs a writable tenant (all demo logins map to the read-only demo tenant); planned as a seed plus fixture change
 
 ### Sprint 7A - Transaction Workflow Control
 - Make transaction rows clickable, not only the View button

@@ -43,7 +43,7 @@ Expected Vercel environment:
 - Development or explicit Dev preview target
 
 ## Stage
-Future Supabase project label:
+Current Supabase project label:
 - `lough-eske-stage`
 
 Current Supabase project ref:
@@ -56,7 +56,8 @@ Purpose:
 - Release candidate validation
 - Sales/demo QA before production promotion
 - Production-like data volume with synthetic or approved demo data
-- Current schema and demo seed state matches Dev as of June 29, 2026
+- Schema current with the repo as of July 6, 2026: migration ledger records `20260628` through `20260705`, seed applied and verified
+- Vercel Preview `DATABASE_URL` points at the Stage transaction pooler; wiring verified end to end on July 6, 2026
 
 Expected Vercel environment:
 - Preview or dedicated staging domain
@@ -120,6 +121,8 @@ Use the IPv4 session pooler connection string for migration and seed commands wh
 For server-side application reads, set `DATABASE_URL` in the target Vercel environment. The application disables prepared statements for this connection so it can use Supabase pooler URLs safely.
 
 The app intentionally does not use Vercel integration-created `POSTGRES_*` variables. Each environment must opt in through `DATABASE_URL` so Dev, Stage, and Prod cannot accidentally share a database.
+
+When writing sensitive values into Vercel, avoid the interactive `vercel env add` prompt and dashboard saves; both have corrupted values on this project. Use the REST API with the value read from the local env file: `POST https://api.vercel.com/v10/projects/{projectId}/env?teamId={orgId}&upsert=true` with `{ key, value, type: "sensitive", target: [...] }`. Deploy from git or `vercel deploy` afterward; `vercel redeploy` reuses the source deployment's env snapshot.
 
 ## Local Files
 
