@@ -3,6 +3,7 @@ import path from "node:path";
 
 const DEV_PROJECT_REF = "ybzelcftszhhbotzcqzq";
 const STAGE_PROJECT_REF = "gdwkhjoushqdrfmbzyit";
+const PROD_PROJECT_REF = "tvomxkspgkbaukyzzbpz";
 
 function getArg(name) {
   const prefix = `${name}=`;
@@ -146,6 +147,14 @@ if (environmentName === "stage" && publicRef && publicRef !== STAGE_PROJECT_REF)
 
 if (environmentName === "dev" && publicRef && publicRef !== DEV_PROJECT_REF) {
   warnings.push("Dev public URL does not match the currently documented Dev Supabase project ref.");
+}
+
+if (environmentName === "prod" && refs.some((ref) => ref === DEV_PROJECT_REF || ref === STAGE_PROJECT_REF)) {
+  failures.push("Prod is pointing at the Dev or Stage Supabase project ref.");
+}
+
+if (environmentName === "prod" && publicRef && publicRef !== PROD_PROJECT_REF) {
+  failures.push("Prod public URL does not match the documented Prod Supabase project ref.");
 }
 
 if (failures.length > 0) {

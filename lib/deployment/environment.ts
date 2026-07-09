@@ -1,5 +1,6 @@
 const DEV_PROJECT_REF = "ybzelcftszhhbotzcqzq";
 const STAGE_PROJECT_REF = "gdwkhjoushqdrfmbzyit";
+const PROD_PROJECT_REF = "tvomxkspgkbaukyzzbpz";
 
 function getSupabaseProjectRef() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -18,6 +19,7 @@ export function getDeploymentEnvironmentLabel() {
 
   if (projectRef === DEV_PROJECT_REF) return "Dev";
   if (projectRef === STAGE_PROJECT_REF) return "Stage";
+  if (projectRef === PROD_PROJECT_REF) return "Prod";
   if (process.env.VERCEL_ENV === "production") return "Prod";
   if (process.env.VERCEL_ENV === "preview") return "Preview";
   return "Local";
