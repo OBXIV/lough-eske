@@ -6,7 +6,7 @@ This document defines the v0.1 execution backlog for Nova.
 Internal project codename: **Lough Eske**  
 Product name: **TBD**  
 Version: **v0.1**  
-Last updated: **July 1, 2026**
+Last updated: **July 9, 2026**
 
 ## Delivery Strategy
 Build the SaaS foundation first, then modules. Do not start with a single screen and wire data later. Multi-tenancy, auth, RBAC, and design tokens must come first.
@@ -40,7 +40,7 @@ Consolidated original backlog:
 
 Next implementation sprint: **Sprint 8B - Plans, Seats, and Entitlements**.
 
-Sprint 7A shipped clickable transaction rows, search plus stage/status/close-timing filters, drawer sections for contingencies, related tasks, and document readiness, close/cancel audit metadata, and active-only dashboard GCI. Migrations `20260630` through `20260705` were applied to `lough-eske-dev` on July 1, 2026, so the schema is current with the repo. Vercel Production and Preview are wired to `lough-eske-dev` via `DATABASE_URL` and serve database-backed reads; the demo tenant keeps writes disabled. Stage and Prod Supabase projects remain unwired.
+Sprint 7A shipped clickable transaction rows, search plus stage/status/close-timing filters, drawer sections for contingencies, related tasks, and document readiness, close/cancel audit metadata, and active-only dashboard GCI. Dev, Stage, and Prod now carry migration ledger entries `20260628` through `20260709` and the repeatable demo seed. Vercel Preview points at `lough-eske-stage`; Vercel Production points at `lough-eske-prod`. The demo tenant remains read-only in every environment.
 
 Sprint 8A shipped task search plus owner/priority/related-type/status/due-timing filters, clickable task rows, drawer sections for notes, related record context, and assignment/due-date editing, a filterable activity log panel, and dashboard task accountability drilldowns. No new migration; assignment edits ride the existing manage_tasks update policy with tenant-membership validation on assignees.
 
@@ -464,7 +464,7 @@ alter table tenants add column seat_count int default 1;
 ```
 
 Tasks:
-- Add migration `20260705_add_plans_and_entitlements.sql` for the `plans` and `plan_features` tables and the `tenants.plan_id` / `tenants.seat_count` columns
+- Add migration `20260710_add_plans_and_entitlements.sql` for the `plans` and `plan_features` tables and the `tenants.plan_id` / `tenants.seat_count` columns
 - Seed the three plans (core, growth, scale) with base seat limit, per-seat price, and base price, plus their `plan_features` rows; keep the seed repeatable
 - Backfill existing tenants (demo, Point Realty, California placeholders) to the core plan, then set `tenants.plan_id` not null so no tenant is planless at launch
 - Add RLS: any authenticated tenant member can read `plans` and `plan_features` (the catalog is shared), and only Platform Admin can write those tables or change a tenant's `plan_id` / `seat_count`

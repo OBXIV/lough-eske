@@ -56,7 +56,7 @@ Purpose:
 - Release candidate validation
 - Sales/demo QA before production promotion
 - Production-like data volume with synthetic or approved demo data
-- Schema current with the repo as of July 6, 2026: migration ledger records `20260628` through `20260705`, seed applied and verified
+- Schema current with the repo as of July 9, 2026: migration ledger records `20260628` through `20260709`, seed applied and verified
 - Vercel Preview `DATABASE_URL` points at the Stage transaction pooler; wiring verified end to end on July 6, 2026
 
 Expected Vercel environment:
@@ -71,8 +71,24 @@ Access rule:
 - Stage Preview should stay behind Vercel SSO.
 
 ## Prod
-Future Supabase project label:
+Current Supabase organization:
+- `OblioX P1` (Pro)
+
+Current Supabase project label:
 - `lough-eske-prod`
+
+Current Supabase project ref:
+- `tvomxkspgkbaukyzzbpz`
+
+Current Supabase project URL:
+- `https://tvomxkspgkbaukyzzbpz.supabase.co`
+
+Current state:
+- Created in `us-west-1` on July 9, 2026
+- Migration ledger records `20260628` through `20260709`
+- Repeatable demo seed applied and verified
+- Vercel Production public Supabase variables and `DATABASE_URL` point at this project
+- Production deployment verified live on July 9, 2026 with the read-only demo workspace, Prod badge, pilot-login rejection, and no Vercel runtime errors
 
 Purpose:
 - Customer-facing production application
@@ -82,9 +98,9 @@ Purpose:
 Expected Vercel environment:
 - Production deployment and production domain
 
-Current decision:
-- Production should use a real Prod Supabase project once credentials are available.
+Access rule:
 - Demo Brokerage remains a read-only demo workspace even when `DATABASE_URL` is configured.
+- The Point Realty pilot login is hidden and rejected in Prod.
 
 ## Rules
 - Never commit secrets.

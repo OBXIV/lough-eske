@@ -250,19 +250,19 @@ The application shell should include:
 - Completed through Sprint 8A
 - Original baseline Sprint 7-11 shell work has been consolidated into completed scope where the route/shell/table already exists
 - Next implementation sprint is Sprint 8B - Plans, Seats, and Entitlements (launch-blocking, must precede Sprint 9A and 10A)
-- Migrations `20260630` through `20260705` applied to `lough-eske-dev` on July 1, 2026; dev schema is current with the repo
+- Dev, Stage, and Prod migration ledgers record `20260628` through `20260709`; all three schemas are current with the repo
 - Sprint 8A required no new migration; task assignment uses existing columns and the column-agnostic manage_tasks update policy
 - Migration `20260705` adds the profiles read policy; the live table had RLS enabled with no policy, which blanked every owner/actor name in database mode
-- Vercel `DATABASE_URL` wired for Production and Preview on July 1, 2026 via CLI (dashboard saves did not persist, and `vercel redeploy` reuses the source deployment's env snapshot; use git deploys after env changes)
-- Production serves `lough-eske-dev` data read-only; the demo tenant keeps writes disabled by design
-- Stage wired on July 6, 2026: migrations `20260703` through `20260705` pushed to `lough-eske-stage` via `supabase db push` (ledger now records `20260628` through `20260705`), seed verified current, Preview `DATABASE_URL` points at the Stage transaction pooler, verified end to end with a temporary tenant-name marker on a Preview deployment
+- Migration `20260709` enables RLS on roles, permissions, and role_permissions; anonymous reads are blocked while authenticated reference-data reads remain available
+- Stage wired on July 6, 2026: seed verified current, Preview `DATABASE_URL` points at the Stage transaction pooler, verified end to end with a temporary tenant-name marker on a Preview deployment
+- Prod wired on July 9, 2026: `lough-eske-prod` created in the `OblioX P1` Pro organization, migrations and seed applied, Vercel Production public variables and `DATABASE_URL` point at Prod, and deployment `83b41a2` verified live with no runtime errors
 - Setting sensitive Vercel env values reliably: interactive `vercel env add` corrupts pasted values too easily (clipboard overwrites, dropped characters, prompt redraw artifacts); use the REST API `POST /v10/projects/{id}/env?upsert=true` with the value read from the local env file
 - Branch pushes do not trigger Preview deployments (only main triggers Production builds); check the Vercel dashboard Git settings to enable them, or cut Preview builds with `vercel deploy`
-- Open: Prod Supabase project (`lough-eske-prod`) not yet created; Production still serves dev data as a stopgap
 - Point Realty is now the writable pilot workspace (July 6, 2026): status `active`, one seeded Broker Owner login (Devon Pierce, point.owner@obliox.io) with agents, recruits, transactions, tasks, and activity; verified on Stage with RLS write and cross-tenant isolation tests
 - Write gating tightened: `areTenantWritesEnabled` now requires tenant status `active` (demo, prospect, and inactive tenants are read-only); a tenant row invisible under RLS resolves as `inactive` so an unseeded database degrades to read-only instead of surfacing RLS errors
 - Pilot logins are hidden and rejected on Prod deployments (login tile filter plus session-layer checks in `setDemoSession` and `getCurrentSession`); pilot write testing happens on Stage Preview and local only
-- Dev database reseeded July 6, 2026; dev and stage both carry the Point Realty pilot workspace, and Prod remains the only unwired environment
+- All environments carry the repeatable demo seed; Production exposes only the read-only demo workspace and rejects the writable pilot login
+- Sprint 8B's next migration must use `20260710` or later because `20260709` is now assigned to reference-table RLS
 
 ### Sprint 7A - Transaction Workflow Control
 - Make transaction rows clickable, not only the View button
