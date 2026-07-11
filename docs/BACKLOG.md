@@ -12,7 +12,7 @@ Last updated: **July 9, 2026**
 Build the SaaS foundation first, then modules. Do not start with a single screen and wire data later. Multi-tenancy, auth, RBAC, and design tokens must come first.
 
 ## Execution Status Snapshot
-Current position: **completed through Sprint 8A; Sprint 8B implementation in progress**.
+Current position: **completed through Sprint 8B**.
 
 Completed baseline:
 - Sprint 0 - Project Foundation
@@ -38,15 +38,15 @@ Consolidated original backlog:
 - Original Sprint 10 agent portal shell is already covered by the agent portal route and clickable demo sections.
 - Original Sprint 11 settings shell is already covered by the tenant profile, role visibility, and environment/admin shell.
 
-Current implementation sprint: **Sprint 8B - Plans, Seats, and Entitlements**.
+Next implementation sprint: **Sprint 9A** (Sprint 8B shipped July 10, 2026).
 
-Sprint 7A shipped clickable transaction rows, search plus stage/status/close-timing filters, drawer sections for contingencies, related tasks, and document readiness, close/cancel audit metadata, and active-only dashboard GCI. Stage and Prod carry migration ledger entries `20260628` through `20260709`; Dev additionally carries Sprint 8B migrations `20260710050654` and `20260710050925`. Vercel Preview points at `lough-eske-stage`; Vercel Production points at `lough-eske-prod`. The demo tenant remains read-only in every environment.
+Sprint 7A shipped clickable transaction rows, search plus stage/status/close-timing filters, drawer sections for contingencies, related tasks, and document readiness, close/cancel audit metadata, and active-only dashboard GCI. Dev, Stage, and Prod all carry migration ledger entries `20260628` through `20260710120000`. Vercel Preview points at `lough-eske-stage`; Vercel Production points at `lough-eske-prod`. The demo tenant remains read-only in every environment.
 
 Sprint 8A shipped task search plus owner/priority/related-type/status/due-timing filters, clickable task rows, drawer sections for notes, related record context, and assignment/due-date editing, a filterable activity log panel, and dashboard task accountability drilldowns. No new migration; assignment edits ride the existing manage_tasks update policy with tenant-membership validation on assignees.
 
 Launch-blocking addition: **Sprint 8B - Plans, Seats, and Entitlements** must be working at v0.1 go-live. Every tenant resolves to a plan on day one and feature access follows the plan. Sequence it before Sprint 9A and Sprint 10A, which gate on plan features.
 
-Sprint 8B implementation status (July 9, 2026): local schema, app gating, Settings UI, repeatable seed, seat enforcement, focused verification, production build, and Dev database validation are complete. Stage Preview and Production migration/deployment validation remain open, so Sprint 8B is not yet marked shipped.
+Sprint 8B shipped July 10, 2026 as `c67d1ae`: schema, app gating, Settings UI, repeatable seed, and seat enforcement rolled out to Stage and Prod after an adversarial review fixed a seed-reseed abort in the seat-limit trigger, seed clobbering of admin plan changes, a destructive plan_features reseed, and a layout-level 500 on RLS-invisible tenants.
 
 ## Sprint 0 - Project Foundation
 ### Epic: Repository and Framework Setup
