@@ -31,6 +31,26 @@ export type PermissionKey =
   | "view_agent_portal"
   | "manage_agent_resources";
 
+export type PlanKey = "core" | "growth" | "scale";
+
+export type FeatureKey = "reports" | "agent_portal" | "mls_sync";
+
+export type TenantEntitlements = {
+  planId: string;
+  planKey: PlanKey;
+  planName: string;
+  baseSeatLimit: number;
+  subscribedSeats: number;
+  activeSeats: number;
+  invitedSeats: number;
+  occupiedSeats: number;
+  availableSeats: number;
+  basePriceCents: number;
+  perSeatPriceCents: number;
+  monthlyPriceCents: number;
+  features: FeatureKey[];
+};
+
 export type Tenant = {
   id: string;
   name: string;

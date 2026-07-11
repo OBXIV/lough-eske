@@ -249,8 +249,8 @@ The application shell should include:
 ### Current Position
 - Completed through Sprint 8A
 - Original baseline Sprint 7-11 shell work has been consolidated into completed scope where the route/shell/table already exists
-- Next implementation sprint is Sprint 8B - Plans, Seats, and Entitlements (launch-blocking, must precede Sprint 9A and 10A)
-- Dev, Stage, and Prod migration ledgers record `20260628` through `20260709`; all three schemas are current with the repo
+- Sprint 8B - Plans, Seats, and Entitlements is in progress (launch-blocking, must precede Sprint 9A and 10A)
+- Dev carries Sprint 8B migrations `20260710050654` and `20260710050925`; Stage and Prod remain current through `20260709` pending the controlled Sprint 8B rollout
 - Sprint 8A required no new migration; task assignment uses existing columns and the column-agnostic manage_tasks update policy
 - Migration `20260705` adds the profiles read policy; the live table had RLS enabled with no policy, which blanked every owner/actor name in database mode
 - Migration `20260709` enables RLS on roles, permissions, and role_permissions; anonymous reads are blocked while authenticated reference-data reads remain available
@@ -262,7 +262,9 @@ The application shell should include:
 - Write gating tightened: `areTenantWritesEnabled` now requires tenant status `active` (demo, prospect, and inactive tenants are read-only); a tenant row invisible under RLS resolves as `inactive` so an unseeded database degrades to read-only instead of surfacing RLS errors
 - Pilot logins are hidden and rejected on Prod deployments (login tile filter plus session-layer checks in `setDemoSession` and `getCurrentSession`); pilot write testing happens on Stage Preview and local only
 - All environments carry the repeatable demo seed; Production exposes only the read-only demo workspace and rejects the writable pilot login
-- Sprint 8B's next migration must use `20260710` or later because `20260709` is now assigned to reference-table RLS
+- Sprint 8B Dev verification passed for plan backfill, billing math, feature allow/deny checks, anonymous catalog denial, Platform Admin-only plan changes, over-limit membership denial, and seat-reduction denial
+- The local production build, Settings surface, Reports, and Agent Portal pass visual/runtime verification with no browser errors; local secret files intentionally do not carry a usable explicit `DATABASE_URL`, so live gate behavior was verified at the Dev database layer
+- Any migration after the Sprint 8B pair must sort after `20260710050925`
 
 ### Sprint 7A - Transaction Workflow Control
 - Make transaction rows clickable, not only the View button
@@ -277,6 +279,16 @@ The application shell should include:
 - Add task detail context for notes and related records
 - Add activity log filtering by entity type and actor
 - Improve dashboard task drilldowns
+
+### Sprint 8B - Plans, Seats, and Entitlements
+- Add the Core, Growth, and Scale plan catalog with repeatable pricing and feature seeds
+- Backfill every tenant to Core with subscribed capacity no lower than included or occupied seats
+- Treat active and invited memberships as occupied seats and enforce capacity in the database
+- Gate Reports and Agent Portal through plan features in addition to role permissions
+- Show plan, monthly billing, occupied/available seats, and included features in Settings
+- Restrict plan catalog writes and tenant plan/seat changes to Platform Admin
+- Require migrations `20260710050654_add_plans_and_entitlements.sql` and `20260710050925_add_tenants_plan_index.sql` before deployed Sprint 8B flows are validated
+- Dev database validation complete; Stage Preview and Production rollout remain pending
 
 ### Sprint 9A - Reports Drilldowns and Exports
 - Add report drilldown panels for recruiting, production, transactions, and GCI

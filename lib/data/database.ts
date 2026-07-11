@@ -48,14 +48,18 @@ export function getDatabaseClient() {
   return globalThis.loughEskeSqlClient;
 }
 
-export async function withTenantRls<T>(session: UserSession, query: (sql: TenantSql) => Promise<T>) {
+export async function withAuthenticatedRls<T>(authUserId: string, query: (sql: TenantSql) => Promise<T>) {
   const client = getDatabaseClient();
 
   return client.begin(async (sql) => {
     await sql.unsafe("set local role authenticated");
-    await sql`select set_config('request.jwt.claim.sub', ${session.user.id}, true)`;
+    await sql`select set_config('request.jwt.claim.sub', ${authUserId}, true)`;
     await sql`select set_config('request.jwt.claim.role', 'authenticated', true)`;
 
     return query(sql);
   });
+}
+
+export async function withTenantRls<T>(session: UserSession, query: (sql: TenantSql) => Promise<T>) {
+  return withAuthenticatedRls(session.user.id, query);
 }

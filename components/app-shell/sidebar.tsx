@@ -6,17 +6,21 @@ import { Building2 } from "lucide-react";
 
 import { navItems } from "@/components/app-shell/nav";
 import { Badge } from "@/components/ui/badge";
+import { hasFeature } from "@/lib/entitlements/catalog";
 import { canAccess } from "@/lib/rbac/permissions";
 import { cn } from "@/lib/utils";
-import type { UserSession } from "@/types/domain";
+import type { TenantEntitlements, UserSession } from "@/types/domain";
 
 type SidebarProps = {
   session: UserSession;
+  entitlements: TenantEntitlements;
 };
 
-export function Sidebar({ session }: SidebarProps) {
+export function Sidebar({ session, entitlements }: SidebarProps) {
   const pathname = usePathname();
-  const visibleItems = navItems.filter((item) => canAccess(session.permissions, item.permission));
+  const visibleItems = navItems.filter(
+    (item) => canAccess(session.permissions, item.permission) && (!item.feature || hasFeature(entitlements, item.feature)),
+  );
   const groups = Array.from(new Set(visibleItems.map((item) => item.group)));
 
   return (

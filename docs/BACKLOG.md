@@ -12,7 +12,7 @@ Last updated: **July 9, 2026**
 Build the SaaS foundation first, then modules. Do not start with a single screen and wire data later. Multi-tenancy, auth, RBAC, and design tokens must come first.
 
 ## Execution Status Snapshot
-Current position: **completed through Sprint 8A**.
+Current position: **completed through Sprint 8A; Sprint 8B implementation in progress**.
 
 Completed baseline:
 - Sprint 0 - Project Foundation
@@ -38,13 +38,15 @@ Consolidated original backlog:
 - Original Sprint 10 agent portal shell is already covered by the agent portal route and clickable demo sections.
 - Original Sprint 11 settings shell is already covered by the tenant profile, role visibility, and environment/admin shell.
 
-Next implementation sprint: **Sprint 8B - Plans, Seats, and Entitlements**.
+Current implementation sprint: **Sprint 8B - Plans, Seats, and Entitlements**.
 
-Sprint 7A shipped clickable transaction rows, search plus stage/status/close-timing filters, drawer sections for contingencies, related tasks, and document readiness, close/cancel audit metadata, and active-only dashboard GCI. Dev, Stage, and Prod now carry migration ledger entries `20260628` through `20260709` and the repeatable demo seed. Vercel Preview points at `lough-eske-stage`; Vercel Production points at `lough-eske-prod`. The demo tenant remains read-only in every environment.
+Sprint 7A shipped clickable transaction rows, search plus stage/status/close-timing filters, drawer sections for contingencies, related tasks, and document readiness, close/cancel audit metadata, and active-only dashboard GCI. Stage and Prod carry migration ledger entries `20260628` through `20260709`; Dev additionally carries Sprint 8B migrations `20260710050654` and `20260710050925`. Vercel Preview points at `lough-eske-stage`; Vercel Production points at `lough-eske-prod`. The demo tenant remains read-only in every environment.
 
 Sprint 8A shipped task search plus owner/priority/related-type/status/due-timing filters, clickable task rows, drawer sections for notes, related record context, and assignment/due-date editing, a filterable activity log panel, and dashboard task accountability drilldowns. No new migration; assignment edits ride the existing manage_tasks update policy with tenant-membership validation on assignees.
 
 Launch-blocking addition: **Sprint 8B - Plans, Seats, and Entitlements** must be working at v0.1 go-live. Every tenant resolves to a plan on day one and feature access follows the plan. Sequence it before Sprint 9A and Sprint 10A, which gate on plan features.
+
+Sprint 8B implementation status (July 9, 2026): local schema, app gating, Settings UI, repeatable seed, seat enforcement, focused verification, production build, and Dev database validation are complete. Stage Preview and Production migration/deployment validation remain open, so Sprint 8B is not yet marked shipped.
 
 ## Sprint 0 - Project Foundation
 ### Epic: Repository and Framework Setup
@@ -460,11 +462,11 @@ create table plan_features (
 
 -- tenants get a plan reference
 alter table tenants add column plan_id uuid references plans(id);
-alter table tenants add column seat_count int default 1;
+alter table tenants add column seat_count int default 5;
 ```
 
 Tasks:
-- Add migration `20260710_add_plans_and_entitlements.sql` for the `plans` and `plan_features` tables and the `tenants.plan_id` / `tenants.seat_count` columns
+- Add migrations `20260710050654_add_plans_and_entitlements.sql` and `20260710050925_add_tenants_plan_index.sql` for the plan catalog, tenant plan/seat columns, enforcement functions, RLS, and covering index
 - Seed the three plans (core, growth, scale) with base seat limit, per-seat price, and base price, plus their `plan_features` rows; keep the seed repeatable
 - Backfill existing tenants (demo, Point Realty, California placeholders) to the core plan, then set `tenants.plan_id` not null so no tenant is planless at launch
 - Add RLS: any authenticated tenant member can read `plans` and `plan_features` (the catalog is shared), and only Platform Admin can write those tables or change a tenant's `plan_id` / `seat_count`
@@ -472,6 +474,11 @@ Tasks:
 - Enforce seat limits on member add and invite against `base_seat_limit` and `seat_count`, and expose the billing math `base_price_cents + max(0, seat_count - base_seat_limit) * per_seat_price_cents`
 - Surface plan, seat usage, and included features in Settings for broker owners
 - Update docs/DATABASE.md with the `plans` and `plan_features` tables and the `tenants` column additions
+
+Implementation decisions:
+- `seat_count` means subscribed capacity; active and invited memberships occupy seats
+- Core includes 5 seats at $199/month with $29 additional seats; Growth includes 15 at $499 with $25 additional seats; Scale includes 30 at $899 with $19 additional seats
+- Core includes Reports and Agent Portal so the existing demo experience remains intact; Growth and Scale also include MLS Sync
 
 Acceptance Criteria:
 - Every tenant, including demo and placeholder tenants, resolves to a plan at launch

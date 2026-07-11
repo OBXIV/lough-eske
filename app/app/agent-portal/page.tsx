@@ -3,7 +3,9 @@ import { ArrowRight, Bot, CalendarDays, FileText, Handshake, Home, Library } fro
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
+import { FeatureUnavailable } from "@/components/entitlements/feature-unavailable";
 import { requirePermission } from "@/lib/auth/session";
+import { getTenantEntitlements, tenantHasFeature } from "@/lib/data/app-data";
 
 const portalCards = [
   { title: "Agent Dashboard", body: "Personal production, upcoming milestones, and brokerage announcements.", href: "#agent-dashboard", icon: Home, status: "Demo" },
@@ -78,7 +80,15 @@ const portalSections = [
 ];
 
 export default async function AgentPortalPage() {
-  await requirePermission("view_agent_portal");
+  const session = await requirePermission("view_agent_portal");
+  const [entitlements, hasAgentPortal] = await Promise.all([
+    getTenantEntitlements(session),
+    tenantHasFeature(session, "agent_portal"),
+  ]);
+
+  if (!hasAgentPortal) {
+    return <FeatureUnavailable feature="agent_portal" entitlements={entitlements} />;
+  }
 
   return (
     <>

@@ -3,12 +3,22 @@ import { BarChart3, CircleDollarSign, Funnel, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
+import { FeatureUnavailable } from "@/components/entitlements/feature-unavailable";
 import { requirePermission } from "@/lib/auth/session";
-import { getAgents, getRecruits, getTransactions } from "@/lib/data/app-data";
+import { getAgents, getRecruits, getTenantEntitlements, getTransactions, tenantHasFeature } from "@/lib/data/app-data";
 import { formatCurrency } from "@/lib/utils";
 
 export default async function ReportsPage() {
   const session = await requirePermission("view_reports");
+  const [entitlements, hasReports] = await Promise.all([
+    getTenantEntitlements(session),
+    tenantHasFeature(session, "reports"),
+  ]);
+
+  if (!hasReports) {
+    return <FeatureUnavailable feature="reports" entitlements={entitlements} />;
+  }
+
   const [agents, recruits, transactions] = await Promise.all([
     getAgents(session),
     getRecruits(session),

@@ -6,7 +6,7 @@ This document defines the v0.1 PostgreSQL/Supabase data model for Lough Eske.
 Internal project codename: **Lough Eske**  
 Product name: **TBD**  
 Version: **v0.1**  
-Last updated: **June 28, 2026**
+Last updated: **July 9, 2026**
 
 ## Database Philosophy
 This is a multi-tenant SaaS database. Tenant isolation is the foundation. Every tenant-owned business table must include `tenant_id` and must be protected by Row Level Security.
@@ -22,6 +22,8 @@ This is a multi-tenant SaaS database. Tenant isolation is the foundation. Every 
 8. Use `created_at` and `updated_at` on all core tables.
 9. Prefer soft statuses over hard deletes where business history matters.
 10. Activity history should be preserved.
+11. Every tenant must resolve to a plan and subscribed seat capacity.
+12. Feature access requires both role permission and plan entitlement.
 
 ## Required Extensions
 Enable:
@@ -43,6 +45,8 @@ Columns:
 - primary_color text default '#2563EB'
 - secondary_color text
 - domain text
+- plan_id uuid not null references plans(id), default Core
+- seat_count integer not null default 5, check greater than zero
 - created_at timestamptz default now()
 - updated_at timestamptz default now()
 
@@ -51,6 +55,48 @@ Status values:
 - demo
 - prospect
 - inactive
+
+`seat_count` is subscribed capacity, not current usage. Active and invited tenant memberships both occupy a seat; suspended and inactive memberships do not.
+
+### plans
+Global plan catalog shared across tenants.
+
+Columns:
+- id uuid primary key default gen_random_uuid()
+- key text unique not null (`core`, `growth`, `scale`)
+- name text not null
+- base_seat_limit integer not null, check greater than zero
+- per_seat_price_cents integer not null, check zero or greater
+- base_price_cents integer not null, check zero or greater
+- created_at timestamptz not null default now()
+- updated_at timestamptz not null default now()
+
+Launch defaults:
+
+| Plan | Included seats | Base price | Additional seat | Features |
+| --- | ---: | ---: | ---: | --- |
+| Core | 5 | $199/month | $29/month | Reports, Agent Portal |
+| Growth | 15 | $499/month | $25/month | Reports, Agent Portal, MLS Sync |
+| Scale | 30 | $899/month | $19/month | Reports, Agent Portal, MLS Sync |
+
+Monthly billing is `base_price_cents + max(0, seat_count - base_seat_limit) * per_seat_price_cents`.
+
+### plan_features
+Plan-scoped feature entitlement catalog.
+
+Columns:
+- plan_id uuid not null references plans(id) on delete cascade
+- feature_key text not null
+- created_at timestamptz not null default now()
+- updated_at timestamptz not null default now()
+
+Constraint:
+- primary key(plan_id, feature_key)
+
+Launch feature keys:
+- reports
+- agent_portal
+- mls_sync
 
 ### profiles
 App profile for Supabase auth users.
@@ -365,6 +411,7 @@ Referral status values:
 
 ## Indexes
 Create indexes on:
+- tenants(plan_id)
 - tenant_memberships(tenant_id)
 - tenant_memberships(profile_id)
 - agents(tenant_id)
@@ -381,6 +428,13 @@ Create indexes on:
 
 ## RLS Principle
 Users can access tenant-owned data only when they have active membership in that tenant.
+
+Plan security:
+- Active tenant members can read the shared `plans` and `plan_features` catalog.
+- Anonymous access to the catalog is revoked explicitly.
+- Only Platform Admin can write plan definitions or change a tenant's plan and subscribed seats.
+- `tenant_has_feature(target_tenant_id, feature_key)` is `SECURITY INVOKER`, requires tenant visibility, and is the database source of truth for feature gates.
+- A private trigger blocks active/invited membership writes beyond subscribed capacity, and tenant seat counts cannot be reduced below occupied seats.
 
 Recommended helper function:
 ```sql
@@ -447,6 +501,7 @@ Create:
 - Demo Brokerage tenant
 - Point Realty tenant placeholder
 - California Brokerage placeholder
+- Core, Growth, and Scale plans with repeatable feature assignments
 
 Demo Brokerage should include:
 - 10 agents

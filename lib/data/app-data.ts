@@ -1,17 +1,33 @@
 import "server-only";
 
+import { cache } from "react";
+
 import {
   activityLogs as fallbackActivityLogs,
   agents as fallbackAgents,
+  demoUsers,
   recruits as fallbackRecruits,
   tasks as fallbackTasks,
   tenantMembers as fallbackTenantMembers,
   transactions as fallbackTransactions,
 } from "@/lib/data/demo";
-import { isDatabaseConfigured, withTenantRls } from "@/lib/data/database";
+import { isDatabaseConfigured, withAuthenticatedRls, withTenantRls } from "@/lib/data/database";
+import { calculateMonthlyPriceCents, createFallbackEntitlements, FEATURE_KEYS } from "@/lib/entitlements/catalog";
 import { canAccess } from "@/lib/rbac/permissions";
 import { getVisibleTenants } from "@/lib/tenant/access";
-import type { ActivityLog, Agent, Recruit, Task, Tenant, TenantMember, Transaction, UserSession } from "@/types/domain";
+import type {
+  ActivityLog,
+  Agent,
+  FeatureKey,
+  PlanKey,
+  Recruit,
+  Task,
+  Tenant,
+  TenantEntitlements,
+  TenantMember,
+  Transaction,
+  UserSession,
+} from "@/types/domain";
 
 type TenantRow = {
   id: string;
@@ -94,6 +110,19 @@ type ActivityLogRow = {
   created_at: string;
 };
 
+type TenantEntitlementsRow = {
+  plan_id: string;
+  plan_key: PlanKey;
+  plan_name: string;
+  base_seat_limit: number;
+  seat_count: number;
+  active_seats: number;
+  invited_seats: number;
+  base_price_cents: number;
+  per_seat_price_cents: number;
+  features: string[];
+};
+
 function toNumber(value: string | number | null) {
   return Number(value ?? 0);
 }
@@ -137,6 +166,95 @@ export async function getVisibleTenantsForSession(session: UserSession) {
   `);
 
   return rows.map(mapTenant);
+}
+
+const loadTenantEntitlements = cache(async (authUserId: string, tenantId: string): Promise<TenantEntitlements> => {
+  if (!isDatabaseConfigured()) {
+    const occupiedSeats = demoUsers.filter((user) => user.tenantId === tenantId).length;
+    return createFallbackEntitlements(occupiedSeats);
+  }
+
+  const rows = await withAuthenticatedRls(authUserId, (sql) => sql<TenantEntitlementsRow[]>`
+    select
+      plans.id::text as plan_id,
+      plans.key as plan_key,
+      plans.name as plan_name,
+      plans.base_seat_limit,
+      tenants.seat_count,
+      (
+        select count(*)::integer
+        from public.tenant_memberships active_memberships
+        where active_memberships.tenant_id = tenants.id
+          and active_memberships.status = 'active'
+      ) as active_seats,
+      (
+        select count(*)::integer
+        from public.tenant_memberships invited_memberships
+        where invited_memberships.tenant_id = tenants.id
+          and invited_memberships.status = 'invited'
+      ) as invited_seats,
+      plans.base_price_cents,
+      plans.per_seat_price_cents,
+      coalesce(
+        array_agg(plan_features.feature_key order by plan_features.feature_key)
+          filter (where plan_features.feature_key is not null),
+        '{}'::text[]
+      ) as features
+    from public.tenants
+    join public.plans on plans.id = tenants.plan_id
+    left join public.plan_features
+      on plan_features.plan_id = plans.id
+      and public.tenant_has_feature(tenants.id, plan_features.feature_key)
+    where tenants.id = ${tenantId}
+    group by tenants.id, plans.id
+    limit 1
+  `);
+
+  const row = rows[0];
+  // No visible row means the tenant or its plan is not provisioned for this
+  // user in this database; fall back to Core defaults so pages render
+  // read-only instead of failing every route through the layout.
+  if (!row) {
+    return createFallbackEntitlements(0);
+  }
+
+  const activeSeats = Number(row.active_seats);
+  const invitedSeats = Number(row.invited_seats);
+  const occupiedSeats = activeSeats + invitedSeats;
+  const subscribedSeats = Number(row.seat_count);
+  const baseSeatLimit = Number(row.base_seat_limit);
+  const basePriceCents = Number(row.base_price_cents);
+  const perSeatPriceCents = Number(row.per_seat_price_cents);
+
+  return {
+    planId: row.plan_id,
+    planKey: row.plan_key,
+    planName: row.plan_name,
+    baseSeatLimit,
+    subscribedSeats,
+    activeSeats,
+    invitedSeats,
+    occupiedSeats,
+    availableSeats: Math.max(0, subscribedSeats - occupiedSeats),
+    basePriceCents,
+    perSeatPriceCents,
+    monthlyPriceCents: calculateMonthlyPriceCents(
+      basePriceCents,
+      perSeatPriceCents,
+      baseSeatLimit,
+      subscribedSeats,
+    ),
+    features: row.features.filter((feature): feature is FeatureKey => FEATURE_KEYS.includes(feature as FeatureKey)),
+  };
+});
+
+export function getTenantEntitlements(session: UserSession) {
+  return loadTenantEntitlements(session.user.id, session.tenant.id);
+}
+
+export async function tenantHasFeature(session: UserSession, feature: FeatureKey) {
+  const entitlements = await getTenantEntitlements(session);
+  return entitlements.features.includes(feature);
 }
 
 export async function getAgents(session: UserSession): Promise<Agent[]> {

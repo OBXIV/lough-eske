@@ -8,10 +8,11 @@ import { searchWorkspaceAction } from "@/app/app/actions";
 import { Badge } from "@/components/ui/badge";
 import { signOutAction } from "@/lib/auth/actions";
 import type { WorkspaceSearchResult } from "@/lib/data/app-data";
-import type { Tenant, UserSession } from "@/types/domain";
+import type { Tenant, TenantEntitlements, UserSession } from "@/types/domain";
 
 type TopBarProps = {
   session: UserSession;
+  entitlements: TenantEntitlements;
   visibleTenants: Tenant[];
   environmentLabel: string;
 };
@@ -111,7 +112,7 @@ function WorkspaceSearch() {
   );
 }
 
-export function TopBar({ session, visibleTenants, environmentLabel }: TopBarProps) {
+export function TopBar({ session, entitlements, visibleTenants, environmentLabel }: TopBarProps) {
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-surface/95 px-4 py-3 backdrop-blur lg:px-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -120,6 +121,7 @@ export function TopBar({ session, visibleTenants, environmentLabel }: TopBarProp
           <div className="mt-1 flex items-center gap-2">
             <h2 className="truncate text-sm font-semibold text-text-primary">{session.tenant.name}</h2>
             <Badge variant={session.tenant.status === "demo" ? "accent" : "default"}>{session.tenant.status}</Badge>
+            <Badge variant="info">{entitlements.planName}</Badge>
             <Badge variant={environmentLabel === "Stage" ? "info" : "default"}>{environmentLabel}</Badge>
           </div>
         </div>

@@ -9,6 +9,62 @@ on conflict (slug) do update set
   primary_color = excluded.primary_color,
   updated_at = now();
 
+-- Sprint 8B plan catalog. These values are launch defaults and are kept in
+-- sync with the plans migration so a reseed is deterministic.
+insert into public.plans (id, key, name, base_seat_limit, per_seat_price_cents, base_price_cents)
+values
+  ('70000000-0000-4000-8000-000000000001', 'core', 'Core', 5, 2900, 19900),
+  ('70000000-0000-4000-8000-000000000002', 'growth', 'Growth', 15, 2500, 49900),
+  ('70000000-0000-4000-8000-000000000003', 'scale', 'Scale', 30, 1900, 89900)
+on conflict (key) do update set
+  name = excluded.name,
+  base_seat_limit = excluded.base_seat_limit,
+  per_seat_price_cents = excluded.per_seat_price_cents,
+  base_price_cents = excluded.base_price_cents,
+  updated_at = now();
+
+-- Re-assert the default feature grants without touching grants added through
+-- the admin surface. Plan ids resolve by key so a recreated plan row keeps
+-- its grants on the next reseed.
+insert into public.plan_features (plan_id, feature_key)
+select plans.id, defaults.feature_key
+from (
+  values
+    ('core', 'reports'),
+    ('core', 'agent_portal'),
+    ('growth', 'reports'),
+    ('growth', 'agent_portal'),
+    ('growth', 'mls_sync'),
+    ('scale', 'reports'),
+    ('scale', 'agent_portal'),
+    ('scale', 'mls_sync')
+) as defaults(plan_key, feature_key)
+join public.plans on plans.key = defaults.plan_key
+on conflict (plan_id, feature_key) do nothing;
+
+-- Fixture tenants start on the Core plan through the tenants column default.
+-- Seat capacity only ratchets upward so Platform Admin plan and seat changes
+-- survive a reseed: never below five included seats, the demo tenant's six
+-- seeded members, or current occupancy.
+update public.tenants
+set
+  seat_count = greatest(
+    tenants.seat_count,
+    5,
+    case when tenants.id = '11111111-1111-4111-8111-111111111111' then 6 else 0 end,
+    (
+      select count(*)::integer
+      from public.tenant_memberships
+      where tenant_memberships.tenant_id = tenants.id
+        and tenant_memberships.status in ('active', 'invited')
+    )
+  )
+where tenants.id in (
+  '11111111-1111-4111-8111-111111111111',
+  '22222222-2222-4222-8222-222222222222',
+  '33333333-3333-4333-8333-333333333333'
+);
+
 insert into public.roles (name, description, scope)
 values
   ('Platform Admin', 'Can administer the SaaS platform across tenants.', 'platform'),

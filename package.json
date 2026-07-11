@@ -14,6 +14,7 @@
     "env:verify:stage": "node scripts/verify-env.mjs --file .env.stage.local --name stage",
     "sprint3:verify": "node scripts/verify-sprint3.mjs",
     "sprint3b:verify": "node scripts/verify-sprint3b.mjs",
+    "sprint8b:verify": "node scripts/verify-sprint8b.mjs",
     "supabase:verify": "node scripts/verify-supabase-public.mjs",
     "env:verify:prod": "node scripts/verify-env.mjs --file .env.prod.local --name prod"
   },

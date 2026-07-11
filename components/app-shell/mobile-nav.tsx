@@ -4,17 +4,21 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { navItems } from "@/components/app-shell/nav";
+import { hasFeature } from "@/lib/entitlements/catalog";
 import { canAccess } from "@/lib/rbac/permissions";
 import { cn } from "@/lib/utils";
-import type { UserSession } from "@/types/domain";
+import type { TenantEntitlements, UserSession } from "@/types/domain";
 
 type MobileNavProps = {
   session: UserSession;
+  entitlements: TenantEntitlements;
 };
 
-export function MobileNav({ session }: MobileNavProps) {
+export function MobileNav({ session, entitlements }: MobileNavProps) {
   const pathname = usePathname();
-  const visibleItems = navItems.filter((item) => canAccess(session.permissions, item.permission));
+  const visibleItems = navItems.filter(
+    (item) => canAccess(session.permissions, item.permission) && (!item.feature || hasFeature(entitlements, item.feature)),
+  );
 
   return (
     <nav
