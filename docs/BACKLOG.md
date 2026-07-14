@@ -12,7 +12,7 @@ Last updated: **July 9, 2026**
 Build the SaaS foundation first, then modules. Do not start with a single screen and wire data later. Multi-tenancy, auth, RBAC, and design tokens must come first.
 
 ## Execution Status Snapshot
-Current position: **completed through Sprint 8B**.
+Current position: **completed through Sprint 9A**.
 
 Completed baseline:
 - Sprint 0 - Project Foundation
@@ -30,6 +30,8 @@ Completed baseline:
 - Sprint 6C - Agent Archive and Portal Clickthrough
 - Sprint 7A - Transaction Workflow Control
 - Sprint 8A - Task and Activity Command Center
+- Sprint 8B - Plans, Seats, and Entitlements
+- Sprint 9A - Reports Drilldowns and Exports
 
 Consolidated original backlog:
 - Original Sprint 7 transaction visibility is already covered by the transactions route, table, badges, GCI fields, drawer, stage update action, and dashboard drilldowns.
@@ -38,7 +40,7 @@ Consolidated original backlog:
 - Original Sprint 10 agent portal shell is already covered by the agent portal route and clickable demo sections.
 - Original Sprint 11 settings shell is already covered by the tenant profile, role visibility, and environment/admin shell.
 
-Next implementation sprint: **Sprint 9A** (Sprint 8B shipped July 10, 2026).
+Next implementation sprint: **Sprint 10A** (Sprint 9A shipped July 14, 2026).
 
 Sprint 7A shipped clickable transaction rows, search plus stage/status/close-timing filters, drawer sections for contingencies, related tasks, and document readiness, close/cancel audit metadata, and active-only dashboard GCI. Dev, Stage, and Prod all carry migration ledger entries `20260628` through `20260710120000`. Vercel Preview points at `lough-eske-stage`; Vercel Production points at `lough-eske-prod`. The demo tenant remains read-only in every environment.
 
@@ -47,6 +49,8 @@ Sprint 8A shipped task search plus owner/priority/related-type/status/due-timing
 Launch-blocking addition: **Sprint 8B - Plans, Seats, and Entitlements** must be working at v0.1 go-live. Every tenant resolves to a plan on day one and feature access follows the plan. Sequence it before Sprint 9A and Sprint 10A, which gate on plan features.
 
 Sprint 8B shipped July 10, 2026 as `c67d1ae`: schema, app gating, Settings UI, repeatable seed, and seat enforcement rolled out to Stage and Prod after an adversarial review fixed a seed-reseed abort in the seat-limit trigger, seed clobbering of admin plan changes, a destructive plan_features reseed, and a layout-level 500 on RLS-invisible tenants.
+
+Sprint 9A shipped July 14, 2026: the Reports summary cards became clickable panel switches (recruiting, production, transactions, GCI) backed by a shared date-range control, a new `getRecruitingActivities` read against the existing `recruiting_activities` table, top-agent and at-risk (cold/overdue recruits, past-due active deals) lists, and a print/CSV export layout that hides app chrome via `print:` utilities. No migration was required. In fixing the drilldowns, the transaction-volume and GCI-forecast summary cards were corrected to count active deals only, matching the Dashboard's existing active-deal filter instead of summing every transaction regardless of status.
 
 ## Sprint 0 - Project Foundation
 ### Epic: Repository and Framework Setup

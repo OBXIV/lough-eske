@@ -1,5 +1,5 @@
 import { rolePermissions } from "@/lib/rbac/permissions";
-import type { ActivityLog, Agent, DemoUser, Recruit, Task, Tenant, TenantMember, Transaction, UserSession } from "@/types/domain";
+import type { ActivityLog, Agent, DemoUser, Recruit, RecruitingActivity, Task, Tenant, TenantMember, Transaction, UserSession } from "@/types/domain";
 
 export const demoTenant: Tenant & { metrics: { agents: number; recruits: number; transactions: number } } = {
   id: "11111111-1111-4111-8111-111111111111",
@@ -161,6 +161,19 @@ export const recruits: Recruit[] = [
   { id: "r6", name: "Miles Grant", stage: "Lost", heatScore: "Cold", recruitScore: 38, source: "Zillow Premier", nextFollowUpDate: "2026-08-01", notesSummary: "Staying put this quarter." },
   { id: "r7", name: "Harper Lane", stage: "Contacted", heatScore: "Warm", recruitScore: 67, source: "Local team lead", nextFollowUpDate: "2026-07-08", notesSummary: "Interested in transaction support." },
   { id: "r8", name: "Theo Hayes", stage: "Identified", heatScore: "Cold", recruitScore: 44, source: "Open house visit", nextFollowUpDate: "2026-07-15", notesSummary: "Early relationship only." },
+];
+
+export const recruitingActivities: RecruitingActivity[] = [
+  { id: "ra1", recruitId: "r1", recruitName: "Sofia Mercer", activityType: "Note", activityDate: "2026-06-12T16:00:00Z", notes: "High-volume neighborhood specialist, early relationship only." },
+  { id: "ra2", recruitId: "r2", recruitName: "Noah Patel", activityType: "Call", activityDate: "2026-06-26T15:30:00Z", notes: "Discussed marketing support and commission split questions." },
+  { id: "ra3", recruitId: "r6", recruitName: "Miles Grant", activityType: "Call", activityDate: "2026-06-18T17:40:00Z", notes: "Confirmed staying put this quarter." },
+  { id: "ra4", recruitId: "r5", recruitName: "Elena Park", activityType: "Stage Change", activityDate: "2026-06-24T18:45:00Z", notes: "Joined the brokerage; onboarding packet sent." },
+  { id: "ra5", recruitId: "r3", recruitName: "Mina Foster", activityType: "Stage Change", activityDate: "2026-06-28T14:20:00Z", notes: "Moved to Engaged after a strong team-fit call." },
+  { id: "ra6", recruitId: "r4", recruitName: "Owen Clarke", activityType: "Email", activityDate: "2026-06-30T13:10:00Z", notes: "Sent updated split model comparison." },
+  { id: "ra7", recruitId: "r7", recruitName: "Harper Lane", activityType: "Text", activityDate: "2026-07-02T12:15:00Z", notes: "Confirmed interest in transaction support role." },
+  { id: "ra8", recruitId: "r8", recruitName: "Theo Hayes", activityType: "Note", activityDate: "2026-07-05T19:20:00Z", notes: "Early relationship only, met at open house." },
+  { id: "ra9", recruitId: "r2", recruitName: "Noah Patel", activityType: "Meeting", activityDate: "2026-07-08T20:00:00Z", notes: "In-person meeting to walk through the offer package." },
+  { id: "ra10", recruitId: "r4", recruitName: "Owen Clarke", activityType: "Call", activityDate: "2026-07-11T15:45:00Z", notes: "Following up before the offer expires Friday." },
 ];
 
 export const transactions: Transaction[] = [

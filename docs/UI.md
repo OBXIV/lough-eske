@@ -327,11 +327,13 @@ Task list columns:
 - Status
 
 ### Reports
-v0.1 reports shell:
-- Recruiting funnel
-- Agent production snapshot
-- Transaction volume snapshot
-- GCI forecast
+Four clickable summary cards (recruiting funnel, agent production, transaction volume, GCI forecast) switch an in-page drilldown panel:
+- Recruiting: funnel by stage, at-risk recruits (cold or overdue follow-up), recent recruiting activity
+- Production: top agents by production, recent closings
+- Transactions: transactions in the selected date range, at-risk pipeline (active deals past expected close)
+- GCI: forecast by stage, top GCI contributors, GCI at risk
+
+A date-range control (all time, past/next 30 or 90 days, year to date) filters the range-aware sections. Print and Export CSV actions cover whichever panel is open; print hides the sidebar, top bar, and mobile nav so only the report content is printed.
 
 ### Agent Portal Shell
 Cards:

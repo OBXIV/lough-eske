@@ -6,6 +6,7 @@ import {
   activityLogs as fallbackActivityLogs,
   agents as fallbackAgents,
   demoUsers,
+  recruitingActivities as fallbackRecruitingActivities,
   recruits as fallbackRecruits,
   tasks as fallbackTasks,
   tenantMembers as fallbackTenantMembers,
@@ -21,6 +22,7 @@ import type {
   FeatureKey,
   PlanKey,
   Recruit,
+  RecruitingActivity,
   Task,
   Tenant,
   TenantEntitlements,
@@ -63,6 +65,15 @@ type RecruitRow = {
   source: string | null;
   next_follow_up_date: string | null;
   notes_summary: string | null;
+};
+
+type RecruitingActivityRow = {
+  id: string;
+  recruit_id: string;
+  recruit_name: string | null;
+  activity_type: RecruitingActivity["activityType"];
+  activity_date: string | null;
+  notes: string | null;
 };
 
 type TransactionRow = {
@@ -342,6 +353,37 @@ export async function getRecruits(session: UserSession): Promise<Recruit[]> {
     source: row.source ?? "Unknown",
     nextFollowUpDate: row.next_follow_up_date ?? "",
     notesSummary: row.notes_summary ?? "",
+  }));
+}
+
+export async function getRecruitingActivities(session: UserSession, limit = 100): Promise<RecruitingActivity[]> {
+  if (!isDatabaseConfigured()) {
+    return fallbackRecruitingActivities.slice(0, limit);
+  }
+
+  const rows = await withTenantRls(session, (sql) => sql<RecruitingActivityRow[]>`
+    select
+      recruiting_activities.id,
+      recruiting_activities.recruit_id,
+      coalesce(recruits.prospect_name, nullif(concat_ws(' ', agents.first_name, agents.last_name), '')) as recruit_name,
+      recruiting_activities.activity_type,
+      recruiting_activities.activity_date::text as activity_date,
+      recruiting_activities.notes
+    from public.recruiting_activities
+    left join public.recruits on recruits.id = recruiting_activities.recruit_id
+    left join public.agents on agents.id = recruits.agent_id
+    where recruiting_activities.tenant_id = ${session.tenant.id}
+    order by recruiting_activities.activity_date desc
+    limit ${limit}
+  `);
+
+  return rows.map((row) => ({
+    id: row.id,
+    recruitId: row.recruit_id,
+    recruitName: row.recruit_name ?? "Unnamed recruit",
+    activityType: row.activity_type,
+    activityDate: row.activity_date ?? "",
+    notes: row.notes ?? "",
   }));
 }
 

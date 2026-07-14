@@ -20,12 +20,18 @@ export function AppShell({ session, entitlements, visibleTenants, children }: Ap
     <div className="min-h-screen bg-background" style={getTenantAccentStyle(session.tenant)}>
       <SessionProvider session={session}>
         <div className="flex min-h-screen">
-          <Sidebar session={session} entitlements={entitlements} />
-          <div className="min-w-0 flex-1 pb-24 lg:pb-0">
-            <TopBar session={session} entitlements={entitlements} visibleTenants={visibleTenants} environmentLabel={environmentLabel} />
-            <main className="mx-auto w-full max-w-[1480px] px-4 py-5 lg:px-6 lg:py-6">{children}</main>
+          <div className="print:hidden">
+            <Sidebar session={session} entitlements={entitlements} />
           </div>
-          <MobileNav session={session} entitlements={entitlements} />
+          <div className="min-w-0 flex-1 pb-24 lg:pb-0 print:pb-0">
+            <div className="print:hidden">
+              <TopBar session={session} entitlements={entitlements} visibleTenants={visibleTenants} environmentLabel={environmentLabel} />
+            </div>
+            <main className="mx-auto w-full max-w-[1480px] px-4 py-5 lg:px-6 lg:py-6 print:max-w-none print:p-0">{children}</main>
+          </div>
+          <div className="print:hidden">
+            <MobileNav session={session} entitlements={entitlements} />
+          </div>
         </div>
       </SessionProvider>
     </div>

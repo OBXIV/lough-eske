@@ -109,6 +109,15 @@ export type Recruit = {
   notesSummary: string;
 };
 
+export type RecruitingActivity = {
+  id: string;
+  recruitId: string;
+  recruitName: string;
+  activityType: "Call" | "Email" | "Text" | "Meeting" | "Note" | "Stage Change";
+  activityDate: string;
+  notes: string;
+};
+
 export type Transaction = {
   id: string;
   agent: string;
