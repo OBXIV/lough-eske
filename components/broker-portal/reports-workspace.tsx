@@ -4,15 +4,22 @@ import { useMemo, useState } from "react";
 import { BarChart3, CircleDollarSign, Download, Funnel, Printer, Users } from "lucide-react";
 import Link from "next/link";
 
+import { DetailField } from "@/components/broker-portal/detail-fields";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { DetailDrawer } from "@/components/ui/detail-drawer";
 import { DataTable, TableCell, TableHead } from "@/components/ui/table";
 import { currentDateKey } from "@/lib/task-filters";
-import { cn, formatCurrency, formatDate, formatDateOnly, shiftDateKey } from "@/lib/utils";
+import { cn, formatCurrency, formatDate, formatDateOnly, formatDateTime, shiftDateKey } from "@/lib/utils";
 import type { Agent, Recruit, RecruitingActivity, Transaction } from "@/types/domain";
 
 export type ReportPanel = "recruiting" | "production" | "transactions" | "gci";
 export type ReportRange = "all" | "past_30" | "past_90" | "next_30" | "next_90" | "ytd";
+
+type SelectedRecord =
+  | { type: "agent"; id: string }
+  | { type: "recruit"; id: string }
+  | { type: "transaction"; id: string };
 
 type ReportsWorkspaceProps = {
   agents: Agent[];
@@ -77,6 +84,28 @@ function transactionStatusVariant(status: Transaction["status"]) {
   return "default";
 }
 
+function agentStatusVariant(status: Agent["brokerageStatus"]) {
+  if (status === "active") return "success";
+  if (status === "former") return "danger";
+  return "default";
+}
+
+const clickableRow = "cursor-pointer transition hover:bg-surface-muted";
+
+function recordRowProps(open: () => void) {
+  return {
+    onClick: open,
+    onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        open();
+      }
+    },
+    role: "button" as const,
+    tabIndex: 0,
+  };
+}
+
 function isRecruitAtRisk(recruit: Recruit, todayKey: string) {
   if (recruit.stage === "Joined" || recruit.stage === "Lost") return false;
 
@@ -137,7 +166,30 @@ export function ReportsWorkspace({
 }: ReportsWorkspaceProps) {
   const [activePanel, setActivePanel] = useState<ReportPanel>(initialPanel);
   const [range, setRange] = useState<ReportRange>("all");
+  const [selectedRecord, setSelectedRecord] = useState<SelectedRecord | null>(null);
   const todayKey = useMemo(() => currentDateKey(), []);
+
+  // Ambiguous display names resolve to null so a row never opens the wrong record.
+  const agentsByName = useMemo(() => {
+    const map = new Map<string, Agent | null>();
+    agents.forEach((agent) => {
+      const name = `${agent.firstName} ${agent.lastName}`;
+      map.set(name, map.has(name) ? null : agent);
+    });
+    return map;
+  }, [agents]);
+  const recruitsById = useMemo(() => new Map(recruits.map((recruit) => [recruit.id, recruit])), [recruits]);
+  const selectedAgent = selectedRecord?.type === "agent"
+    ? agents.find((agent) => agent.id === selectedRecord.id) ?? null
+    : null;
+  const selectedRecruit = selectedRecord?.type === "recruit" ? recruitsById.get(selectedRecord.id) ?? null : null;
+  const selectedTransaction = selectedRecord?.type === "transaction"
+    ? transactions.find((transaction) => transaction.id === selectedRecord.id) ?? null
+    : null;
+  const selectedRecruitActivities = useMemo(
+    () => (selectedRecruit ? recruitingActivities.filter((activity) => activity.recruitId === selectedRecruit.id) : []),
+    [recruitingActivities, selectedRecruit],
+  );
 
   const activeRecruits = useMemo(
     () => recruits.filter((recruit) => recruit.stage !== "Joined" && recruit.stage !== "Lost"),
@@ -240,7 +292,7 @@ export function ReportsWorkspace({
             recruit.name,
             recruit.stage,
             recruit.heatScore,
-            formatDate(recruit.nextFollowUpDate),
+            formatDateOnly(recruit.nextFollowUpDate),
             isRecruitAtRisk(recruit, todayKey) ? "Yes" : "No",
           ]),
         ] as (string | number)[][],
@@ -257,7 +309,7 @@ export function ReportsWorkspace({
             agent.brokerageStatus,
             agent.productionYtd,
             agent.gciYtd,
-            formatDate(agent.lastCloseDate),
+            formatDateOnly(agent.lastCloseDate),
           ]),
         ] as (string | number)[][],
       };
@@ -274,7 +326,7 @@ export function ReportsWorkspace({
             transaction.propertyAddress,
             transaction.stage,
             transaction.estimatedGci,
-            formatDate(transaction.expectedCloseDate),
+            formatDateOnly(transaction.expectedCloseDate),
             transaction.status,
             isTransactionAtRisk(transaction, todayKey) ? "Yes" : "No",
           ]),
@@ -412,11 +464,11 @@ export function ReportsWorkspace({
                 </thead>
                 <tbody className="divide-y divide-border">
                   {atRiskRecruits.map((recruit) => (
-                    <tr key={recruit.id}>
+                    <tr key={recruit.id} className={clickableRow} {...recordRowProps(() => setSelectedRecord({ type: "recruit", id: recruit.id }))}>
                       <TableCell className="font-medium">{recruit.name}</TableCell>
                       <TableCell><Badge variant="accent">{recruit.stage}</Badge></TableCell>
                       <TableCell><Badge variant={heatVariant(recruit.heatScore)}>{recruit.heatScore}</Badge></TableCell>
-                      <TableCell className="text-text-secondary">{formatDate(recruit.nextFollowUpDate)}</TableCell>
+                      <TableCell className="text-text-secondary">{formatDateOnly(recruit.nextFollowUpDate)}</TableCell>
                     </tr>
                   ))}
                 </tbody>
@@ -436,18 +488,26 @@ export function ReportsWorkspace({
             </div>
             {filteredActivities.length > 0 ? (
               <div className="mt-5 divide-y divide-border">
-                {filteredActivities.map((activity) => (
-                  <div key={activity.id} className="flex items-start justify-between gap-4 py-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-text-primary">{activity.recruitName}</p>
-                      <p className="mt-1 text-xs text-text-secondary">{activity.notes}</p>
+                {filteredActivities.map((activity) => {
+                  const hasRecruit = recruitsById.has(activity.recruitId);
+
+                  return (
+                    <div
+                      key={activity.id}
+                      className={cn("flex items-start justify-between gap-4 px-2 py-3", hasRecruit && "cursor-pointer rounded-md transition hover:bg-surface-muted")}
+                      {...(hasRecruit ? recordRowProps(() => setSelectedRecord({ type: "recruit", id: activity.recruitId })) : {})}
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-text-primary">{activity.recruitName}</p>
+                        <p className="mt-1 text-xs text-text-secondary">{activity.notes}</p>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <Badge variant="info">{activity.activityType}</Badge>
+                        <p className="mt-1 text-xs text-text-secondary">{formatDate(activity.activityDate)}</p>
+                      </div>
                     </div>
-                    <div className="shrink-0 text-right">
-                      <Badge variant="info">{activity.activityType}</Badge>
-                      <p className="mt-1 text-xs text-text-secondary">{formatDate(activity.activityDate)}</p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <EmptyPanelState className="mt-5" message="No recruiting activity in this date range." />
@@ -479,12 +539,12 @@ export function ReportsWorkspace({
                 </thead>
                 <tbody className="divide-y divide-border">
                   {topAgents.map((agent) => (
-                    <tr key={agent.id}>
+                    <tr key={agent.id} className={clickableRow} {...recordRowProps(() => setSelectedRecord({ type: "agent", id: agent.id }))}>
                       <TableCell className="font-medium">{agent.firstName} {agent.lastName}</TableCell>
                       <TableCell><Badge variant={agent.brokerageStatus === "active" ? "success" : "default"}>{agent.brokerageStatus}</Badge></TableCell>
                       <TableCell>{formatCurrency(agent.productionYtd)}</TableCell>
                       <TableCell>{formatCurrency(agent.gciYtd)}</TableCell>
-                      <TableCell className="text-text-secondary">{formatDate(agent.lastCloseDate)}</TableCell>
+                      <TableCell className="text-text-secondary">{formatDateOnly(agent.lastCloseDate)}</TableCell>
                     </tr>
                   ))}
                 </tbody>
@@ -513,9 +573,9 @@ export function ReportsWorkspace({
                 </thead>
                 <tbody className="divide-y divide-border">
                   {filteredClosings.map((agent) => (
-                    <tr key={agent.id}>
+                    <tr key={agent.id} className={clickableRow} {...recordRowProps(() => setSelectedRecord({ type: "agent", id: agent.id }))}>
                       <TableCell className="font-medium">{agent.firstName} {agent.lastName}</TableCell>
-                      <TableCell className="text-text-secondary">{formatDate(agent.lastCloseDate)}</TableCell>
+                      <TableCell className="text-text-secondary">{formatDateOnly(agent.lastCloseDate)}</TableCell>
                       <TableCell>{formatCurrency(agent.gciYtd)}</TableCell>
                     </tr>
                   ))}
@@ -552,12 +612,12 @@ export function ReportsWorkspace({
                 </thead>
                 <tbody className="divide-y divide-border">
                   {filteredTransactions.map((transaction) => (
-                    <tr key={transaction.id}>
+                    <tr key={transaction.id} className={clickableRow} {...recordRowProps(() => setSelectedRecord({ type: "transaction", id: transaction.id }))}>
                       <TableCell className="font-medium">{transaction.agent}</TableCell>
                       <TableCell>{transaction.clientName}</TableCell>
                       <TableCell><Badge variant="accent">{transaction.stage}</Badge></TableCell>
                       <TableCell>{formatCurrency(transaction.estimatedGci)}</TableCell>
-                      <TableCell className="text-text-secondary">{formatDate(transaction.expectedCloseDate)}</TableCell>
+                      <TableCell className="text-text-secondary">{formatDateOnly(transaction.expectedCloseDate)}</TableCell>
                       <TableCell><Badge variant={transactionStatusVariant(transaction.status)}>{transaction.status}</Badge></TableCell>
                     </tr>
                   ))}
@@ -589,12 +649,12 @@ export function ReportsWorkspace({
                 </thead>
                 <tbody className="divide-y divide-border">
                   {atRiskTransactions.map((transaction) => (
-                    <tr key={transaction.id}>
+                    <tr key={transaction.id} className={clickableRow} {...recordRowProps(() => setSelectedRecord({ type: "transaction", id: transaction.id }))}>
                       <TableCell className="font-medium">{transaction.clientName || transaction.propertyAddress}</TableCell>
                       <TableCell>{transaction.agent}</TableCell>
                       <TableCell><Badge variant="accent">{transaction.stage}</Badge></TableCell>
                       <TableCell>{formatCurrency(transaction.estimatedGci)}</TableCell>
-                      <TableCell className="text-danger">{formatDate(transaction.expectedCloseDate)}</TableCell>
+                      <TableCell className="text-danger">{formatDateOnly(transaction.expectedCloseDate)}</TableCell>
                     </tr>
                   ))}
                 </tbody>
@@ -649,12 +709,20 @@ export function ReportsWorkspace({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {gciByAgent.map((row) => (
-                    <tr key={row.agent}>
-                      <TableCell className="font-medium">{row.agent}</TableCell>
-                      <TableCell>{formatCurrency(row.gci)}</TableCell>
-                    </tr>
-                  ))}
+                  {gciByAgent.map((row) => {
+                    const agentRecord = agentsByName.get(row.agent);
+
+                    return (
+                      <tr
+                        key={row.agent}
+                        className={cn(agentRecord && clickableRow)}
+                        {...(agentRecord ? recordRowProps(() => setSelectedRecord({ type: "agent", id: agentRecord.id })) : {})}
+                      >
+                        <TableCell className="font-medium">{row.agent}</TableCell>
+                        <TableCell>{formatCurrency(row.gci)}</TableCell>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </DataTable>
             ) : (
@@ -677,6 +745,112 @@ export function ReportsWorkspace({
           </Card>
         </section>
       ) : null}
+
+      <DetailDrawer
+        eyebrow={selectedAgent ? "Agent record" : selectedRecruit ? "Recruit record" : "Transaction record"}
+        isOpen={Boolean(selectedAgent || selectedRecruit || selectedTransaction)}
+        onClose={() => setSelectedRecord(null)}
+        title={
+          selectedAgent
+            ? `${selectedAgent.firstName} ${selectedAgent.lastName}`
+            : selectedRecruit
+              ? selectedRecruit.name
+              : selectedTransaction?.clientName || selectedTransaction?.propertyAddress || "Record"
+        }
+      >
+        {selectedAgent ? (
+          <div className="space-y-5">
+            <dl className="grid gap-3 sm:grid-cols-2">
+              <DetailField label="Status" value={<Badge variant={agentStatusVariant(selectedAgent.brokerageStatus)}>{selectedAgent.brokerageStatus}</Badge>} />
+              <DetailField label="Source" value={selectedAgent.source} />
+              <DetailField label="Email" value={selectedAgent.email || "Not on file"} />
+              <DetailField label="Phone" value={selectedAgent.phone || "Not on file"} />
+              <DetailField label="License" value={selectedAgent.licenseNumber || "Not on file"} />
+              <DetailField label="Last close" value={formatDateOnly(selectedAgent.lastCloseDate)} />
+              <DetailField label="Production YTD" value={formatCurrency(selectedAgent.productionYtd)} />
+              <DetailField label="GCI YTD" value={formatCurrency(selectedAgent.gciYtd)} />
+            </dl>
+            <Link
+              className="inline-block text-sm font-medium text-accent hover:underline"
+              href={`/app/agents?q=${encodeURIComponent(`${selectedAgent.firstName} ${selectedAgent.lastName}`)}`}
+            >
+              Open in Agents →
+            </Link>
+          </div>
+        ) : null}
+        {selectedRecruit ? (
+          <div className="space-y-5">
+            <dl className="grid gap-3 sm:grid-cols-2">
+              <DetailField label="Stage" value={<Badge variant="accent">{selectedRecruit.stage}</Badge>} />
+              <DetailField label="Heat" value={<Badge variant={heatVariant(selectedRecruit.heatScore)}>{selectedRecruit.heatScore}</Badge>} />
+              <DetailField label="Recruit score" value={selectedRecruit.recruitScore} />
+              <DetailField label="Source" value={selectedRecruit.source} />
+              <DetailField label="Next follow-up" value={formatDateOnly(selectedRecruit.nextFollowUpDate)} />
+              <DetailField label="Notes" value={selectedRecruit.notesSummary || "No notes yet"} />
+            </dl>
+            <div className="rounded-lg border border-border bg-surface p-4">
+              <div className="flex items-center justify-between gap-4">
+                <h3 className="text-sm font-semibold text-text-primary">Recent recruiting activity</h3>
+                <Badge>{selectedRecruitActivities.length}</Badge>
+              </div>
+              <div className="mt-4 space-y-3">
+                {selectedRecruitActivities.length > 0 ? (
+                  selectedRecruitActivities.slice(0, 5).map((activity) => (
+                    <div key={activity.id} className="rounded-md border border-border bg-surface-muted px-3 py-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-medium text-text-primary">{activity.activityType}</p>
+                        <p className="text-xs text-text-secondary">{formatDate(activity.activityDate)}</p>
+                      </div>
+                      <p className="mt-1 text-xs text-text-secondary">{activity.notes}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="rounded-md border border-dashed border-border bg-surface-muted px-3 py-6 text-center text-sm text-text-secondary">
+                    No recent activity for this recruit
+                  </p>
+                )}
+              </div>
+            </div>
+            <Link
+              className="inline-block text-sm font-medium text-accent hover:underline"
+              href={`/app/recruiting?stage=${encodeURIComponent(selectedRecruit.stage)}`}
+            >
+              Open in Recruiting →
+            </Link>
+          </div>
+        ) : null}
+        {selectedTransaction ? (
+          <div className="space-y-5">
+            <dl className="grid gap-3 sm:grid-cols-2">
+              <DetailField label="Agent" value={selectedTransaction.agent} />
+              <DetailField label="Client" value={selectedTransaction.clientName || "Not on file"} />
+              <DetailField label="Property" value={selectedTransaction.propertyAddress || "Not on file"} />
+              <DetailField label="Type" value={selectedTransaction.transactionType} />
+              <DetailField label="Stage" value={<Badge variant="accent">{selectedTransaction.stage}</Badge>} />
+              <DetailField label="Status" value={<Badge variant={transactionStatusVariant(selectedTransaction.status)}>{selectedTransaction.status}</Badge>} />
+              <DetailField label="List price" value={formatCurrency(selectedTransaction.listPrice)} />
+              <DetailField label="Estimated GCI" value={formatCurrency(selectedTransaction.estimatedGci)} />
+              <DetailField label="Expected close" value={formatDateOnly(selectedTransaction.expectedCloseDate)} />
+              {selectedTransaction.finalizedAt ? (
+                <DetailField
+                  label={selectedTransaction.status === "cancelled" ? "Cancelled" : "Closed"}
+                  value={
+                    <span>
+                      {formatDateTime(selectedTransaction.finalizedAt)}
+                      <span className="mt-1 block text-xs font-normal text-text-secondary">
+                        by {selectedTransaction.finalizedBy ?? "Unknown user"}
+                      </span>
+                    </span>
+                  }
+                />
+              ) : null}
+            </dl>
+            <Link className="inline-block text-sm font-medium text-accent hover:underline" href="/app/transactions">
+              Open in Transactions →
+            </Link>
+          </div>
+        ) : null}
+      </DetailDrawer>
     </>
   );
 }

@@ -29,7 +29,7 @@ export function DetailDrawer({ children, eyebrow, footer, isOpen, onClose, title
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50 print:hidden">
       <button
         aria-label="Close detail drawer"
         className="absolute inset-0 h-full w-full cursor-default bg-text-primary/30"
