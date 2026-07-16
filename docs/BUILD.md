@@ -247,10 +247,10 @@ The application shell should include:
 - Require migration `20260703_add_agent_archive_audit.sql` before deployed archive flows are validated
 
 ### Current Position
-- Completed through Sprint 8A
+- Completed through Sprint 10A
 - Original baseline Sprint 7-11 shell work has been consolidated into completed scope where the route/shell/table already exists
 - Sprint 8B - Plans, Seats, and Entitlements shipped July 10, 2026: committed as `c67d1ae`, rolled out to Stage and Prod, validated on a Stage Preview, and deployed to Production
-- All three databases carry the same ledger through `20260710120000`; migrations `20260710050654` and `20260710050925` add the plan schema, and `20260710120000` fixes the seat-limit trigger
+- All three databases carry the same ledger through `20260716090000`; migrations `20260710050654` and `20260710050925` add the plan schema, `20260710120000` fixes the seat-limit trigger, and `20260716090000` adds the agent portal workflows and permission-scoped RLS policies
 - A pre-rollout adversarial review confirmed one critical and three major defects, all fixed before commit: the seat-limit trigger aborted every seed re-run on a tenant at exact capacity (BEFORE INSERT fires ahead of ON CONFLICT resolution; proven and fixed against Prod data in rolled-back transactions), the seed reverted Platform Admin plan and seat changes (plan_id reset dropped, seat_count now only ratchets upward), the seed deleted and reinserted plan_features wiping admin grants (now an upsert by plan key), and the entitlements loader threw a 500 through the layout where the app contract degrades to read-only (now falls back to Core defaults)
 - The seat-limit trigger also moved from FOR SHARE to FOR UPDATE on the tenants row so concurrent membership admissions serialize instead of racing past the limit
 - Known gap: `scripts/verify-sprint8b.mjs` only greps local files and recomputes billing math; database-level rollout verification is manual
@@ -269,7 +269,9 @@ The application shell should include:
 - Sprint 8B Dev verification passed for plan backfill, billing math, feature allow/deny checks, anonymous catalog denial, Platform Admin-only plan changes, over-limit membership denial, and seat-reduction denial
 - Sprint 8B Stage validation passed July 10, 2026 on a Preview deployment: Devon Pierce login renders the Core plan badge, Settings shows plan pricing, seat usage, and feature access from live Stage data, and plan controls stay Platform Admin-only
 - The local production build, Settings surface, Reports, and Agent Portal pass visual/runtime verification with no browser errors; local secret files intentionally do not carry a usable explicit `DATABASE_URL`, so live gate behavior was verified at the Dev database layer
-- Any new migration must sort after `20260710120000`
+- Sprint 9A shipped July 14, 2026 with report drilldowns, shared date-range controls, top-agent and at-risk lists, and print/CSV exports; no migration was required
+- Sprint 10A shipped July 16, 2026 with signed-in-agent data scoping, transaction and referral detail drawers, assigned-task visibility, a filterable resource library, staff publishing, and database-enforced portal isolation; Dev, Stage, and Prod carry the migration and repeatable seed
+- Any new migration must sort after `20260716090000`
 
 ### Sprint 7A - Transaction Workflow Control
 - Make transaction rows clickable, not only the View button
@@ -293,7 +295,7 @@ The application shell should include:
 - Show plan, monthly billing, occupied/available seats, and included features in Settings
 - Restrict plan catalog writes and tenant plan/seat changes to Platform Admin
 - Require migrations `20260710050654_add_plans_and_entitlements.sql` and `20260710050925_add_tenants_plan_index.sql` before deployed Sprint 8B flows are validated
-- Dev database validation complete; Stage Preview and Production rollout remain pending
+- Dev, Stage, and Production rollout completed July 10, 2026
 
 ### Sprint 9A - Reports Drilldowns and Exports
 - Add report drilldown panels for recruiting, production, transactions, and GCI

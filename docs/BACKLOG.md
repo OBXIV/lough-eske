@@ -12,7 +12,7 @@ Last updated: **July 16, 2026**
 Build the SaaS foundation first, then modules. Do not start with a single screen and wire data later. Multi-tenancy, auth, RBAC, and design tokens must come first.
 
 ## Execution Status Snapshot
-Current position: **completed through Sprint 9A; Sprint 10A integration and rollout in progress**.
+Current position: **completed through Sprint 10A**.
 
 Completed baseline:
 - Sprint 0 - Project Foundation
@@ -32,6 +32,7 @@ Completed baseline:
 - Sprint 8A - Task and Activity Command Center
 - Sprint 8B - Plans, Seats, and Entitlements
 - Sprint 9A - Reports Drilldowns and Exports
+- Sprint 10A - Agent Portal Data Workflows
 
 Consolidated original backlog:
 - Original Sprint 7 transaction visibility is already covered by the transactions route, table, badges, GCI fields, drawer, stage update action, and dashboard drilldowns.
@@ -40,7 +41,7 @@ Consolidated original backlog:
 - Original Sprint 10 agent portal shell is already covered by the agent portal route and clickable demo sections.
 - Original Sprint 11 settings shell is already covered by the tenant profile, role visibility, and environment/admin shell.
 
-Next implementation sprint: **Sprint 10A** (Sprint 9A shipped July 14, 2026).
+Next implementation sprint: **Sprint 11A - Settings Administration Workflows** (Sprint 10A shipped July 16, 2026).
 
 Sprint 7A shipped clickable transaction rows, search plus stage/status/close-timing filters, drawer sections for contingencies, related tasks, and document readiness, close/cancel audit metadata, and active-only dashboard GCI. Dev, Stage, and Prod all carry migration ledger entries `20260628` through `20260710120000`. Vercel Preview points at `lough-eske-stage`; Vercel Production points at `lough-eske-prod`. The demo tenant remains read-only in every environment.
 
@@ -52,7 +53,7 @@ Sprint 8B shipped July 10, 2026 as `c67d1ae`: schema, app gating, Settings UI, r
 
 Sprint 9A shipped July 14, 2026: the Reports summary cards became clickable panel switches (recruiting, production, transactions, GCI) backed by a shared date-range control, a new `getRecruitingActivities` read against the existing `recruiting_activities` table, top-agent and at-risk (cold/overdue recruits, past-due active deals) lists, and a print/CSV export layout that hides app chrome via `print:` utilities. No migration was required. In fixing the drilldowns, the transaction-volume and GCI-forecast summary cards were corrected to count active deals only, matching the Dashboard's existing active-deal filter instead of summing every transaction regardless of status.
 
-Sprint 10A implementation was integrated July 16, 2026: the agent portal's demo sections became role-scoped workflows. `agents.profile_id` links a workspace login to its agent record, and the portal scopes production stats, transactions (with a status detail drawer, derived next action, and stage progress), referrals, and tasks to the signed-in agent. The resource library is query-driven with search and type filters; staff holding `manage_agent_resources` publish resources (with `staff_only` drafts hidden from the portal at both the RLS and app layers) via an activity-logged flow. Portal-only users with no linked agent record, and staff previewing the portal, get explicit empty states. Migration `20260716090000` remains pending rollout to Dev, Stage, and Prod.
+Sprint 10A shipped July 16, 2026 as `32eef03` plus the isolation hardening in `bb50cdf`: the agent portal's demo sections became role-scoped workflows. `agents.profile_id` links a workspace login to its agent record, and the portal scopes production stats, transactions (with a status detail drawer, derived next action, and stage progress), referrals, and tasks to the signed-in agent. The resource library is query-driven with search and type filters; staff holding `manage_agent_resources` publish resources (with `staff_only` drafts hidden from the portal at both the RLS and app layers) via an activity-logged flow. Portal-only users with no linked agent record, and staff previewing the portal, get explicit empty states. Migration `20260716090000` and the updated repeatable seed were applied and verified in Dev, Stage, and Prod. The final RLS policies preserve staff permissions while limiting portal-only users to their linked agent, transactions, referrals, assigned tasks, and `all_agents` resources. Production commit `bb50cdf` built successfully on Vercel with no build or runtime errors.
 
 ## Sprint 0 - Project Foundation
 ### Epic: Repository and Framework Setup

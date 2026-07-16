@@ -39,6 +39,11 @@ Purpose:
 - Seed data testing
 - Demo data iteration
 
+Current state:
+- Migration ledger current through `20260716090000`
+- Repeatable demo seed applied and verified July 16, 2026
+- Sprint 10A portal data, permission-scoped RLS policies, and anonymous helper-function denial verified
+
 Expected Vercel environment:
 - Development or explicit Dev preview target
 
@@ -56,8 +61,8 @@ Purpose:
 - Release candidate validation
 - Sales/demo QA before production promotion
 - Production-like data volume with synthetic or approved demo data
-- Schema current with the repo as of July 10, 2026: migration ledger records `20260628` through `20260710120000`, seed applied and verified
-- Pending rollout: migration `20260716090000` (Sprint 10A agent portal workflows) and the updated seed have not been applied yet
+- Schema current with the repo as of July 16, 2026: migration ledger records `20260628` through `20260716090000`
+- Repeatable demo seed and Sprint 10A portal/RLS verification applied successfully July 16, 2026
 - Vercel Preview `DATABASE_URL` points at the Stage transaction pooler; wiring verified end to end on July 6, 2026
 
 Expected Vercel environment:
@@ -86,11 +91,10 @@ Current Supabase project URL:
 
 Current state:
 - Created in `us-west-1` on July 9, 2026
-- Migration ledger records `20260628` through `20260710120000`
-- Repeatable demo seed applied and verified
-- Pending rollout: migration `20260716090000` (Sprint 10A agent portal workflows) and the updated seed have not been applied yet
+- Migration ledger records `20260628` through `20260716090000`
+- Repeatable demo seed and Sprint 10A portal/RLS verification applied successfully July 16, 2026
 - Vercel Production public Supabase variables and `DATABASE_URL` point at this project
-- Production deployment verified live on July 9, 2026 with the read-only demo workspace, Prod badge, pilot-login rejection, and no Vercel runtime errors
+- Production deployment for commit `bb50cdf` reached READY on July 16, 2026 with no build or runtime errors; the read-only demo workspace, Prod badge, and pilot-login rejection were last browser-verified July 9, 2026
 
 Purpose:
 - Customer-facing production application
