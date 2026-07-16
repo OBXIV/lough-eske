@@ -234,18 +234,18 @@ on conflict (tenant_id, profile_id) do update set
   status = excluded.status,
   updated_at = now();
 
-insert into public.agents (id, tenant_id, first_name, last_name, email, phone, brokerage_status, license_number, source, production_ytd, gci_ytd, last_close_date, assigned_owner_id)
+insert into public.agents (id, tenant_id, first_name, last_name, email, phone, brokerage_status, license_number, source, production_ytd, gci_ytd, last_close_date, assigned_owner_id, profile_id)
 values
-  ('aaaaaaaa-0001-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111', 'Avery', 'Stone', 'avery@example.com', '(415) 555-0130', 'active', 'CA-010001', 'Internal', 12800000, 358400, '2026-06-11', '91000000-0000-4000-8000-000000000001'),
-  ('aaaaaaaa-0002-4000-8000-000000000002', '11111111-1111-4111-8111-111111111111', 'Jordan', 'Reed', 'jordan@example.com', '(415) 555-0178', 'active', 'CA-010002', 'Internal', 9650000, 270200, '2026-05-29', '91000000-0000-4000-8000-000000000001'),
-  ('aaaaaaaa-0003-4000-8000-000000000003', '11111111-1111-4111-8111-111111111111', 'Casey', 'Lin', 'casey@example.com', '(415) 555-0199', 'onboarding', 'CA-010003', 'Recruiting', 4200000, 117600, '2026-04-18', '91000000-0000-4000-8000-000000000003'),
-  ('aaaaaaaa-0004-4000-8000-000000000004', '11111111-1111-4111-8111-111111111111', 'Taylor', 'Brooks', 'taylor@example.com', '(415) 555-0144', 'active', 'CA-010004', 'Internal', 15100000, 422800, '2026-06-20', '91000000-0000-4000-8000-000000000001'),
-  ('aaaaaaaa-0005-4000-8000-000000000005', '11111111-1111-4111-8111-111111111111', 'Jamie', 'Quinn', 'jamie@example.com', '(415) 555-0186', 'active', 'CA-010005', 'Internal', 7350000, 205800, '2026-05-08', '91000000-0000-4000-8000-000000000003'),
-  ('aaaaaaaa-0006-4000-8000-000000000006', '11111111-1111-4111-8111-111111111111', 'Mina', 'Foster', 'mina@example.com', '(415) 555-0121', 'active', 'CA-010006', 'Recruiting', 6100000, 170800, '2026-06-02', '91000000-0000-4000-8000-000000000003'),
-  ('aaaaaaaa-0007-4000-8000-000000000007', '11111111-1111-4111-8111-111111111111', 'Noah', 'Patel', 'noah@example.com', '(415) 555-0163', 'active', 'CA-010007', 'Referral', 11200000, 313600, '2026-06-18', '91000000-0000-4000-8000-000000000001'),
-  ('aaaaaaaa-0008-4000-8000-000000000008', '11111111-1111-4111-8111-111111111111', 'Sofia', 'Mercer', 'sofia@example.com', '(415) 555-0157', 'inactive', 'CA-010008', 'Internal', 2800000, 78400, '2026-03-21', '91000000-0000-4000-8000-000000000001'),
-  ('aaaaaaaa-0009-4000-8000-000000000009', '11111111-1111-4111-8111-111111111111', 'Owen', 'Clarke', 'owen@example.com', '(415) 555-0172', 'recruit', 'CA-010009', 'Recruiting', 5100000, 142800, '2026-02-12', '91000000-0000-4000-8000-000000000003'),
-  ('aaaaaaaa-0010-4000-8000-000000000010', '11111111-1111-4111-8111-111111111111', 'Elena', 'Park', 'elena@example.com', '(415) 555-0191', 'onboarding', 'CA-010010', 'Independent', 3200000, 89600, '2026-05-17', '91000000-0000-4000-8000-000000000003')
+  ('aaaaaaaa-0001-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111', 'Avery', 'Stone', 'avery@example.com', '(415) 555-0130', 'active', 'CA-010001', 'Internal', 12800000, 358400, '2026-06-11', '91000000-0000-4000-8000-000000000001', null),
+  ('aaaaaaaa-0002-4000-8000-000000000002', '11111111-1111-4111-8111-111111111111', 'Jordan', 'Reed', 'jordan@example.com', '(415) 555-0178', 'active', 'CA-010002', 'Internal', 9650000, 270200, '2026-05-29', '91000000-0000-4000-8000-000000000001', null),
+  ('aaaaaaaa-0003-4000-8000-000000000003', '11111111-1111-4111-8111-111111111111', 'Casey', 'Lin', 'casey@example.com', '(415) 555-0199', 'onboarding', 'CA-010003', 'Recruiting', 4200000, 117600, '2026-04-18', '91000000-0000-4000-8000-000000000003', null),
+  ('aaaaaaaa-0004-4000-8000-000000000004', '11111111-1111-4111-8111-111111111111', 'Taylor', 'Brooks', 'taylor@example.com', '(415) 555-0144', 'active', 'CA-010004', 'Internal', 15100000, 422800, '2026-06-20', '91000000-0000-4000-8000-000000000001', null),
+  ('aaaaaaaa-0005-4000-8000-000000000005', '11111111-1111-4111-8111-111111111111', 'Jamie', 'Quinn', 'jamie@example.com', '(415) 555-0186', 'active', 'CA-010005', 'Internal', 7350000, 205800, '2026-05-08', '91000000-0000-4000-8000-000000000003', null),
+  ('aaaaaaaa-0006-4000-8000-000000000006', '11111111-1111-4111-8111-111111111111', 'Mina', 'Foster', 'mina@example.com', '(415) 555-0121', 'active', 'CA-010006', 'Recruiting', 6100000, 170800, '2026-06-02', '91000000-0000-4000-8000-000000000003', null),
+  ('aaaaaaaa-0007-4000-8000-000000000007', '11111111-1111-4111-8111-111111111111', 'Noah', 'Patel', 'noah@example.com', '(415) 555-0163', 'active', 'CA-010007', 'Referral', 11200000, 313600, '2026-06-18', '91000000-0000-4000-8000-000000000001', null),
+  ('aaaaaaaa-0008-4000-8000-000000000008', '11111111-1111-4111-8111-111111111111', 'Sofia', 'Mercer', 'sofia@example.com', '(415) 555-0157', 'inactive', 'CA-010008', 'Internal', 2800000, 78400, '2026-03-21', '91000000-0000-4000-8000-000000000001', null),
+  ('aaaaaaaa-0009-4000-8000-000000000009', '11111111-1111-4111-8111-111111111111', 'Owen', 'Clarke', 'owen@example.com', '(415) 555-0172', 'recruit', 'CA-010009', 'Recruiting', 5100000, 142800, '2026-02-12', '91000000-0000-4000-8000-000000000003', null),
+  ('aaaaaaaa-0010-4000-8000-000000000010', '11111111-1111-4111-8111-111111111111', 'Elena', 'Park', 'elena@example.com', '(415) 555-0191', 'onboarding', 'CA-010010', 'Independent', 3200000, 89600, '2026-05-17', '91000000-0000-4000-8000-000000000003', '91000000-0000-4000-8000-000000000005')
 on conflict (id) do update set
   first_name = excluded.first_name,
   last_name = excluded.last_name,
@@ -258,6 +258,7 @@ on conflict (id) do update set
   gci_ytd = excluded.gci_ytd,
   last_close_date = excluded.last_close_date,
   assigned_owner_id = excluded.assigned_owner_id,
+  profile_id = excluded.profile_id,
   updated_at = now();
 
 insert into public.recruits (id, tenant_id, agent_id, prospect_name, stage, heat_score, recruit_score, source, assigned_recruiter_id, next_follow_up_date, notes_summary)
@@ -303,7 +304,8 @@ values
   ('cccccccc-0003-4000-8000-000000000003', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0002-4000-8000-000000000002', 'A. Nguyen', '77 Laurel Street', 'Seller', 'Listing', 975000, 27300, '2026-08-03', 'active'),
   ('cccccccc-0004-4000-8000-000000000004', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0005-4000-8000-000000000005', 'R. Ellis', '510 Mission Bay', 'Dual', 'Clear to Close', 2140000, 59900, '2026-07-02', 'active'),
   ('cccccccc-0005-4000-8000-000000000005', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0007-4000-8000-000000000007', 'M. Torres', '912 Valley Ridge', 'Buyer', 'Lead', 1185000, 33180, '2026-08-14', 'active'),
-  ('cccccccc-0006-4000-8000-000000000006', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0006-4000-8000-000000000006', 'D. Shaw', '46 Lake Street', 'Referral', 'Closed', 740000, 10360, '2026-06-24', 'closed')
+  ('cccccccc-0006-4000-8000-000000000006', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0006-4000-8000-000000000006', 'D. Shaw', '46 Lake Street', 'Referral', 'Closed', 740000, 10360, '2026-06-24', 'closed'),
+  ('cccccccc-0007-4000-8000-000000000007', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0010-4000-8000-000000000010', 'J. Alvarez', '18 Cypress Court', 'Buyer', 'Under Contract', 890000, 24920, '2026-08-07', 'active')
 on conflict (id) do update set
   agent_id = excluded.agent_id,
   client_name = excluded.client_name,
@@ -329,7 +331,8 @@ values
   ('dddddddd-0009-4000-8000-000000000009', '11111111-1111-4111-8111-111111111111', '91000000-0000-4000-8000-000000000002', 'report', null, 'Prepare month-end GCI snapshot', 'Summarize closed and expected GCI.', '2026-07-15 13:00:00+00', 'open', 'normal', '91000000-0000-4000-8000-000000000002'),
   ('dddddddd-0010-4000-8000-000000000010', '11111111-1111-4111-8111-111111111111', '91000000-0000-4000-8000-000000000004', 'transaction', 'cccccccc-0005-4000-8000-000000000005', 'Verify buyer agency agreement', 'Confirm signed paperwork.', '2026-07-06 17:00:00+00', 'open', 'normal', '91000000-0000-4000-8000-000000000004'),
   ('dddddddd-0011-4000-8000-000000000011', '11111111-1111-4111-8111-111111111111', '91000000-0000-4000-8000-000000000003', 'recruit', 'bbbbbbbb-0008-4000-8000-000000000008', 'Research early-stage prospect', 'Collect public production indicators.', '2026-07-12 12:00:00+00', 'open', 'low', '91000000-0000-4000-8000-000000000003'),
-  ('dddddddd-0012-4000-8000-000000000012', '11111111-1111-4111-8111-111111111111', '91000000-0000-4000-8000-000000000001', 'agent', 'aaaaaaaa-0004-4000-8000-000000000004', 'Schedule top agent check-in', 'Discuss support needs and retention risk.', '2026-07-09 16:00:00+00', 'open', 'high', '91000000-0000-4000-8000-000000000001')
+  ('dddddddd-0012-4000-8000-000000000012', '11111111-1111-4111-8111-111111111111', '91000000-0000-4000-8000-000000000001', 'agent', 'aaaaaaaa-0004-4000-8000-000000000004', 'Schedule top agent check-in', 'Discuss support needs and retention risk.', '2026-07-09 16:00:00+00', 'open', 'high', '91000000-0000-4000-8000-000000000001'),
+  ('dddddddd-0013-4000-8000-000000000013', '11111111-1111-4111-8111-111111111111', '91000000-0000-4000-8000-000000000005', 'transaction', 'cccccccc-0007-4000-8000-000000000007', 'Schedule buyer inspection', 'Coordinate inspection access with the listing agent.', '2026-07-20 17:00:00+00', 'open', 'high', '91000000-0000-4000-8000-000000000004')
 on conflict (id) do update set
   assigned_to = excluded.assigned_to,
   related_type = excluded.related_type,
@@ -352,20 +355,22 @@ on conflict (id) do update set
   body = excluded.body,
   created_by = excluded.created_by;
 
-insert into public.agent_resources (id, tenant_id, title, description, resource_type, url, visibility)
+insert into public.agent_resources (id, tenant_id, title, description, resource_type, url, visibility, created_by)
 values
-  ('eeeeeeee-0001-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111', 'Listing launch checklist', 'Standard launch steps for new listings.', 'Template', null, 'all_agents'),
-  ('eeeeeeee-0002-4000-8000-000000000002', '11111111-1111-4111-8111-111111111111', 'Buyer consultation playbook', 'Talk track and discovery prompts.', 'Training', null, 'all_agents'),
-  ('eeeeeeee-0003-4000-8000-000000000003', '11111111-1111-4111-8111-111111111111', 'Commission policy overview', 'Current internal commission policy summary.', 'Policy', null, 'all_agents'),
-  ('eeeeeeee-0004-4000-8000-000000000004', '11111111-1111-4111-8111-111111111111', 'Open house follow-up template', 'Email and text follow-up copy.', 'Template', null, 'all_agents'),
-  ('eeeeeeee-0005-4000-8000-000000000005', '11111111-1111-4111-8111-111111111111', 'New agent onboarding path', 'First 30 days onboarding resource.', 'Training', null, 'all_agents'),
-  ('eeeeeeee-0006-4000-8000-000000000006', '11111111-1111-4111-8111-111111111111', 'Referral intake form', 'Standard referral capture workflow.', 'Link', null, 'all_agents')
+  ('eeeeeeee-0001-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111', 'Listing launch checklist', 'Standard launch steps for new listings.', 'Template', null, 'all_agents', '91000000-0000-4000-8000-000000000001'),
+  ('eeeeeeee-0002-4000-8000-000000000002', '11111111-1111-4111-8111-111111111111', 'Buyer consultation playbook', 'Talk track and discovery prompts.', 'Training', null, 'all_agents', '91000000-0000-4000-8000-000000000001'),
+  ('eeeeeeee-0003-4000-8000-000000000003', '11111111-1111-4111-8111-111111111111', 'Commission policy overview', 'Current internal commission policy summary.', 'Policy', null, 'all_agents', '91000000-0000-4000-8000-000000000001'),
+  ('eeeeeeee-0004-4000-8000-000000000004', '11111111-1111-4111-8111-111111111111', 'Open house follow-up template', 'Email and text follow-up copy.', 'Template', null, 'all_agents', '91000000-0000-4000-8000-000000000001'),
+  ('eeeeeeee-0005-4000-8000-000000000005', '11111111-1111-4111-8111-111111111111', 'New agent onboarding path', 'First 30 days onboarding resource.', 'Training', null, 'all_agents', '91000000-0000-4000-8000-000000000001'),
+  ('eeeeeeee-0006-4000-8000-000000000006', '11111111-1111-4111-8111-111111111111', 'Referral intake form', 'Standard referral capture workflow.', 'Link', null, 'all_agents', '91000000-0000-4000-8000-000000000001'),
+  ('eeeeeeee-0007-4000-8000-000000000007', '11111111-1111-4111-8111-111111111111', 'Draft: revised commission tiers', 'Staff-only draft pending broker approval.', 'Policy', null, 'staff_only', '91000000-0000-4000-8000-000000000001')
 on conflict (id) do update set
   title = excluded.title,
   description = excluded.description,
   resource_type = excluded.resource_type,
   url = excluded.url,
   visibility = excluded.visibility,
+  created_by = excluded.created_by,
   updated_at = now();
 
 insert into public.agent_referrals (id, tenant_id, agent_id, referral_name, referral_email, referral_phone, referral_status, notes)
@@ -373,7 +378,8 @@ values
   ('f1000000-0001-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0001-4000-8000-000000000001', 'Priya Shah', 'priya@example.com', '(415) 555-0101', 'contacted', 'Buyer lead from past client.'),
   ('f1000000-0002-4000-8000-000000000002', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0004-4000-8000-000000000004', 'Victor Chen', 'victor@example.com', '(415) 555-0102', 'active', 'Seller consultation scheduled.'),
   ('f1000000-0003-4000-8000-000000000003', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0005-4000-8000-000000000005', 'Amara Wells', 'amara@example.com', '(415) 555-0103', 'new', 'Needs first outreach.'),
-  ('f1000000-0004-4000-8000-000000000004', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0010-4000-8000-000000000010', 'Leo Martin', 'leo@example.com', '(415) 555-0104', 'closed', 'Referral closed in June.')
+  ('f1000000-0004-4000-8000-000000000004', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0010-4000-8000-000000000010', 'Leo Martin', 'leo@example.com', '(415) 555-0104', 'closed', 'Referral closed in June.'),
+  ('f1000000-0005-4000-8000-000000000005', '11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0010-4000-8000-000000000010', 'Nadia Osei', 'nadia@example.com', '(415) 555-0105', 'new', 'Met at the June open house; wants to buy this fall.')
 on conflict (id) do update set
   referral_status = excluded.referral_status,
   notes = excluded.notes,

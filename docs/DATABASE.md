@@ -6,7 +6,7 @@ This document defines the v0.1 PostgreSQL/Supabase data model for Lough Eske.
 Internal project codename: **Lough Eske**  
 Product name: **TBD**  
 Version: **v0.1**  
-Last updated: **July 9, 2026**
+Last updated: **July 16, 2026**
 
 ## Database Philosophy
 This is a multi-tenant SaaS database. Tenant isolation is the foundation. Every tenant-owned business table must include `tenant_id` and must be protected by Row Level Security.
@@ -197,7 +197,7 @@ Status values:
 - inactive
 
 ### agents
-Brokerage agents as business records. In v0.1, most agents are records, not login users.
+Brokerage agents as business records. In v0.1, most agents are records, not login users. An agent record may be linked to a workspace profile through `profile_id`; the agent portal uses that link to scope portal data to the signed-in agent.
 
 Columns:
 - id uuid primary key default gen_random_uuid()
@@ -215,8 +215,11 @@ Columns:
 - assigned_owner_id uuid references profiles(id)
 - archived_at timestamptz
 - archived_by uuid references profiles(id)
+- profile_id uuid references profiles(id) on delete set null
 - created_at timestamptz default now()
 - updated_at timestamptz default now()
+
+`profile_id` is unique per tenant (partial unique index where not null), so a workspace login resolves to at most one agent record within a tenant.
 
 Status values:
 - active
@@ -366,7 +369,7 @@ Columns:
 - created_at timestamptz default now()
 
 ### agent_resources
-Agent portal resource library.
+Agent portal resource library. Staff holding `manage_agent_resources` publish rows; portal users only see `all_agents` rows.
 
 Columns:
 - id uuid primary key default gen_random_uuid()
@@ -375,7 +378,8 @@ Columns:
 - description text
 - resource_type text
 - url text
-- visibility text default 'all_agents'
+- visibility text not null default 'all_agents', check in ('all_agents', 'staff_only')
+- created_by uuid references profiles(id)
 - created_at timestamptz default now()
 - updated_at timestamptz default now()
 
@@ -386,6 +390,10 @@ Resource types:
 - Training
 - Policy
 - Template
+
+Visibility values:
+- all_agents (visible in the agent portal)
+- staff_only (draft, visible only to manage_agent_resources holders)
 
 ### agent_referrals
 Agent portal referral tracking.
@@ -425,6 +433,9 @@ Create indexes on:
 - tasks(tenant_id, status)
 - notes(tenant_id, related_type, related_id)
 - activity_logs(tenant_id, created_at)
+- agents(tenant_id, profile_id) unique where profile_id is not null
+- transactions(tenant_id, agent_id)
+- agent_referrals(tenant_id, agent_id)
 
 ## RLS Principle
 Users can access tenant-owned data only when they have active membership in that tenant.
@@ -435,6 +446,10 @@ Plan security:
 - Only Platform Admin can write plan definitions or change a tenant's plan and subscribed seats.
 - `tenant_has_feature(target_tenant_id, feature_key)` is `SECURITY INVOKER`, requires tenant visibility, and is the database source of truth for feature gates.
 - A private trigger blocks active/invited membership writes beyond subscribed capacity, and tenant seat counts cannot be reduced below occupied seats.
+
+Agent portal security:
+- `agent_resources` reads are visibility-scoped: tenant members only see `all_agents` rows unless they hold `manage_agent_resources` (or are Platform Admin), which also grants insert and update.
+- Portal production, transaction, and referral panels are scoped in the app layer to the agent record whose `profile_id` matches the signed-in profile.
 
 Recommended helper function:
 ```sql

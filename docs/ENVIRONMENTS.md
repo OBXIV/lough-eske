@@ -57,6 +57,7 @@ Purpose:
 - Sales/demo QA before production promotion
 - Production-like data volume with synthetic or approved demo data
 - Schema current with the repo as of July 10, 2026: migration ledger records `20260628` through `20260710120000`, seed applied and verified
+- Pending rollout: migration `20260716090000` (Sprint 10A agent portal workflows) and the updated seed have not been applied yet
 - Vercel Preview `DATABASE_URL` points at the Stage transaction pooler; wiring verified end to end on July 6, 2026
 
 Expected Vercel environment:
@@ -87,6 +88,7 @@ Current state:
 - Created in `us-west-1` on July 9, 2026
 - Migration ledger records `20260628` through `20260710120000`
 - Repeatable demo seed applied and verified
+- Pending rollout: migration `20260716090000` (Sprint 10A agent portal workflows) and the updated seed have not been applied yet
 - Vercel Production public Supabase variables and `DATABASE_URL` point at this project
 - Production deployment verified live on July 9, 2026 with the read-only demo workspace, Prod badge, pilot-login rejection, and no Vercel runtime errors
 

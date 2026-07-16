@@ -1,5 +1,17 @@
 import { rolePermissions } from "@/lib/rbac/permissions";
-import type { ActivityLog, Agent, DemoUser, Recruit, Task, Tenant, TenantMember, Transaction, UserSession } from "@/types/domain";
+import type {
+  ActivityLog,
+  Agent,
+  AgentReferral,
+  AgentResource,
+  DemoUser,
+  Recruit,
+  Task,
+  Tenant,
+  TenantMember,
+  Transaction,
+  UserSession,
+} from "@/types/domain";
 
 export const demoTenant: Tenant & { metrics: { agents: number; recruits: number; transactions: number } } = {
   id: "11111111-1111-4111-8111-111111111111",
@@ -149,7 +161,7 @@ export const agents: Agent[] = [
   { id: "a7", firstName: "Noah", lastName: "Patel", email: "noah@example.com", phone: "(415) 555-0163", brokerageStatus: "active", licenseNumber: "CA-010007", source: "Referral", productionYtd: 11200000, gciYtd: 313600, lastCloseDate: "2026-06-18", assignedOwner: "Morgan Hale" },
   { id: "a8", firstName: "Sofia", lastName: "Mercer", email: "sofia@example.com", phone: "(415) 555-0157", brokerageStatus: "inactive", licenseNumber: "CA-010008", source: "Internal", productionYtd: 2800000, gciYtd: 78400, lastCloseDate: "2026-03-21", assignedOwner: "Morgan Hale" },
   { id: "a9", firstName: "Owen", lastName: "Clarke", email: "owen@example.com", phone: "(415) 555-0172", brokerageStatus: "recruit", licenseNumber: "CA-010009", source: "Recruiting", productionYtd: 5100000, gciYtd: 142800, lastCloseDate: "2026-02-12", assignedOwner: "Riley Moss" },
-  { id: "a10", firstName: "Elena", lastName: "Park", email: "elena@example.com", phone: "(415) 555-0191", brokerageStatus: "onboarding", licenseNumber: "CA-010010", source: "Independent", productionYtd: 3200000, gciYtd: 89600, lastCloseDate: "2026-05-17", assignedOwner: "Riley Moss" },
+  { id: "a10", firstName: "Elena", lastName: "Park", email: "elena@example.com", phone: "(415) 555-0191", brokerageStatus: "onboarding", licenseNumber: "CA-010010", source: "Independent", productionYtd: 3200000, gciYtd: 89600, lastCloseDate: "2026-05-17", assignedOwner: "Riley Moss", profileId: "91000000-0000-4000-8000-000000000005" },
 ];
 
 export const recruits: Recruit[] = [
@@ -170,6 +182,7 @@ export const transactions: Transaction[] = [
   { id: "t4", agent: "Jamie Quinn", clientName: "R. Ellis", propertyAddress: "510 Mission Bay", transactionType: "Dual", stage: "Clear to Close", listPrice: 2140000, estimatedGci: 59900, expectedCloseDate: "2026-07-02", status: "active" },
   { id: "t5", agent: "Noah Patel", clientName: "M. Torres", propertyAddress: "912 Valley Ridge", transactionType: "Buyer", stage: "Lead", listPrice: 1185000, estimatedGci: 33180, expectedCloseDate: "2026-08-14", status: "active" },
   { id: "t6", agent: "Mina Foster", clientName: "D. Shaw", propertyAddress: "46 Lake Street", transactionType: "Referral", stage: "Closed", listPrice: 740000, estimatedGci: 10360, expectedCloseDate: "2026-06-24", status: "closed", finalizedAt: "2026-06-24T22:15:00Z", finalizedBy: "Sam Ortiz" },
+  { id: "t7", agent: "Elena Park", clientName: "J. Alvarez", propertyAddress: "18 Cypress Court", transactionType: "Buyer", stage: "Under Contract", listPrice: 890000, estimatedGci: 24920, expectedCloseDate: "2026-08-07", status: "active" },
 ];
 
 export const tenantMembers: TenantMember[] = demoUsers
@@ -185,6 +198,7 @@ const memberIds = {
   parker: "91000000-0000-4000-8000-000000000002",
   riley: "91000000-0000-4000-8000-000000000003",
   sam: "91000000-0000-4000-8000-000000000004",
+  elena: "91000000-0000-4000-8000-000000000005",
 };
 
 export const tasks: Task[] = [
@@ -200,6 +214,25 @@ export const tasks: Task[] = [
   { id: "task10", title: "Verify buyer agency agreement", description: null, relatedRecord: "M. Torres", relatedType: "transaction", assignee: "Sam Ortiz", assigneeId: memberIds.sam, dueDate: "2026-07-06", priority: "normal", status: "open", createdAt: "2026-06-29T16:10:00Z" },
   { id: "task11", title: "Research early-stage prospect", description: null, relatedRecord: "Theo Hayes", relatedType: "recruit", assignee: null, assigneeId: null, dueDate: "2026-07-12", priority: "low", status: "open", createdAt: "2026-06-29T18:30:00Z" },
   { id: "task12", title: "Schedule top agent check-in", description: "Top producer retention. Book time before the July sales meeting.", relatedRecord: "Taylor Brooks", relatedType: "agent", assignee: "Morgan Hale", assigneeId: memberIds.morgan, dueDate: "2026-07-09", priority: "high", status: "open", createdAt: "2026-06-26T20:05:00Z" },
+  { id: "task13", title: "Schedule buyer inspection", description: "Coordinate inspection access with the listing agent.", relatedRecord: "J. Alvarez", relatedType: "transaction", assignee: "Elena Park", assigneeId: memberIds.elena, dueDate: "2026-07-20", priority: "high", status: "open", createdAt: "2026-07-14T16:30:00Z" },
+];
+
+export const agentResources: AgentResource[] = [
+  { id: "res1", title: "Listing launch checklist", description: "Standard launch steps for new listings.", resourceType: "Template", url: null, visibility: "all_agents", publishedBy: "Morgan Hale", createdAt: "2026-06-18T17:00:00Z" },
+  { id: "res2", title: "Buyer consultation playbook", description: "Talk track and discovery prompts.", resourceType: "Training", url: null, visibility: "all_agents", publishedBy: "Morgan Hale", createdAt: "2026-06-20T15:30:00Z" },
+  { id: "res3", title: "Commission policy overview", description: "Current internal commission policy summary.", resourceType: "Policy", url: null, visibility: "all_agents", publishedBy: "Morgan Hale", createdAt: "2026-06-22T18:45:00Z" },
+  { id: "res4", title: "Open house follow-up template", description: "Email and text follow-up copy.", resourceType: "Template", url: null, visibility: "all_agents", publishedBy: "Morgan Hale", createdAt: "2026-06-25T14:10:00Z" },
+  { id: "res5", title: "New agent onboarding path", description: "First 30 days onboarding resource.", resourceType: "Training", url: null, visibility: "all_agents", publishedBy: "Morgan Hale", createdAt: "2026-06-27T16:20:00Z" },
+  { id: "res6", title: "Referral intake form", description: "Standard referral capture workflow.", resourceType: "Link", url: null, visibility: "all_agents", publishedBy: "Morgan Hale", createdAt: "2026-06-29T13:40:00Z" },
+  { id: "res7", title: "Draft: revised commission tiers", description: "Staff-only draft pending broker approval.", resourceType: "Policy", url: null, visibility: "staff_only", publishedBy: "Morgan Hale", createdAt: "2026-07-08T19:00:00Z" },
+];
+
+export const agentReferrals: AgentReferral[] = [
+  { id: "ref1", agentId: "a1", referralName: "Priya Shah", referralEmail: "priya@example.com", referralPhone: "(415) 555-0101", status: "contacted", notes: "Buyer lead from past client.", createdAt: "2026-06-20T17:30:00Z", updatedAt: "2026-06-26T18:00:00Z" },
+  { id: "ref2", agentId: "a4", referralName: "Victor Chen", referralEmail: "victor@example.com", referralPhone: "(415) 555-0102", status: "active", notes: "Seller consultation scheduled.", createdAt: "2026-06-22T15:00:00Z", updatedAt: "2026-06-28T14:20:00Z" },
+  { id: "ref3", agentId: "a5", referralName: "Amara Wells", referralEmail: "amara@example.com", referralPhone: "(415) 555-0103", status: "new", notes: "Needs first outreach.", createdAt: "2026-06-27T12:45:00Z", updatedAt: "2026-06-27T12:45:00Z" },
+  { id: "ref4", agentId: "a10", referralName: "Leo Martin", referralEmail: "leo@example.com", referralPhone: "(415) 555-0104", status: "closed", notes: "Referral closed in June.", createdAt: "2026-06-05T16:10:00Z", updatedAt: "2026-06-24T20:00:00Z" },
+  { id: "ref5", agentId: "a10", referralName: "Nadia Osei", referralEmail: "nadia@example.com", referralPhone: "(415) 555-0105", status: "new", notes: "Met at the June open house; wants to buy this fall.", createdAt: "2026-07-10T18:20:00Z", updatedAt: "2026-07-10T18:20:00Z" },
 ];
 
 export const activityLogs: ActivityLog[] = [

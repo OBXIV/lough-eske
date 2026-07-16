@@ -96,6 +96,30 @@ export type Agent = {
   archivedAt?: string | null;
   archivedBy?: string | null;
   assignedOwner: string;
+  profileId?: string | null;
+};
+
+export type AgentResource = {
+  id: string;
+  title: string;
+  description: string;
+  resourceType: "Link" | "PDF" | "Video" | "Training" | "Policy" | "Template";
+  url: string | null;
+  visibility: "all_agents" | "staff_only";
+  publishedBy: string | null;
+  createdAt: string;
+};
+
+export type AgentReferral = {
+  id: string;
+  agentId: string | null;
+  referralName: string;
+  referralEmail: string;
+  referralPhone: string;
+  status: "new" | "contacted" | "active" | "closed" | "lost";
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type Recruit = {

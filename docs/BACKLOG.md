@@ -6,13 +6,13 @@ This document defines the v0.1 execution backlog for Nova.
 Internal project codename: **Lough Eske**  
 Product name: **TBD**  
 Version: **v0.1**  
-Last updated: **July 9, 2026**
+Last updated: **July 16, 2026**
 
 ## Delivery Strategy
 Build the SaaS foundation first, then modules. Do not start with a single screen and wire data later. Multi-tenancy, auth, RBAC, and design tokens must come first.
 
 ## Execution Status Snapshot
-Current position: **completed through Sprint 8B**.
+Current position: **completed through Sprint 8B, plus Sprint 10A** (Sprint 9A intentionally deferred; see below).
 
 Completed baseline:
 - Sprint 0 - Project Foundation
@@ -30,6 +30,8 @@ Completed baseline:
 - Sprint 6C - Agent Archive and Portal Clickthrough
 - Sprint 7A - Transaction Workflow Control
 - Sprint 8A - Task and Activity Command Center
+- Sprint 8B - Plans, Seats, and Entitlements
+- Sprint 10A - Agent Portal Data Workflows
 
 Consolidated original backlog:
 - Original Sprint 7 transaction visibility is already covered by the transactions route, table, badges, GCI fields, drawer, stage update action, and dashboard drilldowns.
@@ -38,7 +40,7 @@ Consolidated original backlog:
 - Original Sprint 10 agent portal shell is already covered by the agent portal route and clickable demo sections.
 - Original Sprint 11 settings shell is already covered by the tenant profile, role visibility, and environment/admin shell.
 
-Next implementation sprint: **Sprint 9A** (Sprint 8B shipped July 10, 2026).
+Next implementation sprint: **Sprint 9A** (Sprint 8B shipped July 10, 2026; Sprint 10A was pulled forward and shipped July 16, 2026).
 
 Sprint 7A shipped clickable transaction rows, search plus stage/status/close-timing filters, drawer sections for contingencies, related tasks, and document readiness, close/cancel audit metadata, and active-only dashboard GCI. Dev, Stage, and Prod all carry migration ledger entries `20260628` through `20260710120000`. Vercel Preview points at `lough-eske-stage`; Vercel Production points at `lough-eske-prod`. The demo tenant remains read-only in every environment.
 
@@ -47,6 +49,8 @@ Sprint 8A shipped task search plus owner/priority/related-type/status/due-timing
 Launch-blocking addition: **Sprint 8B - Plans, Seats, and Entitlements** must be working at v0.1 go-live. Every tenant resolves to a plan on day one and feature access follows the plan. Sequence it before Sprint 9A and Sprint 10A, which gate on plan features.
 
 Sprint 8B shipped July 10, 2026 as `c67d1ae`: schema, app gating, Settings UI, repeatable seed, and seat enforcement rolled out to Stage and Prod after an adversarial review fixed a seed-reseed abort in the seat-limit trigger, seed clobbering of admin plan changes, a destructive plan_features reseed, and a layout-level 500 on RLS-invisible tenants.
+
+Sprint 10A shipped July 16, 2026 (pulled forward ahead of Sprint 9A): the agent portal's demo sections became role-scoped workflows. `agents.profile_id` links a workspace login to its agent record, and the portal scopes production stats, transactions (with a status detail drawer, derived next action, and stage progress), referrals, and tasks to the signed-in agent. The resource library is query-driven with search and type filters; staff holding `manage_agent_resources` publish resources (with `staff_only` drafts hidden from the portal at both the RLS and app layers) via an activity-logged flow. Portal-only users with no linked agent record, and staff previewing the portal, get explicit empty states. Migration `20260716090000` is pending rollout to Dev, Stage, and Prod.
 
 ## Sprint 0 - Project Foundation
 ### Epic: Repository and Framework Setup

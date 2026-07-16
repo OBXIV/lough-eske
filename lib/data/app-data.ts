@@ -4,6 +4,8 @@ import { cache } from "react";
 
 import {
   activityLogs as fallbackActivityLogs,
+  agentReferrals as fallbackAgentReferrals,
+  agentResources as fallbackAgentResources,
   agents as fallbackAgents,
   demoUsers,
   recruits as fallbackRecruits,
@@ -18,6 +20,8 @@ import { getVisibleTenants } from "@/lib/tenant/access";
 import type {
   ActivityLog,
   Agent,
+  AgentReferral,
+  AgentResource,
   FeatureKey,
   PlanKey,
   Recruit,
@@ -52,6 +56,30 @@ type AgentRow = {
   archived_at: string | null;
   archived_by: string | null;
   assigned_owner: string | null;
+  profile_id: string | null;
+};
+
+type AgentResourceRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  resource_type: AgentResource["resourceType"] | null;
+  url: string | null;
+  visibility: AgentResource["visibility"];
+  published_by: string | null;
+  created_at: string | null;
+};
+
+type AgentReferralRow = {
+  id: string;
+  agent_id: string | null;
+  referral_name: string;
+  referral_email: string | null;
+  referral_phone: string | null;
+  referral_status: AgentReferral["status"];
+  notes: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 };
 
 type RecruitRow = {
@@ -257,6 +285,26 @@ export async function tenantHasFeature(session: UserSession, feature: FeatureKey
   return entitlements.features.includes(feature);
 }
 
+function mapAgent(row: AgentRow): Agent {
+  return {
+    id: row.id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    email: row.email ?? "",
+    phone: row.phone ?? "",
+    brokerageStatus: row.brokerage_status,
+    licenseNumber: row.license_number ?? "",
+    source: row.source ?? "Unknown",
+    productionYtd: toNumber(row.production_ytd),
+    gciYtd: toNumber(row.gci_ytd),
+    lastCloseDate: row.last_close_date ?? "",
+    archivedAt: row.archived_at,
+    archivedBy: row.archived_by,
+    assignedOwner: row.assigned_owner ?? "Unassigned",
+    profileId: row.profile_id,
+  };
+}
+
 export async function getAgents(session: UserSession): Promise<Agent[]> {
   if (!isDatabaseConfigured()) {
     return fallbackAgents;
@@ -277,7 +325,8 @@ export async function getAgents(session: UserSession): Promise<Agent[]> {
       agents.last_close_date::text as last_close_date,
       agents.archived_at::text as archived_at,
       nullif(concat_ws(' ', archived_by.first_name, archived_by.last_name), '') as archived_by,
-      nullif(concat_ws(' ', owners.first_name, owners.last_name), '') as assigned_owner
+      nullif(concat_ws(' ', owners.first_name, owners.last_name), '') as assigned_owner,
+      agents.profile_id::text as profile_id
     from public.agents
     left join public.profiles owners on owners.id = agents.assigned_owner_id
     left join public.profiles archived_by on archived_by.id = agents.archived_by
@@ -285,22 +334,143 @@ export async function getAgents(session: UserSession): Promise<Agent[]> {
     order by agents.production_ytd desc, agents.last_name
   `);
 
+  return rows.map(mapAgent);
+}
+
+export async function getLinkedAgent(session: UserSession): Promise<Agent | null> {
+  if (!isDatabaseConfigured()) {
+    return fallbackAgents.find((agent) => agent.profileId === session.user.profileId) ?? null;
+  }
+
+  const rows = await withTenantRls(session, (sql) => sql<AgentRow[]>`
+    select
+      agents.id,
+      agents.first_name,
+      agents.last_name,
+      agents.email,
+      agents.phone,
+      agents.brokerage_status,
+      agents.license_number,
+      agents.source,
+      agents.production_ytd,
+      agents.gci_ytd,
+      agents.last_close_date::text as last_close_date,
+      agents.archived_at::text as archived_at,
+      null as archived_by,
+      nullif(concat_ws(' ', owners.first_name, owners.last_name), '') as assigned_owner,
+      agents.profile_id::text as profile_id
+    from public.agents
+    left join public.profiles owners on owners.id = agents.assigned_owner_id
+    where agents.tenant_id = ${session.tenant.id}
+      and agents.profile_id = ${session.user.profileId}
+    limit 1
+  `);
+
+  return rows[0] ? mapAgent(rows[0]) : null;
+}
+
+export async function getAgentResources(session: UserSession): Promise<AgentResource[]> {
+  const canManage = canAccess(session.permissions, "manage_agent_resources");
+
+  if (!isDatabaseConfigured()) {
+    return fallbackAgentResources.filter((resource) => canManage || resource.visibility === "all_agents");
+  }
+
+  // RLS already hides staff_only rows from non-managers; the visibility filter
+  // here keeps the app honest when the demo session maps to a broader role.
+  const rows = await withTenantRls(session, (sql) => sql<AgentResourceRow[]>`
+    select
+      agent_resources.id,
+      agent_resources.title,
+      agent_resources.description,
+      agent_resources.resource_type,
+      agent_resources.url,
+      agent_resources.visibility,
+      nullif(concat_ws(' ', publishers.first_name, publishers.last_name), '') as published_by,
+      agent_resources.created_at::text as created_at
+    from public.agent_resources
+    left join public.profiles publishers on publishers.id = agent_resources.created_by
+    where agent_resources.tenant_id = ${session.tenant.id}
+      and (${canManage} or agent_resources.visibility = 'all_agents')
+    order by agent_resources.created_at desc, agent_resources.title
+  `);
+
   return rows.map((row) => ({
     id: row.id,
-    firstName: row.first_name,
-    lastName: row.last_name,
-    email: row.email ?? "",
-    phone: row.phone ?? "",
-    brokerageStatus: row.brokerage_status,
-    licenseNumber: row.license_number ?? "",
-    source: row.source ?? "Unknown",
-    productionYtd: toNumber(row.production_ytd),
-    gciYtd: toNumber(row.gci_ytd),
-    lastCloseDate: row.last_close_date ?? "",
-    archivedAt: row.archived_at,
-    archivedBy: row.archived_by,
-    assignedOwner: row.assigned_owner ?? "Unassigned",
+    title: row.title,
+    description: row.description ?? "",
+    resourceType: row.resource_type ?? "Link",
+    url: row.url,
+    visibility: row.visibility,
+    publishedBy: row.published_by,
+    createdAt: row.created_at ?? "",
   }));
+}
+
+export async function getReferralsForAgent(session: UserSession, agentId: string): Promise<AgentReferral[]> {
+  if (!isDatabaseConfigured()) {
+    return fallbackAgentReferrals.filter((referral) => referral.agentId === agentId);
+  }
+
+  const rows = await withTenantRls(session, (sql) => sql<AgentReferralRow[]>`
+    select
+      agent_referrals.id,
+      agent_referrals.agent_id::text as agent_id,
+      agent_referrals.referral_name,
+      agent_referrals.referral_email,
+      agent_referrals.referral_phone,
+      agent_referrals.referral_status,
+      agent_referrals.notes,
+      agent_referrals.created_at::text as created_at,
+      agent_referrals.updated_at::text as updated_at
+    from public.agent_referrals
+    where agent_referrals.tenant_id = ${session.tenant.id}
+      and agent_referrals.agent_id = ${agentId}
+    order by agent_referrals.created_at desc
+  `);
+
+  return rows.map((row) => ({
+    id: row.id,
+    agentId: row.agent_id,
+    referralName: row.referral_name,
+    referralEmail: row.referral_email ?? "",
+    referralPhone: row.referral_phone ?? "",
+    status: row.referral_status,
+    notes: row.notes ?? "",
+    createdAt: row.created_at ?? "",
+    updatedAt: row.updated_at ?? "",
+  }));
+}
+
+export async function getTransactionsForAgent(session: UserSession, agent: Agent): Promise<Transaction[]> {
+  if (!isDatabaseConfigured()) {
+    const agentName = `${agent.firstName} ${agent.lastName}`;
+    return fallbackTransactions.filter((transaction) => transaction.agent === agentName);
+  }
+
+  const rows = await withTenantRls(session, (sql) => sql<TransactionRow[]>`
+    select
+      transactions.id,
+      nullif(concat_ws(' ', agents.first_name, agents.last_name), '') as agent,
+      transactions.client_name,
+      transactions.property_address,
+      transactions.transaction_type,
+      transactions.stage,
+      transactions.list_price,
+      transactions.estimated_gci,
+      transactions.expected_close_date::text as expected_close_date,
+      transactions.status,
+      transactions.finalized_at::text as finalized_at,
+      nullif(concat_ws(' ', finalized_by.first_name, finalized_by.last_name), '') as finalized_by
+    from public.transactions
+    left join public.agents on agents.id = transactions.agent_id
+    left join public.profiles finalized_by on finalized_by.id = transactions.finalized_by
+    where transactions.tenant_id = ${session.tenant.id}
+      and transactions.agent_id = ${agent.id}
+    order by transactions.expected_close_date nulls last, transactions.created_at desc
+  `);
+
+  return rows.map(mapTransaction);
 }
 
 export async function getRecruits(session: UserSession): Promise<Recruit[]> {
@@ -345,6 +515,23 @@ export async function getRecruits(session: UserSession): Promise<Recruit[]> {
   }));
 }
 
+function mapTransaction(row: TransactionRow): Transaction {
+  return {
+    id: row.id,
+    agent: row.agent ?? "Unassigned",
+    clientName: row.client_name ?? "",
+    propertyAddress: row.property_address ?? "",
+    transactionType: row.transaction_type ?? "Buyer",
+    stage: row.stage,
+    listPrice: toNumber(row.list_price),
+    estimatedGci: toNumber(row.estimated_gci),
+    expectedCloseDate: row.expected_close_date ?? "",
+    status: row.status,
+    finalizedAt: row.finalized_at,
+    finalizedBy: row.finalized_by,
+  };
+}
+
 export async function getTransactions(session: UserSession): Promise<Transaction[]> {
   if (!isDatabaseConfigured()) {
     return fallbackTransactions;
@@ -371,20 +558,7 @@ export async function getTransactions(session: UserSession): Promise<Transaction
     order by transactions.expected_close_date nulls last, transactions.created_at desc
   `);
 
-  return rows.map((row) => ({
-    id: row.id,
-    agent: row.agent ?? "Unassigned",
-    clientName: row.client_name ?? "",
-    propertyAddress: row.property_address ?? "",
-    transactionType: row.transaction_type ?? "Buyer",
-    stage: row.stage,
-    listPrice: toNumber(row.list_price),
-    estimatedGci: toNumber(row.estimated_gci),
-    expectedCloseDate: row.expected_close_date ?? "",
-    status: row.status,
-    finalizedAt: row.finalized_at,
-    finalizedBy: row.finalized_by,
-  }));
+  return rows.map(mapTransaction);
 }
 
 export async function getTasks(session: UserSession): Promise<Task[]> {

@@ -2,7 +2,7 @@ import "server-only";
 
 import { isDatabaseConfigured, withTenantRls } from "@/lib/data/database";
 import { formatDateOnly } from "@/lib/utils";
-import type { Agent, Recruit, Task, Transaction, UserSession } from "@/types/domain";
+import type { Agent, AgentResource, Recruit, Task, Transaction, UserSession } from "@/types/domain";
 
 type UpdatedAgentRow = {
   first_name: string;
@@ -522,6 +522,64 @@ export async function createTask(session: UserSession, input: CreateTaskInput) {
     `;
 
     return task.id;
+  });
+}
+
+type CreatedResourceRow = {
+  id: string;
+  title: string;
+};
+
+export type CreateAgentResourceInput = {
+  description: string | null;
+  resourceType: AgentResource["resourceType"];
+  title: string;
+  url: string | null;
+  visibility: AgentResource["visibility"];
+};
+
+export async function createAgentResource(session: UserSession, input: CreateAgentResourceInput) {
+  if (!isDatabaseConfigured()) return null;
+
+  return withTenantRls(session, async (sql) => {
+    const rows = await sql<CreatedResourceRow[]>`
+      insert into public.agent_resources (
+        tenant_id,
+        title,
+        description,
+        resource_type,
+        url,
+        visibility,
+        created_by
+      )
+      values (
+        ${session.tenant.id},
+        ${input.title},
+        ${input.description},
+        ${input.resourceType},
+        ${input.url},
+        ${input.visibility},
+        ${actorId(session)}
+      )
+      returning id, title
+    `;
+
+    const resource = rows[0];
+    if (!resource) throw new Error("Resource could not be published.");
+
+    await sql`
+      insert into public.activity_logs (tenant_id, actor_id, action, entity_type, entity_id, metadata)
+      values (
+        ${session.tenant.id},
+        ${actorId(session)},
+        ${input.visibility === "all_agents" ? `Published agent resource "${resource.title}"` : `Saved staff-only resource "${resource.title}"`},
+        'agent_resource',
+        ${resource.id},
+        jsonb_build_object('visibility', ${input.visibility}::text, 'resource_type', ${input.resourceType}::text)
+      )
+    `;
+
+    return resource.id;
   });
 }
 
