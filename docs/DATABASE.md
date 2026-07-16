@@ -449,7 +449,8 @@ Plan security:
 
 Agent portal security:
 - `agent_resources` reads are visibility-scoped: tenant members only see `all_agents` rows unless they hold `manage_agent_resources` (or are Platform Admin), which also grants insert and update.
-- Portal production, transaction, and referral panels are scoped in the app layer to the agent record whose `profile_id` matches the signed-in profile.
+- Portal production, transaction, referral, and task reads are scoped in both RLS and the app layer to the agent record whose `profile_id` matches the signed-in profile.
+- Staff retain their existing permission-scoped reads through `view_agents`, `view_transactions`, `view_dashboard`, and `manage_tasks`; portal-only users cannot query other agents' operational records through the Data API.
 
 Recommended helper function:
 ```sql
