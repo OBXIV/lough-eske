@@ -9,6 +9,7 @@ import { areTenantWritesEnabled } from "@/lib/data/database";
 import {
   archiveAgent,
   createAgent,
+  createAgentResource,
   createRecruit,
   createTask,
   updateAgentProfile,
@@ -18,7 +19,7 @@ import {
   updateTaskStatus,
   updateTransactionStage,
 } from "@/lib/data/mutations";
-import type { Agent, Recruit, Task, Transaction, UserSession } from "@/types/domain";
+import type { Agent, AgentResource, Recruit, Task, Transaction, UserSession } from "@/types/domain";
 
 const editableAgentStatuses: Agent["brokerageStatus"][] = ["active", "inactive", "recruit", "onboarding"];
 const recruitStages: Recruit["stage"][] = ["Identified", "Contacted", "Engaged", "Offer Pending", "Joined", "Lost"];
@@ -34,6 +35,8 @@ const transactionStages: Transaction["stage"][] = [
 const taskStatuses: Task["status"][] = ["open", "in_progress", "complete", "cancelled"];
 const recruitHeatScores: Recruit["heatScore"][] = ["Hot", "Warm", "Cold"];
 const taskPriorities: Task["priority"][] = ["low", "normal", "high", "urgent"];
+const resourceTypes: AgentResource["resourceType"][] = ["Link", "PDF", "Video", "Training", "Policy", "Template"];
+const resourceVisibilities: AgentResource["visibility"][] = ["all_agents", "staff_only"];
 
 function formDataFromArgs(previousStateOrFormData: ActionFormState | FormData, formData?: FormData) {
   return formData ?? (previousStateOrFormData instanceof FormData ? previousStateOrFormData : new FormData());
@@ -327,6 +330,36 @@ export async function updateTaskDetailsAction(
     revalidatePath("/app/tasks");
     revalidatePath("/app/dashboard");
     return "Task assignment and schedule updated.";
+  });
+}
+
+export async function publishAgentResourceAction(
+  previousStateOrFormData: ActionFormState | FormData = initialActionFormState,
+  maybeFormData?: FormData,
+) {
+  const session = await requirePermission("manage_agent_resources");
+  const formData = formDataFromArgs(previousStateOrFormData, maybeFormData);
+
+  return runAction(session, async () => {
+    const url = optionalFormValue(formData, "url");
+
+    if (url && !/^https?:\/\//.test(url)) {
+      throw new Error("Resource URL must start with http:// or https://.");
+    }
+
+    const input = {
+      description: optionalFormValue(formData, "description"),
+      resourceType: assertAllowed(requiredFormValue(formData, "resourceType"), resourceTypes, "resource type"),
+      title: requiredFormValue(formData, "title"),
+      url,
+      visibility: assertAllowed(requiredFormValue(formData, "visibility"), resourceVisibilities, "resource visibility"),
+    };
+
+    await createAgentResource(session, input);
+    revalidatePath("/app/agent-portal");
+    return input.visibility === "all_agents"
+      ? `Resource "${input.title}" published to agents.`
+      : `Resource "${input.title}" saved as staff-only.`;
   });
 }
 

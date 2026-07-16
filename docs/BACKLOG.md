@@ -6,13 +6,13 @@ This document defines the v0.1 execution backlog for Nova.
 Internal project codename: **Lough Eske**  
 Product name: **TBD**  
 Version: **v0.1**  
-Last updated: **July 9, 2026**
+Last updated: **July 16, 2026**
 
 ## Delivery Strategy
 Build the SaaS foundation first, then modules. Do not start with a single screen and wire data later. Multi-tenancy, auth, RBAC, and design tokens must come first.
 
 ## Execution Status Snapshot
-Current position: **completed through Sprint 9A**.
+Current position: **completed through Sprint 9A; Sprint 10A integration and rollout in progress**.
 
 Completed baseline:
 - Sprint 0 - Project Foundation
@@ -51,6 +51,8 @@ Launch-blocking addition: **Sprint 8B - Plans, Seats, and Entitlements** must be
 Sprint 8B shipped July 10, 2026 as `c67d1ae`: schema, app gating, Settings UI, repeatable seed, and seat enforcement rolled out to Stage and Prod after an adversarial review fixed a seed-reseed abort in the seat-limit trigger, seed clobbering of admin plan changes, a destructive plan_features reseed, and a layout-level 500 on RLS-invisible tenants.
 
 Sprint 9A shipped July 14, 2026: the Reports summary cards became clickable panel switches (recruiting, production, transactions, GCI) backed by a shared date-range control, a new `getRecruitingActivities` read against the existing `recruiting_activities` table, top-agent and at-risk (cold/overdue recruits, past-due active deals) lists, and a print/CSV export layout that hides app chrome via `print:` utilities. No migration was required. In fixing the drilldowns, the transaction-volume and GCI-forecast summary cards were corrected to count active deals only, matching the Dashboard's existing active-deal filter instead of summing every transaction regardless of status.
+
+Sprint 10A implementation was integrated July 16, 2026: the agent portal's demo sections became role-scoped workflows. `agents.profile_id` links a workspace login to its agent record, and the portal scopes production stats, transactions (with a status detail drawer, derived next action, and stage progress), referrals, and tasks to the signed-in agent. The resource library is query-driven with search and type filters; staff holding `manage_agent_resources` publish resources (with `staff_only` drafts hidden from the portal at both the RLS and app layers) via an activity-logged flow. Portal-only users with no linked agent record, and staff previewing the portal, get explicit empty states. Migration `20260716090000` remains pending rollout to Dev, Stage, and Prod.
 
 ## Sprint 0 - Project Foundation
 ### Epic: Repository and Framework Setup

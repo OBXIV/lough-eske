@@ -17,6 +17,7 @@ npm run env:verify:dev
 npm run env:verify:stage
 npm run sprint3:verify
 npm run sprint3b:verify
+npm run sprint10a:verify
 npm run supabase:verify
 npm run typecheck
 npm run lint
