@@ -40,9 +40,10 @@ Purpose:
 - Demo data iteration
 
 Current state:
-- Migration ledger current through `20260716090000`
+- Migration ledger current through `20260717181113`
 - Repeatable demo seed applied and verified July 16, 2026
 - Sprint 10A portal data, permission-scoped RLS policies, and anonymous helper-function denial verified
+- Sprint 11A branding authorization, audit logging, protected-field denial, cross-tenant denial, and settings read models verified in a rolled-back transaction July 17, 2026
 
 Expected Vercel environment:
 - Development or explicit Dev preview target
@@ -63,6 +64,7 @@ Purpose:
 - Production-like data volume with synthetic or approved demo data
 - Schema current with the repo as of July 16, 2026: migration ledger records `20260628` through `20260716090000`
 - Repeatable demo seed and Sprint 10A portal/RLS verification applied successfully July 16, 2026
+- Pending rollout: Sprint 11A migrations `20260717180736` and `20260717181113`
 - Vercel Preview `DATABASE_URL` points at the Stage transaction pooler; wiring verified end to end on July 6, 2026
 
 Expected Vercel environment:
@@ -93,6 +95,7 @@ Current state:
 - Created in `us-west-1` on July 9, 2026
 - Migration ledger records `20260628` through `20260716090000`
 - Repeatable demo seed and Sprint 10A portal/RLS verification applied successfully July 16, 2026
+- Pending rollout: Sprint 11A migrations `20260717180736` and `20260717181113`
 - Vercel Production public Supabase variables and `DATABASE_URL` point at this project
 - Production deployment for commit `bb50cdf` reached READY on July 16, 2026 with no build or runtime errors; the read-only demo workspace, Prod badge, and pilot-login rejection were last browser-verified July 9, 2026
 

@@ -17,6 +17,7 @@ import {
   updateRecruitPipeline,
   updateTaskDetails,
   updateTaskStatus,
+  updateTenantProfile,
   updateTransactionStage,
 } from "@/lib/data/mutations";
 import type { Agent, AgentResource, Recruit, Task, Transaction, UserSession } from "@/types/domain";
@@ -110,6 +111,26 @@ function recruitScoreValue(formData: FormData) {
   }
 
   return Math.round(parsed);
+}
+
+function tenantNameValue(formData: FormData) {
+  const value = requiredFormValue(formData, "name");
+
+  if (value.length < 2 || value.length > 80) {
+    throw new Error("Tenant name must be between 2 and 80 characters.");
+  }
+
+  return value;
+}
+
+function tenantColorValue(formData: FormData) {
+  const value = requiredFormValue(formData, "primaryColor").toUpperCase();
+
+  if (!/^#[0-9A-F]{6}$/.test(value)) {
+    throw new Error("Accent color must be a six-digit hex value.");
+  }
+
+  return value;
 }
 
 async function runAction(session: UserSession, work: () => Promise<void | string | null> | void | string | null) {
@@ -360,6 +381,24 @@ export async function publishAgentResourceAction(
     return input.visibility === "all_agents"
       ? `Resource "${input.title}" published to agents.`
       : `Resource "${input.title}" saved as staff-only.`;
+  });
+}
+
+export async function updateTenantProfileAction(
+  previousStateOrFormData: ActionFormState | FormData = initialActionFormState,
+  maybeFormData?: FormData,
+) {
+  const session = await requirePermission("manage_settings");
+  const formData = formDataFromArgs(previousStateOrFormData, maybeFormData);
+
+  return runAction(session, async () => {
+    const name = tenantNameValue(formData);
+    const primaryColor = tenantColorValue(formData);
+
+    await updateTenantProfile(session, { name, primaryColor });
+    revalidatePath("/app", "layout");
+    revalidatePath("/app/settings");
+    return `Branding updated for ${name}.`;
   });
 }
 

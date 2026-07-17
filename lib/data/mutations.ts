@@ -39,6 +39,11 @@ type CreatedTaskRow = {
   title: string;
 };
 
+type UpdatedTenantRow = {
+  name: string;
+  primary_color: string | null;
+};
+
 function actorId(session: UserSession) {
   return session.user.profileId;
 }
@@ -89,12 +94,40 @@ export type UpdateRecruitPipelineInput = {
   stage: Recruit["stage"];
 };
 
+export type UpdateTenantProfileInput = {
+  name: string;
+  primaryColor: string;
+};
+
 type ArchivedAgentRow = UpdatedAgentRow & {
   archived_at: string;
 };
 
 function agentLabel(agent: Pick<UpdatedAgentRow, "first_name" | "last_name">) {
   return `${agent.first_name} ${agent.last_name}`.trim() || "Agent";
+}
+
+export async function updateTenantProfile(
+  session: UserSession,
+  input: UpdateTenantProfileInput,
+) {
+  if (!isDatabaseConfigured()) return;
+
+  await withTenantRls(session, async (sql) => {
+    const rows = await sql<UpdatedTenantRow[]>`
+      update public.tenants
+      set
+        name = ${input.name},
+        primary_color = ${input.primaryColor},
+        updated_at = now()
+      where id = ${session.tenant.id}
+      returning name, primary_color
+    `;
+
+    if (!rows[0]) {
+      throw new Error("Tenant was not found or branding changes are not permitted.");
+    }
+  });
 }
 
 export async function createAgent(session: UserSession, input: CreateAgentInput) {

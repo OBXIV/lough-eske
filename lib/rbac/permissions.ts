@@ -76,6 +76,28 @@ export const rolePermissions: Record<RoleName, PermissionKey[]> = {
   "Agent Portal User": ["view_agent_portal"],
 };
 
+export const roleDescriptions: Record<RoleName, string> = {
+  "Platform Admin": "Can administer the SaaS platform across tenants.",
+  "Broker Owner": "Brokerage owner with full tenant visibility.",
+  "CFO / Finance": "Finance leader focused on transactions and reports.",
+  "Office Admin": "Administrative operator for brokerage settings and tasks.",
+  Recruiter: "Recruiting team member.",
+  "Transaction Coordinator": "Transaction pipeline operator.",
+  "Read Only": "Read-only tenant user.",
+  "Agent Portal User": "Agent-facing portal user.",
+};
+
+export const roleScopes: Record<RoleName, "platform" | "tenant"> = {
+  "Platform Admin": "platform",
+  "Broker Owner": "tenant",
+  "CFO / Finance": "tenant",
+  "Office Admin": "tenant",
+  Recruiter: "tenant",
+  "Transaction Coordinator": "tenant",
+  "Read Only": "tenant",
+  "Agent Portal User": "tenant",
+};
+
 export function canAccess(permissions: PermissionKey[], permission: PermissionKey) {
   return permissions.includes(permission);
 }

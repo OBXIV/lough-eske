@@ -174,7 +174,21 @@ export type Task = {
 export type TenantMember = {
   profileId: string;
   name: string;
-  role: string;
+  email: string;
+  role: RoleName;
+  status: "active" | "invited" | "suspended" | "inactive";
+  joinedAt: string;
+};
+
+export type RoleDetail = {
+  id: string;
+  name: RoleName;
+  description: string;
+  scope: "platform" | "tenant";
+  permissions: Array<{
+    key: PermissionKey;
+    description: string;
+  }>;
 };
 
 export type ActivityLog = {

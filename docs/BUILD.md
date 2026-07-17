@@ -271,7 +271,9 @@ The application shell should include:
 - The local production build, Settings surface, Reports, and Agent Portal pass visual/runtime verification with no browser errors; local secret files intentionally do not carry a usable explicit `DATABASE_URL`, so live gate behavior was verified at the Dev database layer
 - Sprint 9A shipped July 14, 2026 with report drilldowns, shared date-range controls, top-agent and at-risk lists, and print/CSV exports; no migration was required
 - Sprint 10A shipped July 16, 2026 with signed-in-agent data scoping, transaction and referral detail drawers, assigned-task visibility, a filterable resource library, staff publishing, and database-enforced portal isolation; Dev, Stage, and Prod carry the migration and repeatable seed
-- Any new migration must sort after `20260716090000`
+- Sprint 11A implementation and Dev validation completed July 17, 2026: tenant branding edits are `manage_settings`-gated and database-audited; membership statuses, role permissions, runtime environment, and plan feature flags are visible; destructive member and role actions remain deferred
+- Dev carries `20260717180736` and `20260717181113`; Stage and Prod remain at `20260716090000` pending Sprint 11A promotion
+- Any new migration must sort after `20260717181113`
 
 ### Sprint 7A - Transaction Workflow Control
 - Make transaction rows clickable, not only the View button

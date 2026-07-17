@@ -6,7 +6,7 @@ This document defines the v0.1 PostgreSQL/Supabase data model for Lough Eske.
 Internal project codename: **Lough Eske**  
 Product name: **TBD**  
 Version: **v0.1**  
-Last updated: **July 16, 2026**
+Last updated: **July 17, 2026**
 
 ## Database Philosophy
 This is a multi-tenant SaaS database. Tenant isolation is the foundation. Every tenant-owned business table must include `tenant_id` and must be protected by Row Level Security.
@@ -57,6 +57,14 @@ Status values:
 - inactive
 
 `seat_count` is subscribed capacity, not current usage. Active and invited tenant memberships both occupy a seat; suspended and inactive memberships do not.
+
+Sprint 11A tenant branding rules:
+- `name` must contain 2-80 trimmed characters.
+- `primary_color` must be null or a six-digit hex color.
+- Members holding `manage_settings` may update only `name`, `primary_color`, and the corresponding `updated_at` timestamp for their active tenant.
+- Platform Admin retains plan, seat, and broader tenant administration.
+- A protected-column trigger rejects direct Data API attempts to change tenant routing, status, entitlement, or other non-branding fields through the settings policy.
+- An after-update trigger records the previous and next branding values in `activity_logs.metadata`.
 
 ### plans
 Global plan catalog shared across tenants.
@@ -446,6 +454,11 @@ Plan security:
 - Only Platform Admin can write plan definitions or change a tenant's plan and subscribed seats.
 - `tenant_has_feature(target_tenant_id, feature_key)` is `SECURITY INVOKER`, requires tenant visibility, and is the database source of truth for feature gates.
 - A private trigger blocks active/invited membership writes beyond subscribed capacity, and tenant seat counts cannot be reduced below occupied seats.
+
+Settings security:
+- Tenant UPDATE authorization uses one permissive authenticated policy combining Platform Admin access with tenant-scoped `manage_settings` access.
+- Non-platform changes are restricted again by `guard_tenant_branding_changes()` so permissive RLS composition cannot broaden field access.
+- `audit_tenant_branding_changes()` records every persisted name or accent change with `current_profile_id()` as actor.
 
 Agent portal security:
 - `agent_resources` reads are visibility-scoped: tenant members only see `all_agents` rows unless they hold `manage_agent_resources` (or are Platform Admin), which also grants insert and update.

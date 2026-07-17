@@ -12,7 +12,7 @@ Last updated: **July 16, 2026**
 Build the SaaS foundation first, then modules. Do not start with a single screen and wire data later. Multi-tenancy, auth, RBAC, and design tokens must come first.
 
 ## Execution Status Snapshot
-Current position: **completed through Sprint 10A**.
+Current position: **completed through Sprint 10A; Sprint 11A implementation is Dev-validated and awaiting Stage/Prod rollout**.
 
 Completed baseline:
 - Sprint 0 - Project Foundation
@@ -54,6 +54,8 @@ Sprint 8B shipped July 10, 2026 as `c67d1ae`: schema, app gating, Settings UI, r
 Sprint 9A shipped July 14, 2026: the Reports summary cards became clickable panel switches (recruiting, production, transactions, GCI) backed by a shared date-range control, a new `getRecruitingActivities` read against the existing `recruiting_activities` table, top-agent and at-risk (cold/overdue recruits, past-due active deals) lists, and a print/CSV export layout that hides app chrome via `print:` utilities. No migration was required. In fixing the drilldowns, the transaction-volume and GCI-forecast summary cards were corrected to count active deals only, matching the Dashboard's existing active-deal filter instead of summing every transaction regardless of status.
 
 Sprint 10A shipped July 16, 2026 as `32eef03` plus the isolation hardening in `bb50cdf`: the agent portal's demo sections became role-scoped workflows. `agents.profile_id` links a workspace login to its agent record, and the portal scopes production stats, transactions (with a status detail drawer, derived next action, and stage progress), referrals, and tasks to the signed-in agent. The resource library is query-driven with search and type filters; staff holding `manage_agent_resources` publish resources (with `staff_only` drafts hidden from the portal at both the RLS and app layers) via an activity-logged flow. Portal-only users with no linked agent record, and staff previewing the portal, get explicit empty states. Migration `20260716090000` and the updated repeatable seed were applied and verified in Dev, Stage, and Prod. The final RLS policies preserve staff permissions while limiting portal-only users to their linked agent, transactions, referrals, assigned tasks, and `all_agents` resources. Production commit `bb50cdf` built successfully on Vercel with no build or runtime errors.
+
+Sprint 11A implementation was completed and Dev-validated July 17, 2026: Settings now provides audited tenant name/accent editing with a live preview, complete active/invited/suspended/inactive membership visibility, database-backed role detail drawers, and environment plus plan-feature status. Migrations `20260717180736` and `20260717181113` add strict branding constraints, a `manage_settings` update path, protected-column and audit triggers, and one consolidated tenant UPDATE policy. A rolled-back Dev test proved Broker Owner branding writes and audit metadata while rejecting protected-field and cross-tenant updates. Stage and Prod rollout remain pending.
 
 ## Sprint 0 - Project Foundation
 ### Epic: Repository and Framework Setup

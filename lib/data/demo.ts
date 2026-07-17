@@ -204,7 +204,10 @@ export const tenantMembers: TenantMember[] = demoUsers
   .map((user) => ({
     profileId: user.profileId,
     name: `${user.firstName} ${user.lastName}`,
+    email: user.email,
     role: user.role,
+    status: "active",
+    joinedAt: "2026-06-28T00:00:00Z",
   }));
 
 const memberIds = {

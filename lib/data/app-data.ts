@@ -16,7 +16,7 @@ import {
 } from "@/lib/data/demo";
 import { isDatabaseConfigured, withAuthenticatedRls, withTenantRls } from "@/lib/data/database";
 import { calculateMonthlyPriceCents, createFallbackEntitlements, FEATURE_KEYS } from "@/lib/entitlements/catalog";
-import { canAccess } from "@/lib/rbac/permissions";
+import { canAccess, roleDescriptions, rolePermissions, roleScopes } from "@/lib/rbac/permissions";
 import { getVisibleTenants } from "@/lib/tenant/access";
 import type {
   ActivityLog,
@@ -27,6 +27,8 @@ import type {
   PlanKey,
   Recruit,
   RecruitingActivity,
+  RoleDetail,
+  RoleName,
   Task,
   Tenant,
   TenantEntitlements,
@@ -137,7 +139,18 @@ type TaskRow = {
 type TenantMemberRow = {
   profile_id: string;
   name: string | null;
-  role: string;
+  email: string;
+  role: RoleName;
+  status: TenantMember["status"];
+  joined_at: string;
+};
+
+type RoleDetailRow = {
+  id: string;
+  name: RoleName;
+  description: string | null;
+  scope: RoleDetail["scope"];
+  permissions: RoleDetail["permissions"];
 };
 
 type ActivityLogRow = {
@@ -692,19 +705,81 @@ export async function getTenantMembers(session: UserSession): Promise<TenantMemb
     select
       profiles.id::text as profile_id,
       nullif(concat_ws(' ', profiles.first_name, profiles.last_name), '') as name,
-      roles.name as role
+      profiles.email,
+      roles.name as role,
+      tenant_memberships.status,
+      tenant_memberships.created_at::text as joined_at
     from public.tenant_memberships
     join public.profiles on profiles.id = tenant_memberships.profile_id
     join public.roles on roles.id = tenant_memberships.role_id
     where tenant_memberships.tenant_id = ${session.tenant.id}
-      and tenant_memberships.status = 'active'
-    order by name
+    order by
+      case tenant_memberships.status
+        when 'active' then 1
+        when 'invited' then 2
+        when 'suspended' then 3
+        else 4
+      end,
+      name
   `);
 
   return rows.map((row) => ({
     profileId: row.profile_id,
     name: row.name ?? "Unnamed member",
+    email: row.email,
     role: row.role,
+    status: row.status,
+    joinedAt: row.joined_at,
+  }));
+}
+
+export async function getRoleDetails(session: UserSession): Promise<RoleDetail[]> {
+  if (!isDatabaseConfigured()) {
+    return (Object.keys(rolePermissions) as RoleName[]).map((name) => ({
+      id: `fallback-${name.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-")}`,
+      name,
+      description: roleDescriptions[name],
+      scope: roleScopes[name],
+      permissions: rolePermissions[name].map((key) => ({
+        key,
+        description: key.replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase()),
+      })),
+    }));
+  }
+
+  const rows = await withTenantRls(session, (sql) => sql<RoleDetailRow[]>`
+    select
+      roles.id::text,
+      roles.name,
+      roles.description,
+      roles.scope,
+      coalesce(
+        jsonb_agg(
+          jsonb_build_object('key', permissions.key, 'description', permissions.description)
+          order by permissions.description
+        ) filter (where permissions.id is not null),
+        '[]'::jsonb
+      ) as permissions
+    from public.roles
+    left join public.role_permissions on role_permissions.role_id = roles.id
+    left join public.permissions on permissions.id = role_permissions.permission_id
+    group by roles.id
+    order by
+      case roles.name
+        when 'Platform Admin' then 1
+        when 'Broker Owner' then 2
+        when 'Office Admin' then 3
+        else 4
+      end,
+      roles.name
+  `);
+
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    description: row.description ?? roleDescriptions[row.name],
+    scope: row.scope,
+    permissions: row.permissions,
   }));
 }
 
