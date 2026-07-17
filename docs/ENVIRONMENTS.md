@@ -62,9 +62,10 @@ Purpose:
 - Release candidate validation
 - Sales/demo QA before production promotion
 - Production-like data volume with synthetic or approved demo data
-- Schema current with the repo as of July 16, 2026: migration ledger records `20260628` through `20260716090000`
+- Schema current with the repo as of July 17, 2026: migration ledger records `20260628` through `20260717181113`
 - Repeatable demo seed and Sprint 10A portal/RLS verification applied successfully July 16, 2026
-- Pending rollout: Sprint 11A migrations `20260717180736` and `20260717181113`
+- Sprint 11A migrations `20260717180736` and `20260717181113` applied and verified July 17, 2026
+- Sprint 11A Preview `dpl_8Vh9W3TYXCMBerkaDNtvHMYJYeRc` at commit `9fe6c95` passed Point Realty login, Settings read-model, branding write/restore, audit readback, browser-console, build-log, and runtime-log checks
 - Vercel Preview `DATABASE_URL` points at the Stage transaction pooler; wiring verified end to end on July 6, 2026
 
 Expected Vercel environment:
